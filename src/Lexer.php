@@ -78,10 +78,33 @@ class Lexer
      */
     public function scan($input)
     {
+        $input = $this->prepare($input);
+
         $stream = $this->tokenize($input);
         $stream->rewind();
 
         return $stream;
+    }
+
+    /**
+     * Prepare input string for scanning
+     *
+     * @param string $input The string input to scan
+     *
+     * @return string The fixed string
+     */
+    protected function prepare($input)
+    {
+        // add " or " between words
+        $input = preg_replace('/(\ )/', ' or ', $input);
+
+        // add replace " or " in double quote string with space
+        $input = preg_replace('/(?:\")(.*?)(?i:\ or\ )(.*?)(?:\")/', '"$1 $2"', $input);
+
+        // remove extra or's
+        $input = preg_replace('/(?:\ or\ )(or|and)(\ or\ )/', ' $1 ', $input);
+
+        return $input;
     }
 
     /**
