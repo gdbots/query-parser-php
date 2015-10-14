@@ -32,7 +32,7 @@ class Grammar extends ParserGrammar
             return new ExcludeOperator($node);
         }));
 
-        $this->addOperator(new BinaryOperator(Lexer::T_FIELD, 2, BinaryOperator::LEFT, function ($left, $right) {
+        $this->addOperator(new BinaryOperator(Lexer::T_COLON, 2, BinaryOperator::LEFT, function ($left, $right) {
             return new BinaryField($left, $right);
         }));
     }
