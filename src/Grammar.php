@@ -20,13 +20,13 @@ class Grammar extends AbstractGrammar
     {
         parent::__construct();
 
-        $this->addOperator(new UnaryOperator(Lexer::T_NOT, 10, function ($node) {
+        $this->addOperator(new UnaryOperator(Lexer::T_NOT, 5, function ($node) {
             return new LogicalNeg($node);
         }));
-        $this->addOperator(new BinaryOperator(Lexer::T_AND, 9, BinaryOperator::LEFT, function ($left, $right) {
+        $this->addOperator(new BinaryOperator(Lexer::T_AND, 1, BinaryOperator::LEFT, function ($left, $right) {
             return new LogicalAnd($left, $right);
         }));
-        $this->addOperator(new BinaryOperator(Lexer::T_OR, 9, BinaryOperator::LEFT, function ($left, $right) {
+        $this->addOperator(new BinaryOperator(Lexer::T_OR, 1, BinaryOperator::LEFT, function ($left, $right) {
             return new LogicalOr($left, $right);
         }));
     }

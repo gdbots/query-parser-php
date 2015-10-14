@@ -22,17 +22,17 @@ class Grammar extends ParserGrammar
     {
         parent::__construct();
 
-        $this->addOperator(new UnaryOperator(Lexer::T_HASHTAG, 5, function ($node) {
+        $this->addOperator(new UnaryOperator(Lexer::T_HASHTAG, 3, function ($node) {
             return new HashtagOperator($node);
         }));
-        $this->addOperator(new UnaryOperator(Lexer::T_REQUIRE, 5, function ($node) {
+        $this->addOperator(new UnaryOperator(Lexer::T_REQUIRE, 2, function ($node) {
             return new RequireOperator($node);
         }));
-        $this->addOperator(new UnaryOperator(Lexer::T_EXCLUDE, 5, function ($node) {
+        $this->addOperator(new UnaryOperator(Lexer::T_EXCLUDE, 2, function ($node) {
             return new ExcludeOperator($node);
         }));
 
-        $this->addOperator(new BinaryOperator(Lexer::T_COLON, 9, BinaryOperator::LEFT, function ($left, $right) {
+        $this->addOperator(new BinaryOperator(Lexer::T_COLON, 4, BinaryOperator::LEFT, function ($left, $right) {
             return new BinaryField($left, $right);
         }));
     }
