@@ -1,231 +1,123 @@
 <?php
+
 namespace Gdbots\QueryParser;
 
-use Gdbots\QueryParser\Token;
-
-final class Lexer
+/**
+ * Tokenize an expression
+ */
+class Lexer
 {
     /**
-     * Array of Tokens
+     * Expression tokens
+     *
+     * @var int
+     */
+    const T_NONE              = 0;
+    const T_OPEN_PARENTHESIS  = 1;  // (
+    const T_CLOSE_PARENTHESIS = 2;  // )
+    const T_NUMBER            = 3;  // 1,0.1
+    const T_STRING            = 4;  // a..zA..Z,;.:-_...
+    const T_AND               = 5;  // &&
+    const T_OR                = 6;  // ||
+    const T_NOT               = 7;  // !
+
+    /**
+     * The lexemes to find the tokens
      *
      * @var array
      */
-    private static $tokens= [];
+    protected $lexemes = [
+        '([\d]+\.?[\d]*)',
+        '([\w\d\'\"]+)',
+        '(.)'
+    ];
 
     /**
-     * Private constructor. This class is not meant to be instantiated.
-     */
-    private function __construct() {}
-
-    /**
-     * Tokenizes search query string and returns search object.
+     * Map the constant values with its token type
      *
-     * @param $str
+     * @var int[]
+     */
+    protected $_constTokens = [
+        '(' => self::T_OPEN_PARENTHESIS,
+        ')' => self::T_CLOSE_PARENTHESIS,
+        'and' => self::T_AND,
+        '&&' => self::T_AND,
+        'or' => self::T_OR,
+        '||' => self::T_OR,
+        '!' => self::T_NOT,
+        'not' => self::T_NOT
+    ];
+
+    /**
+     * Adds a new lexem to the lexemes array
+     *
+     * @param string $lexem
+     */
+    public function addLexem($lexem)
+    {
+        $this->lexemes[] = $lexem;
+    }
+
+    /**
+     * Returns the instance of the lexemes array
+     *
      * @return array
      */
-    public static function tokenize($str)
+    public function getLexemes()
     {
-        //$searchToken = new Searc();
-        //$currentState = Parser::T_TERM;
-        $len = strlen($str);
-
-        $currentToken = new Token(Token::T_NONE, 0);
-        $i = 0;
-        while ($i < $len) {
-            $char = $str[$i];
-            switch ($char) {
-                case ' ':
-                   /* if ($currentState == Parser::T_LEFT_QUOTE) {
-                        $currentToken .= $c;
-                    }
-                    else {
-                        $currentToken = self::addToken($searchToken, $currentToken, $currentState);
-                        $currentState = Parser::T_TERM;
-                    }*/
-                    $currentToken = self::pushToken($currentToken, $i);
-                    break;
-                case '@':
-                    /*if ($currentToken != null || $currentState == Parser::T_LEFT_QUOTE) {
-                        $currentToken .= $c;
-                    } else {
-                        $currentState = Parser::T_MENTION;
-                    }*/
-                    break;
-                case '#':
-                   /* if ($currentToken != null || $currentState == Parser::T_LEFT_QUOTE) {
-                        $currentToken .= $c;
-                    } else {
-                        $currentState = Parser::T_HASHTAG;
-                    }*/
-                    break;
-                case '"':
-                    /*if ($currentState == Parser::T_LEFT_QUOTE) {
-                        $currentState = Parser::T_PHRASE;
-                        $currentToken = self::addToken($searchToken, $currentToken, $currentState);
-                        $currentState = Parser::T_TERM;
-                    } else {
-                        if ($currentToken == null) {
-                            $currentState = Parser::T_LEFT_QUOTE;
-                        }
-                        else {
-                            //add current token and start new token with left quote state
-                            $currentToken = self::addToken($searchToken, $currentToken, $currentState);
-                            $currentState = Parser::T_LEFT_QUOTE;
-                        }
-                    }*/
-                    $currentToken = self::tokenizeQuotedString($currentToken, $str, $i);
-                    break;
-                case '+':
-                    /*if ($currentToken != null || $currentState == Parser::T_LEFT_QUOTE) {
-                        $currentToken .= $c;
-                    } else {
-                        $currentState = Parser::T_INCLUDE;
-                    }*/
-                    break;
-                case '-':
-                    /*if ($currentToken != null || $currentState == Parser::T_LEFT_QUOTE) {
-                        $currentToken .= $c;
-                    } else {
-                        $currentState = Parser::T_EXCLUDE;
-                    }*/
-                    break;
-                default:
-                    $currentToken->addData($char);
-            }
-            $i++;
-        }
-
-        $currentToken = self::pushToken($currentToken, $i);
-        return self::$tokens;
+        return $this->lexemes;
     }
 
     /**
-     * Adds token to array and creates new token
+     * Tokenize the given input string and return the resulting token stream
      *
-     * @param array $tokens
-     * @param Token $currentToken
-     * @param int $i
-     * @return Token
+     * @param string $input The string input to scan
+     *
+     * @return TokenStream The resulting token stream
      */
-
-    static private function pushToken($currentToken, $i)
+    public function scan($input)
     {
-        if($currentToken->getData() === null) {
-            $currentToken->setStartPosition($i);
-            return;
-        }
-        $currentToken->setTypeIfNone(Token::T_TERM);
-        self::$tokens[] = $currentToken;
-        $currentToken = new Token(Token::T_NONE, $i);
+        $stream = $this->tokenize($input);
+        $stream->rewind();
 
-        return $currentToken;
+        return $stream;
     }
 
     /**
-     * Parses an quoted string
+     * Transform the input string into a token stream
      *
-     * @param Token $currentToken
-     * @param string $string
-     * @param int $i
-     * @throws ParseException
+     * @param string $input The string input to tokenize
+     *
+     * @return TokenStream The resulting token stream
      */
-    static private function tokenizeQuotedString($currentToken, $string, &$i)
+    protected function tokenize($input)
     {
-        //check to see if ending quote
-       /* if($currentToken->getType() == Token::T_QUOTE){
-            $currentToken->setType(Token::T_PHRASE);
-            $currentToken = self::pushToken($currentToken, $i);
+        $stream = new TokenStream();
+        $stream->setSource($input);
+
+        // PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_OFFSET_CAPTURE
+        $matches = preg_split('/' . implode('|', $this->getLexemes()) . '/', $input, -1, 7);
+
+        foreach ($matches as $match) {
+            $value = strtolower($match[0]);
+
+            if (is_numeric($value)) {
+                $code = self::T_NUMBER;
+            } elseif (isset($this->_constTokens[$value])) {
+                $code = $this->_constTokens[$value];
+            } elseif (isset($this->constTokens[$value])) {
+                $code = $this->constTokens[$value];
+            } elseif (ctype_space($value)) {
+                continue;
+            } elseif (ctype_graph($value)) {
+                $code = self::T_STRING;
+            } else {
+                $code = self::T_NONE;
+            }
+
+            $stream->push(new Token($code, $match[0], $match[1]));
         }
-        else{*/
-            if ($currentToken->getData() != null) {
-                //add token you have now and begin the exact phrase
-                $currentToken = self::pushToken($currentToken, $i);
-            }
-            //beginning quote
-            $currentToken->setType(Token::T_PHRASE);
 
-            //keep adding character to token until another quote or end of string
-            while(++$i < strlen($string)) {
-                if($string[$i] == '\\') {
-                    $currentToken->addData($string[++$i]);
-                } else if($string[$i] != '"') {
-                    $currentToken->addData($string[$i]);
-                } else {
-                    break;
-                }
-            }
-            $currentToken = self::pushToken($currentToken, $i);
-
-        return $currentToken;
-
-        /*if($currentToken->getData() == null) {
-            $currentToken->setTypeIfNone(Token::T_STRING);
-            self::readEncString($currentToken, $string, $i);
-            if($i + 1 < strlen($string) && $string[$i + 1] != ' ') // Peek one ahead. Should be empty
-                throw new ParseException('Unexpected T_STRING', $string, $i + 1);
-        } else {
-            throw new ParseException('Unexpected T_STRING', $string, $i);
-        }*/
-
-        /*if ($currentState == Parser::T_LEFT_QUOTE) {
-                       $currentState = Parser::T_PHRASE;
-                       $currentToken = self::addToken($searchToken, $currentToken, $currentState);
-                       $currentState = Parser::T_TERM;
-                   } else {
-                       if ($currentToken == null) {
-                           $currentState = Parser::T_LEFT_QUOTE;
-                       }
-                       else {
-                           //add current token and start new token with left quote state
-                           $currentToken = self::addToken($searchToken, $currentToken, $currentState);
-                           $currentState = Parser::T_LEFT_QUOTE;
-                       }
-                   }*/
-
-
-
+        return $stream;
     }
-
-    /**
-     * Adds token to SearchToken object.
-     *
-     * @param SearchToken $searchToken
-     * @param string $currentToken
-     * @param int $currentState
-     * @return null
-     */
-
-    /*static private function addToken($searchToken, $currentToken, $currentState)
-    {
-        if ($currentToken == null) {
-            return;
-        }
-
-        switch ($currentState) {
-            case Parser::T_TERM:
-                $searchToken->terms[] = trim($currentToken);
-                break;
-            case Parser::T_MENTION:
-                $searchToken->mentions[] = trim($currentToken);
-                break;
-            case Parser::T_HASHTAG:
-                $searchToken->hashtags[] = trim($currentToken);
-                break;
-            case Parser::T_PHRASE:
-                $searchToken->phrases[] = trim($currentToken);
-                break;
-            case Parser::T_LEFT_QUOTE:
-                //never got closing quote so treat token as a phrase
-                $searchToken->phrases[] = trim($currentToken);
-                break;
-            case Parser::T_INCLUDE:
-                $searchToken->includes[] = trim($currentToken);
-                break;
-            case Parser::T_EXCLUDE:
-                $searchToken->excludes[] = trim($currentToken);
-                break;
-        }
-        return null;
-    }*/
-
 }
