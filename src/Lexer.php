@@ -28,7 +28,8 @@ class Lexer
      */
     protected $lexemes = [
         '([\d]+\.?[\d]*)',
-        '([\w\d\'\"]+)',
+        '([\w\d\']+)',
+        '(\"[^"]*\")',
         '(.)'
     ];
 
@@ -109,7 +110,7 @@ class Lexer
                 $code = $this->constTokens[$value];
             } elseif (ctype_space($value)) {
                 continue;
-            } elseif (ctype_graph($value)) {
+            } elseif (is_string($value)) {
                 $code = self::T_STRING;
             } else {
                 $code = self::T_NONE;
