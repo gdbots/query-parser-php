@@ -9,53 +9,59 @@ use Gdbots\QueryParser\Node\SubExpression;
 use Gdbots\QueryParser\Node\ExcludeTerm;
 use Gdbots\QueryParser\Node\IncludeTerm;
 use Gdbots\QueryParser\Node\Hashtag;
+use Gdbots\QueryParser\Node\Mention;
 use Gdbots\QueryParser\Node\OrExpressionList;
 use Gdbots\QueryParser\Node\AndExpressionList;
 
 interface QueryItemVisitorinterface
 {
     /**
-     * @param Word
+     * @param Word $word
      */
     public function visitWord(Word $word);
 
     /**
-     * @param Text
+     * @param Text $text
      */
     public function visitText(Text $text);
 
     /**
-     * @param ExplicitTerm
+     * @param ExplicitTerm $term
      */
     public function visitExplicitTerm(ExplicitTerm $term);
 
     /**
-     * @param SubExpression
+     * @param SubExpression $sub
      */
     public function visitSubExpression(SubExpression $sub);
 
     /**
-     * @param ExcludeTerm
+     * @param ExcludeTerm $term
      */
     public function visitExcludeTerm(ExcludeTerm $term);
 
     /**
-     * @param IncludeTerm
+     * @param IncludeTerm $term
      */
     public function visitIncludeTerm(IncludeTerm $term);
 
     /**
-     * @param Hashtags
+     * @param Hashtag $hashtag
      */
-    public function visitHashtags(Hashtags $hashtags);
+    public function visitHashtag(Hashtag $hashtag);
 
     /**
-     * @param OrExpressionList
+     * @param Mention $mention
+     */
+    public function visitMention(Mention $mention);
+
+    /**
+     * @param OrExpressionList $list
      */
     public function visitOrExpressionList(OrExpressionList $list);
 
     /**
-     * @param QueryAndExpressionList
+     * @param QueryAndExpressionList $list
      */
     public function visitAndExpressionList(AndExpressionList $list);
 }
