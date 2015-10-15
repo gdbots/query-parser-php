@@ -7,13 +7,19 @@ class Token
 {
 
     const T_NONE        = 0;
-    const T_TERM        = 1;
+    const T_KEYWORD     = 1;
     const T_MENTION     = 2;
     const T_HASHTAG     = 3;
-    const T_QUOTE       = 4;
-    const T_PHRASE      = 5;
-    const T_INCLUDE     = 6;
-    const T_EXCLUDE     = 7;
+    const T_PHRASE      = 4;
+    const T_INCLUDE     = 5;
+    const T_EXCLUDE     = 6;
+    const T_BOOST       = 7;
+    const T_FILTER_GT   = 8;
+    const T_FILTER_GTE  = 9;
+    const T_FILTER_LT   = 10;
+    const T_FILTER_LTE  = 11;
+    const T_FILTER_EQ   = 12;
+
 
     /**
      * The token type
@@ -30,6 +36,12 @@ class Token
      * @var int
      */
     protected $startPos;
+
+    /**
+     * The value of boost or filter
+     * @var string
+     */
+    protected $value = null;
 
     /**
      * Create a new token
@@ -99,6 +111,15 @@ class Token
     }
 
     /**
+     * Sets the token data
+     * @param string $data
+     */
+    public function setData($data)
+    {
+        $this->data = $data;
+    }
+
+    /**
      * Gets the token start position in the string
 
      * @return int
@@ -110,7 +131,6 @@ class Token
 
     /**
      * Sets the token start position
-     * @internal
      * @param int $startPos
      */
     public function setStartPosition($startPos)
@@ -132,5 +152,24 @@ class Token
             return $name;
         return 'UNKNOWN_TOKEN';
     }
+
+    /**
+     * Gets the token value
+     * @return string
+     */
+    public function getValue()
+    {
+        return $this->value;
+    }
+
+    /**
+     * Sets the token value
+     * @param string $value
+     */
+    public function setvalue($value)
+    {
+        $this->value = $value;
+    }
+
 
 }
