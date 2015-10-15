@@ -196,9 +196,14 @@ class QueryScanner
      * Reads the new input string and set the position to 0. The processed data will be cleared.
      *
      * @param string $input
+     * @param bool   $ignoreOperator
      */
-    public function readString($input)
+    public function readString($input, $ignoreOperator = false)
     {
+        if ($ignoreOperator) {
+            // todo: lowercase OR & AND before parsing
+        }
+
         // file all strings and rebuild input string with "OR"
         if (preg_match_all('/[^\\s\"\']+|\"([^\"]*)\"|\'([^\']*)\'/', $input, $matches)) {
             $input = '';
@@ -209,13 +214,17 @@ class QueryScanner
                     isset($matches[0][$key+1]) &&
                     $matches[0][$key+1] != 'AND' &&
                     $matches[0][$key+1] != 'OR' &&
+                    substr($matches[0][$key+1], 0, 1) != '^' &&
                     $value != 'AND' &&
                     $value != 'OR' &&
                     $value != '(' &&
                     substr($value, -1) != ':'
                 ) {
                     $input .= ' OR ';
-                } else {
+                } elseif (
+                    isset($matches[0][$key+1]) &&
+                    substr($matches[0][$key+1], 0, 1) != '^'
+                ) {
                     $input .= ' ';
                 }
             }
@@ -224,8 +233,7 @@ class QueryScanner
         // removed duplicate spaces
         $input = preg_replace('/\s+/', ' ', $input);
 
-        // removed spaces around operators
-        $input = preg_replace('/(\ ?)([!|:|=|<|>])(\ ?)/', '$2', $input);
+        // todo: close quotes if open at the end
 
         $this->input = $input;
         $this->processed = '';

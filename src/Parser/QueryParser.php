@@ -2,22 +2,13 @@
 
 namespace Gdbots\QueryParser\Parser;
 
-use Gdbots\QueryParser\Node\Text;
-use Gdbots\QueryParser\Node\Word;
-use Gdbots\QueryParser\Node\ExplicitTerm;
-use Gdbots\QueryParser\Node\Hashtag;
-use Gdbots\QueryParser\Node\Mention;
-use Gdbots\QueryParser\Node\ExcludeTerm;
-use Gdbots\QueryParser\Node\IncludeTerm;
-use Gdbots\QueryParser\Node\OrExpressionList;
-use Gdbots\QueryParser\Node\AndExpressionList;
-use Gdbots\QueryParser\Node\SubExpression;
+use Gdbots\QueryParser\Node;
 
 /**
  * A parser using the QueryScanner as input for tokens. The parser builds a
  * a query tree, representing the query expression delivered as input.
  * The parser returns a Query Tree if the parsing is successful or null if it failed.
- * The parser will try to parse the entire input string and delivers feedback on errors,
+ * The parser will try to parse the entire input string and delivers errors,
  * for each expression it could not parse.
  */
 class QueryParser
@@ -33,7 +24,7 @@ class QueryParser
      *
      * @var array
      */
-    protected $feedback = array();
+    protected $errors = array();
 
     /**
      * __construct
@@ -44,44 +35,45 @@ class QueryParser
     }
 
     /**
-     * Resets the input string and feedback.
+     * Resets the input string and errors.
+     *
+     * @param string $input
+     * @param bool   $ignoreOperator
+     */
+    public function readString($input, $ignoreOperator = false)
+    {
+        $this->scanner->readString($input, $ignoreOperator);
+        $this->errors = array();
+    }
+
+    /**
+     * Private function to add an error message to the errors array.
      *
      * @param string $input
      */
-    public function readString($input)
+    protected function addError($message)
     {
-        $this->scanner->readString($input);
-        $this->feedback = array();
+        $this->errors[] = $message;
     }
 
     /**
-     * Private function to add an error message to the feedback array.
-     *
-     * @param string $input
-     */
-    protected function addFeedback($message)
-    {
-        $this->feedback[] = $message;
-    }
-
-    /**
-     * Checks if the parser has any feedback to deliver.
+     * Checks if the parser has any errors to deliver.
      *
      * @return bool
      */
-    public function hasFeedback()
+    public function hasErrors()
     {
-        return count($this->feedback) > 0;
+        return count($this->errors) > 0;
     }
 
     /**
-     * Returns an array with feedback (error) messages from the parser.
+     * Returns an array with error messages from the parser.
      *
      * @return bool
      */
-    public function getFeedback()
+    public function getErrors()
     {
-        return $this->feedback;
+        return $this->errors;
     }
 
     /**
@@ -102,24 +94,24 @@ class QueryParser
 
         switch ($this->scanner->next()) {
             case QueryScanner::T_TEXT:
-                $value = new Text($this->scanner->getToken());
+                $value = new Node\Text($this->scanner->getToken());
 
                 break;
 
             case QueryScanner::T_WORD:
-                $value = new Word($this->scanner->getToken());
+                $value = new Node\Word($this->scanner->getToken());
 
                 break;
 
             default:
-                $this->addFeedback(sprintf('Error: Expected Word or Text. Found: "%s"', $this->scanner->getTokenTypeText()));
+                $this->addError(sprintf('Error: Expected Word or Text. Found: "%s"', $this->scanner->getTokenTypeText()));
 
                 return null;
         }
 
         $this->scanner->next();
 
-        return new ExplicitTerm($word, $tokenType, $value);
+        return new Node\ExplicitTerm($word, $tokenType, $value);
     }
 
     /**
@@ -145,23 +137,23 @@ class QueryParser
                 return $this->readSubQuery($tokenType);
 
             case QueryScanner::T_TEXT:
-                $text = new Text($this->scanner->getToken());
+                $text = new Node\Text($this->scanner->getToken());
 
                 $this->scanner->next();
 
                 return $text;
 
             case QueryScanner::T_WORD:
-                $word =  new Word($this->scanner->getToken());
+                $word =  new Node\Word($this->scanner->getToken());
 
                 return $this->readTerm($this->scanner->next(), $word);
 
             case QueryScanner::T_EXCLUDE:
                 $expression = $this->readExpression($this->scanner->next());
                 if ($expression) {
-                    return new ExcludeTerm($expression);
+                    return new Node\ExcludeTerm($expression);
                 } else {
-                    $this->addFeedback('Error: EXCLUDE not followed by a valid expression.');
+                    $this->addError('Error: EXCLUDE not followed by a valid expression.');
                 }
 
                 break;
@@ -169,9 +161,9 @@ class QueryParser
             case QueryScanner::T_INCLUDE:
                 $expression = $this->readExpression($this->scanner->next());
                 if ($expression) {
-                    return new IncludeTerm($expression);
+                    return new Node\IncludeTerm($expression);
                 } else {
-                    $this->addFeedback('Error: INCLUDE not followed by a valid expression.');
+                    $this->addError('Error: INCLUDE not followed by a valid expression.');
                 }
 
                 break;
@@ -179,9 +171,9 @@ class QueryParser
             case QueryScanner::T_HASHTAG:
                 $expression = $this->readExpression($this->scanner->next());
                 if ($expression) {
-                    return new Hashtag($expression);
+                    return new Node\Hashtag($expression);
                 } else {
-                    $this->addFeedback('Error: HASHTAG not followed by a valid expression.');
+                    $this->addError('Error: HASHTAG not followed by a valid expression.');
                 }
 
                 break;
@@ -189,15 +181,15 @@ class QueryParser
             case QueryScanner::T_MENTION:
                 $expression = $this->readExpression($this->scanner->next());
                 if ($expression) {
-                    return new Mention($expression);
+                    return new Node\Mention($expression);
                 } else {
-                    $this->addFeedback('Error: MENTION not followed by a valid expression.');
+                    $this->addError('Error: MENTION not followed by a valid expression.');
                 }
 
                 break;
 
             case QueryScanner::T_ILLEGAL:
-                $this->addFeedback(sprintf(
+                $this->addError(sprintf(
                     'Error: Expected Expression. Found illegal character: "%s"',
                     $this->scanner->getTokenTypeText()
                 ));
@@ -205,7 +197,7 @@ class QueryParser
                 break;
 
             case QueryScanner::T_QUOTE:
-                $this->addFeedback(sprintf(
+                $this->addError(sprintf(
                     'Error: Opening quote at pos %s lacks closing quote: "%s"',
                     $this->scanner->getPosition(),
                     $this->scanner->getToken()
@@ -214,7 +206,7 @@ class QueryParser
                 break;
 
             case QueryScanner::T_OR_OPERATOR:
-                $this->addFeedback(sprintf(
+                $this->addError(sprintf(
                     'Error: Expected Expression. OR operator found at pos %s "%s" remaining: "%s"',
                     $this->scanner->getPosition(),
                     $this->scanner->getToken(),
@@ -224,7 +216,7 @@ class QueryParser
                 break;
 
             case QueryScanner::T_AND_OPERATOR:
-                $this->addFeedback(sprintf(
+                $this->addError(sprintf(
                     'Error: Expected Expression. AND operator found at pos %s "%s" remaining: "%s"',
                     $this->scanner->getPosition(),
                     $this->scanner->getToken(),
@@ -261,7 +253,7 @@ class QueryParser
             if (sizeof($expressions) === 1) {
                 return $expressions[0];
             } else {
-                return new OrExpressionList($expressions);
+                return new Node\OrExpressionList($expressions);
             }
         }
 
@@ -271,7 +263,7 @@ class QueryParser
     /**
      * Makes the parser read a list of statements. This can be:
      * - Expression
-     * - Expression Expression ...
+     * - Expression AND Expression AND ...
      *
      * @param int $tokenType
      *
@@ -294,11 +286,11 @@ class QueryParser
                 if (sizeof($expressions) === 1) {
                     return $expressions[0];
                 } else {
-                    return new AndExpressionList($expressions);
+                    return new Node\AndExpressionList($expressions);
                 }
         }
 
-        $this->addFeedback(sprintf('Error: Expected Expression. Found: "%s"', $this->scanner->getTokenTypeText()));
+        $this->addError(sprintf('Error: Expected Expression. Found: "%s"', $this->scanner->getTokenTypeText()));
 
         return null;
     }
@@ -315,10 +307,10 @@ class QueryParser
         $expressionlist = $this->readAndExpressionList($this->scanner->next());
         if ($this->scanner->getTokenType() == QueryScanner::T_RPAREN) {
             $this->scanner->next();
-            return new SubExpression($expressionlist);
+            return new Node\SubExpression($expressionlist);
         }
 
-        $this->addFeedback('Error: Expected Right Paren.');
+        $this->addError('Error: Expected Right Paren.');
 
         return null;
     }
