@@ -4,7 +4,7 @@ namespace Gdbots\QueryParser\Node;
 
 use Gdbots\QueryParser\Visitor\QueryItemVisitorinterface;
 
-class Negation extends CompositeExpression
+class ExcludeTerm extends CompositeExpression
 {
     /**
      * {@inheritDoc}
@@ -12,7 +12,7 @@ class Negation extends CompositeExpression
     public function toArray()
     {
         return [
-            'Operator' => 'NOT',
+            'Operator' => 'Exclude Term',
             'Expression' => $this->expression
         ];
     }
@@ -22,6 +22,6 @@ class Negation extends CompositeExpression
      */
     public function accept(QueryItemVisitorinterface $visitor)
     {
-        $visitor->visitNegation($this);
+        $visitor->visitExcludeTerm($this);
     }
 }

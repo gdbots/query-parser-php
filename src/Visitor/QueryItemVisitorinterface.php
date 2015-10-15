@@ -6,7 +6,8 @@ use Gdbots\QueryParser\Node\Word;
 use Gdbots\QueryParser\Node\Text;
 use Gdbots\QueryParser\Node\ExplicitTerm;
 use Gdbots\QueryParser\Node\SubExpression;
-use Gdbots\QueryParser\Node\Negation;
+use Gdbots\QueryParser\Node\ExcludeTerm;
+use Gdbots\QueryParser\Node\IncludeTerm;
 use Gdbots\QueryParser\Node\Hashtag;
 use Gdbots\QueryParser\Node\OrExpressionList;
 use Gdbots\QueryParser\Node\AndExpressionList;
@@ -34,9 +35,14 @@ interface QueryItemVisitorinterface
     public function visitSubExpression(SubExpression $sub);
 
     /**
-     * @param Negation
+     * @param ExcludeTerm
      */
-    public function visitNegation(Negation $negation);
+    public function visitExcludeTerm(ExcludeTerm $term);
+
+    /**
+     * @param IncludeTerm
+     */
+    public function visitIncludeTerm(IncludeTerm $term);
 
     /**
      * @param Hashtags

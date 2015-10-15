@@ -7,7 +7,8 @@ use Gdbots\QueryParser\Node\Word;
 use Gdbots\QueryParser\Node\ExplicitTerm;
 use Gdbots\QueryParser\Node\Hashtag;
 use Gdbots\QueryParser\Node\Mention;
-use Gdbots\QueryParser\Node\Negation;
+use Gdbots\QueryParser\Node\ExcludeTerm;
+use Gdbots\QueryParser\Node\IncludeTerm;
 use Gdbots\QueryParser\Node\OrExpressionList;
 use Gdbots\QueryParser\Node\AndExpressionList;
 use Gdbots\QueryParser\Node\SubExpression;
@@ -129,7 +130,9 @@ class QueryParser
      * - Word:Text
      * - Word:Word
      * - '-' Expression
+     * - '+' Expression
      * - '#' Expression
+     * - '@' Expression
      *
      * @param int $tokenType
      *
@@ -153,12 +156,22 @@ class QueryParser
 
                 return $this->readTerm($this->scanner->next(), $word);
 
-            case QueryScanner::T_MINUS:
+            case QueryScanner::T_EXCLUDE:
                 $expression = $this->readExpression($this->scanner->next());
                 if ($expression) {
-                    return new Negation($expression);
+                    return new ExcludeTerm($expression);
                 } else {
-                    $this->addFeedback('Error: MINUS not followed by a valid expression.');
+                    $this->addFeedback('Error: EXCLUDE not followed by a valid expression.');
+                }
+
+                break;
+
+            case QueryScanner::T_INCLUDE:
+                $expression = $this->readExpression($this->scanner->next());
+                if ($expression) {
+                    return new IncludeTerm($expression);
+                } else {
+                    $this->addFeedback('Error: INCLUDE not followed by a valid expression.');
                 }
 
                 break;
@@ -274,7 +287,6 @@ class QueryParser
             $expressions[] = $lastExpression;
 
         } while ($lastExpression && $this->scanner->getTokenType() == QueryScanner::T_AND_OPERATOR && $this->scanner->next());
-
 
         switch ($this->scanner->getTokenType()) {
             case QueryScanner::T_RPAREN:

@@ -25,87 +25,22 @@ namespace Gdbots\QueryParser\Parser;
  */
 class QueryScanner
 {
-    /**
-     * Constant for "End of Line" tokens. An "end of line" indicates the end of the inputs.
-     */
-    const T_EOL = 0;
-
-    /**
-     * Constant for a " Word" token.
-     */
-    const T_WORD = 1;
-
-    /**
-     * Stands for "(", "Left paren" token.
-     */
-    const T_LPAREN = 2;
-
-    /**
-     * Stands for ")", " right pairs " token.
-     */
-    const T_RPAREN = 3;
-
-    /**
-     * Stands for "-", a "minus" token.
-     */
-    const T_MINUS = 5;
-
-    /**
-     * Stands for "#", a "hashtag" token.
-     */
-    const T_HASHTAG = 6;
-
-    /**
-     * Stands for "@", a "Mention" token.
-     */
-    const T_MENTION = 7;
-
-    /**
-     *  Stands for ":", a "colon"  token.
-     */
-    const T_COLON = 8;
-
-    /**
-     *  Stands for "^", a "boost"  token.
-     */
-    const T_BOOST = 9;
-
-    /**
-     * Stands for "OR", if word. A "OR operator" token.
-     */
-    const T_OR_OPERATOR = 10;
-
-    /**
-     * Stands for "AND", if word. A "AND operator" token.
-     */
-    const T_AND_OPERATOR = 11;
-
-    /**
-     * Stands for every kind (and amount) of spaces, a "White Space" token.
-     */
-    const T_WSPC = 12;
-
-    /**
-     * A "TEXT" token represents text between two quotes (parentheses).
-     * This is already the scanner captured from simplicity for both
-     * scanner and parser and in order to avoid a complete parse of the text.
-     */
-    const T_TEXT = 13;
-
-    /**
-     * '"' A quote token represents double parentheses.
-     * Because the scanner automatically all text between double
-     * parenthesis in a TEXT token move, this ratio is only
-     * returned for a double hook without matching
-     * double closing parenthesis.
-     */
-    const T_QUOTE = 14;
-
-    /**
-     * An illegal character, such as, a control character or character system.
-     * This should not occur.
-     */
-    const T_ILLEGAL = 15;
+    const T_EOL          = 0;
+    const T_WORD         = 1;
+    const T_LPAREN       = 2; // "("
+    const T_RPAREN       = 3; // ")"
+    const T_EXCLUDE      = 4; // "-"
+    const T_INCLUDE      = 5; // "+"
+    const T_HASHTAG      = 6; // "#"
+    const T_MENTION      = 7; // "@"
+    const T_COLON        = 8; // ":"
+    const T_BOOST        = 9; // "^"
+    const T_OR_OPERATOR  = 10; // "OR"
+    const T_AND_OPERATOR = 11; // "AND"
+    const T_WSPC         = 12; // white-space
+    const T_TEXT         = 13; // text between two quotes (parentheses)
+    const T_QUOTE        = 14; // double parentheses
+    const T_ILLEGAL      = 15; // illegal character
 
     /**
      * The input string which has already been processed and data back into tokens.
@@ -152,7 +87,8 @@ class QueryScanner
         self::T_WORD         => 'WORD',
         self::T_LPAREN       => 'LPAREN',
         self::T_RPAREN       => 'RPAREN',
-        self::T_MINUS        => 'MINUS',
+        self::T_EXCLUDE      => 'EXCLUDE',
+        self::T_INCLUDE      => 'INCLUDE',
         self::T_HASHTAG      => 'HASHTAG',
         self::T_MENTION      => 'MENTION',
         self::T_COLON        => 'COLON',
@@ -187,6 +123,7 @@ class QueryScanner
      * @var array
      */
     private $regEx = array(
+
         // WSPC matches in (frequent) spaces, tabs and newlines.
         self::T_WSPC => '#^([ \t\n]+)(.*)#',
 
@@ -213,7 +150,8 @@ class QueryScanner
         self::T_RPAREN => '#^(\))(.*)#',
 
         // hyphen, colon, quote
-        self::T_MINUS   => '#^(-)(.*)#',
+        self::T_EXCLUDE => '#^(-)(.*)#',
+        self::T_INCLUDE => '#^(\+)(.*)#',
         self::T_HASHTAG => '#^(\#)(.*)#',
         self::T_MENTION => '#^(@)(.*)#',
         self::T_COLON   => '#^(:)(.*)#',
@@ -290,7 +228,7 @@ class QueryScanner
         $input = preg_replace('/(\ ?)([!|:|=|<|>])(\ ?)/', '$2', $input);
 
         $this->input = $input;
-        $this->processed = "";
+        $this->processed = '';
         $this->position = 0;
     }
 
@@ -349,10 +287,10 @@ class QueryScanner
         // if no token matches, we are probably at the end. The control is
         // still entered, was the "match all" expression failure for illegal
         // characters.
-        if ($this->input != "") {
+        if ($this->input != '') {
             $this->tokenType = self::T_ILLEGAL;
             $this->token = $this->input;
-            $this->input = "";
+            $this->input = '';
             return self::T_ILLEGAL;
         }
 
