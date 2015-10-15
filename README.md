@@ -8,14 +8,15 @@ Php library that converts search queries into terms, phrases, hashtags, mentions
 ``` php
 <?php
 
-use Gdbots\QueryParser\SearchQueryParser;
+use Gdbots\QueryParser\Parser\QueryParser;
 
-$query = new SearchQueryParser();
+$parser = new QueryParser();
+$parser->readString('mandatoryWord AND -excludedWord fieldName:"value"');
+$query = $parser->parse();
+var_dump($query);
 
-$query->setQuery('+mandatoryWord -excludedWord fieldName:"value"');
-var_dump($query->evaluate());
-
-$query->setQuery('a AND (b OR c) AND NOT d');
-var_dump($query->evaluate());
+$parser->readString('a AND (b OR c) AND NOT d');
+$query = $parser->parse();
+var_dump($query);
 
 ```
