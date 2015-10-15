@@ -200,14 +200,19 @@ class QueryScanner
      */
     public function readString($input, $ignoreOperator = false)
     {
-        if ($ignoreOperator) {
-            // todo: lowercase OR & AND before parsing
-        }
-
         // file all strings and rebuild input string with "OR"
         if (preg_match_all('/[^\\s\"\']+|\"([^\"]*)\"|\'([^\']*)\'/', $input, $matches)) {
             $input = '';
             foreach ($matches[0] as $key => $value) {
+                if ($ignoreOperator) {
+                    if ($value == 'AND') {
+                        $value = 'OR';
+                    }
+                    if ($value == '(' || $value == ')') {
+                        continue;
+                    }
+                }
+
                 $input .= $value;
 
                 if (
