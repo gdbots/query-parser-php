@@ -10,7 +10,7 @@ class OrExpressionListTest extends ExpressionListTest
     {
         parent::setUp();
 
-        $this->expressionList = new OrExpressionList(array($this->word1, $this->word2));
+        $this->expressionList = new OrExpressionList([$this->word1, $this->word2]);
     }
 
     public function testToArray()

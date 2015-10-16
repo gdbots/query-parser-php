@@ -118,7 +118,7 @@ class QueryScanner
      *
      * @var array
      */
-    private $regEx = array(
+    private $regEx = [
 
         // WSPC matches in (frequent) spaces, tabs and newlines.
         self::T_WSPC => '/^([ \t\n]+)(.*)/',
@@ -156,7 +156,7 @@ class QueryScanner
 
         // this should match with each character that is left over.
         self::T_ILLEGAL => '/^(.)(.*)/'
-    );
+    ];
 
     /**
      * Displays the part of the input string that's already been processed.
@@ -222,12 +222,12 @@ class QueryScanner
 
                 if (
                     isset($matches[0][$key+1]) &&
-                    !in_array(substr($matches[0][$key+1], 0, 1), array(':', '^', ')')) &&
-                    !in_array(substr($value, -1), array(':', '^'))
+                    !in_array(substr($matches[0][$key+1], 0, 1), [':', '^', ')']) &&
+                    !in_array(substr($value, -1), [':', '^'])
                 ) {
                     if (
-                        !in_array($matches[0][$key+1], array('AND', 'OR')) &&
-                        !in_array($value, array('AND', 'OR', '('))
+                        !in_array($matches[0][$key+1], ['AND', 'OR']) &&
+                        !in_array($value, ['AND', 'OR', '('])
                     ) {
                         $input .= ' OR ';
                     } else {

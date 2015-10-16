@@ -24,7 +24,7 @@ class QueryParser
      *
      * @var array
      */
-    protected $errors = array();
+    protected $errors = [];
 
     /**
      * __construct
@@ -43,7 +43,7 @@ class QueryParser
     public function readString($input, $ignoreOperator = false)
     {
         $this->scanner->readString($input, $ignoreOperator);
-        $this->errors = array();
+        $this->errors = [];
     }
 
     /**
@@ -86,7 +86,7 @@ class QueryParser
      */
     protected function readTerm($tokenType, $term)
     {
-        if (!in_array($tokenType, array(QueryScanner::T_COLON, QueryScanner::T_BOOST))) {
+        if (!in_array($tokenType, [QueryScanner::T_COLON, QueryScanner::T_BOOST])) {
             return $term;
         }
 
@@ -262,7 +262,7 @@ class QueryParser
      */
     protected function readOrExpressionList($tokenType)
     {
-        $expressions = array();
+        $expressions = [];
         $lastExpression = false;
 
         do {
@@ -299,7 +299,7 @@ class QueryParser
      */
     protected function readAndExpressionList($tokenType)
     {
-        $expressions = array();
+        $expressions = [];
         $lastExpression = false;
 
         do {

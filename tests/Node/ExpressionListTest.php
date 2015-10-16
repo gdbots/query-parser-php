@@ -30,7 +30,7 @@ abstract class ExpressionListTest extends \PHPUnit_Framework_TestCase
 
     public function testGetExpressions()
     {
-        $this->assertEquals(array($this->word1, $this->word2), $this->expressionList->getExpressions());
+        $this->assertEquals([$this->word1, $this->word2], $this->expressionList->getExpressions());
     }
 
     public function testCount()
@@ -40,10 +40,10 @@ abstract class ExpressionListTest extends \PHPUnit_Framework_TestCase
 
     public function testIterator()
     {
-        $items = array(
+        $items = [
             $this->word1,
             $this->word2
-        );
+        ];
 
         foreach ($this->expressionList as $key => $word) {
             $this->assertSame($word, $items[$key]);

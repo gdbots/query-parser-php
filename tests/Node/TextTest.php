@@ -43,10 +43,10 @@ class TextTest extends \PHPUnit_Framework_TestCase
 
     public function testToArray()
     {
-        $array = array(
+        $array = [
             'Expression' => 'Text',
             'Term' => 'phrase'
-        );
+        ];
 
         $this->assertEquals($array, $this->text->toArray());
     }

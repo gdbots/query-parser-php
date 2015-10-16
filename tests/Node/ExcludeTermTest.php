@@ -32,10 +32,10 @@ class ExcludeTermTest extends \PHPUnit_Framework_TestCase
 
     public function testToArray()
     {
-        $array = array(
+        $array = [
             'Operator' => 'Exclude Term',
             'Expression' => $this->word
-        );
+        ];
 
         $this->assertEquals($array, $this->excludeTerm->toArray());
     }

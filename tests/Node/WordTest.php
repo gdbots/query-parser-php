@@ -32,10 +32,10 @@ class WordTest extends \PHPUnit_Framework_TestCase
 
     public function testToArray()
     {
-        $array = array(
+        $array = [
             'Expression' => 'Word',
             'Term' => 'phrase'
-        );
+        ];
 
         $this->assertEquals($array, $this->word->toArray());
     }

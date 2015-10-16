@@ -40,22 +40,22 @@ class QueryScannerTest extends \PHPUnit_Framework_TestCase
 
     public function getTestNextWithOneTokenDataprovider()
     {
-        return array(
-            array('phrase', QueryScanner::T_WORD),
-            array('', QueryScanner::T_EOI),
-            array('(', QueryScanner::T_OPEN_PARENTHESIS),
-            array(')', QueryScanner::T_CLOSE_PARENTHESIS),
-            array('-', QueryScanner::T_EXCLUDE),
-            array('+', QueryScanner::T_INCLUDE),
-            array('#', QueryScanner::T_HASHTAG),
-            array('@', QueryScanner::T_MENTION),
-            array('^', QueryScanner::T_BOOST),
-            array(':', QueryScanner::T_COLON),
-            array('OR', QueryScanner::T_OR_OPERATOR),
-            array('AND', QueryScanner::T_AND_OPERATOR),
-            array('"phrase"', QueryScanner::T_TEXT),
-            array('"', QueryScanner::T_QUOTE),
-       );
+        return [
+            ['phrase', QueryScanner::T_WORD],
+            ['', QueryScanner::T_EOI],
+            ['(', QueryScanner::T_OPEN_PARENTHESIS],
+            [')', QueryScanner::T_CLOSE_PARENTHESIS],
+            ['-', QueryScanner::T_EXCLUDE],
+            ['+', QueryScanner::T_INCLUDE],
+            ['#', QueryScanner::T_HASHTAG],
+            ['@', QueryScanner::T_MENTION],
+            ['^', QueryScanner::T_BOOST],
+            [':', QueryScanner::T_COLON],
+            ['OR', QueryScanner::T_OR_OPERATOR],
+            ['AND', QueryScanner::T_AND_OPERATOR],
+            ['"phrase"', QueryScanner::T_TEXT],
+            ['"', QueryScanner::T_QUOTE]
+       ];
     }
 
     public function testGetTokenTypeText()

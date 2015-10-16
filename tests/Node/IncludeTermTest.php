@@ -32,10 +32,10 @@ class IncludeTermTest extends \PHPUnit_Framework_TestCase
 
     public function testToArray()
     {
-        $array = array(
+        $array = [
             'Operator' => 'Include Term',
             'Expression' => $this->word
-        );
+        ];
 
         $this->assertEquals($array, $this->includeTerm->toArray());
     }

@@ -10,7 +10,7 @@ class AndExpressionListTest extends ExpressionListTest
     {
         parent::setUp();
 
-        $this->expressionList = new AndExpressionList(array($this->word1, $this->word2));
+        $this->expressionList = new AndExpressionList([$this->word1, $this->word2]);
     }
 
     public function testToArray()

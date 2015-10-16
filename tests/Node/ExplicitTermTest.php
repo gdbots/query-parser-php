@@ -38,12 +38,12 @@ class ExplicitTest extends \PHPUnit_Framework_TestCase
 
     public function testToArray()
     {
-        $array = array(
+        $array = [
             'Expression' => 'Explicit Term',
             'Nominator' => 'people',
             'Term' => $this->word,
             'TokenType' => QueryScanner::T_COLON
-        );
+        ];
 
         $this->assertEquals($array, $this->explicitTerm->toArray());
     }

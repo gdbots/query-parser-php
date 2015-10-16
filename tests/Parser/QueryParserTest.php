@@ -32,21 +32,20 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
 
     public function getTestParseWithOneClassDataprovider()
     {
-        return array(
-            array('phrase', 'Gdbots\QueryParser\Node\Word'),
-            array('"phrase"', 'Gdbots\QueryParser\Node\Text'),
-            array('country:"United State"', 'Gdbots\QueryParser\Node\ExplicitTerm'),
-            array('phrase^boost', 'Gdbots\QueryParser\Node\ExplicitTerm'),
-            array('-phrase', 'Gdbots\QueryParser\Node\ExcludeTerm'),
-            array('+phrase', 'Gdbots\QueryParser\Node\IncludeTerm'),
-            array('#phrase', 'Gdbots\QueryParser\Node\Hashtag'),
-            array('@phrase', 'Gdbots\QueryParser\Node\Mention'),
-            array('phrase word', 'Gdbots\QueryParser\Node\OrExpressionList'),
-            array('phrase OR word', 'Gdbots\QueryParser\Node\OrExpressionList'),
-            array('phrase AND word', 'Gdbots\QueryParser\Node\AndExpressionList'),
-            array('(phrase)', 'Gdbots\QueryParser\Node\Subexpression'),
-
-        );
+        return [
+            ['phrase', 'Gdbots\QueryParser\Node\Word'],
+            ['"phrase"', 'Gdbots\QueryParser\Node\Text'],
+            ['country:"United State"', 'Gdbots\QueryParser\Node\ExplicitTerm'],
+            ['phrase^boost', 'Gdbots\QueryParser\Node\ExplicitTerm'],
+            ['-phrase', 'Gdbots\QueryParser\Node\ExcludeTerm'],
+            ['+phrase', 'Gdbots\QueryParser\Node\IncludeTerm'],
+            ['#phrase', 'Gdbots\QueryParser\Node\Hashtag'],
+            ['@phrase', 'Gdbots\QueryParser\Node\Mention'],
+            ['phrase word', 'Gdbots\QueryParser\Node\OrExpressionList'],
+            ['phrase OR word', 'Gdbots\QueryParser\Node\OrExpressionList'],
+            ['phrase AND word', 'Gdbots\QueryParser\Node\AndExpressionList'],
+            ['(phrase)', 'Gdbots\QueryParser\Node\Subexpression']
+        ];
     }
 
     public function testParseTextWithUnclosedQuotes()

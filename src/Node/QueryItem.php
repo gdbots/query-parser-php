@@ -11,7 +11,7 @@ abstract class QueryItem
      */
     public function toArray()
     {
-        return array();
+        return [];
     }
 
     /**
