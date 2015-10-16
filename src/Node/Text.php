@@ -18,17 +18,9 @@ class Text extends SimpleTerm
     /**
      * @return string
      */
-    public function getText()
-    {
-        return $this->getToken();
-    }
-
-    /**
-     * @return string
-     */
     public function getQuotedText()
     {
-        return sprintf('"%s"', $this->getText());
+        return sprintf('"%s"', $this->getToken());
     }
 
     /**

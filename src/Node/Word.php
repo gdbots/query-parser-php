@@ -18,14 +18,6 @@ class Word extends SimpleTerm
     /**
      * {@inheritDoc}
      */
-    public function getWord()
-    {
-        return $this->getToken();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public function toArray()
     {
         return [
