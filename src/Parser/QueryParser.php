@@ -282,7 +282,7 @@ class QueryParser
 
         switch ($this->scanner->getTokenType()) {
             case QueryScanner::T_RPAREN:
-            case QueryScanner::T_EOL:
+            case QueryScanner::T_EOI:
                 if (sizeof($expressions) === 1) {
                     return $expressions[0];
                 } else {

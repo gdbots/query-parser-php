@@ -18,15 +18,11 @@ namespace Gdbots\QueryParser\Parser;
  *
  * For debugging and error reporting reasons, the scanner retains all input to be processed,
  * all input that is processed and the position of the scanner in the original input string.
- *
- * @todo Refactor EOL token to EOF (end of file) token, or EOI (end of input).
- *       The EOL token is erronously used by the scanner to denote the end of the
- *       input string.
  */
 class QueryScanner
 {
-    const T_EOL          = 0;
-    const T_WORD         = 1;
+    const T_EOI          = 0; // end of input
+    const T_WORD         = 1; // word
     const T_LPAREN       = 2; // "("
     const T_RPAREN       = 3; // ")"
     const T_EXCLUDE      = 4; // "-"
@@ -83,7 +79,7 @@ class QueryScanner
      * @var array
      */
     private $typeStrings = array (
-        self::T_EOL          => 'EOL',
+        self::T_EOI          => 'EOI',
         self::T_WORD         => 'WORD',
         self::T_LPAREN       => 'LPAREN',
         self::T_RPAREN       => 'RPAREN',
@@ -163,7 +159,7 @@ class QueryScanner
     );
 
     /**
-     * Displays the part of the input string back that's already been processed.
+     * Displays the part of the input string that's already been processed.
      *
      * @return string
      */
@@ -173,7 +169,7 @@ class QueryScanner
     }
 
     /**
-     * Indicates the part of the input string returned yet to be processed.
+     * Indicates the part of the input string remaining to be processed.
      *
      * @return string
      */
@@ -183,7 +179,7 @@ class QueryScanner
     }
 
     /**
-     * Returns the position of the scanner in the original input string back.
+     * Returns the position of the scanner in the original input string.
      *
      * @return int
      */
@@ -193,14 +189,14 @@ class QueryScanner
     }
 
     /**
-     * Reads the new input string and set the position to 0. The processed data will be cleared.
+     * Reads the new input string and set the position to 0.
      *
      * @param string $input
      * @param bool   $ignoreOperator
      */
     public function readString($input, $ignoreOperator = false)
     {
-        // file all strings and rebuild input string with "OR"
+        // find all strings and rebuild input string with "OR"
         if (preg_match_all('/[^\\s\"\']+|\"([^\"]*)\"|\'([^\']*)\'/', $input, $matches)) {
             $input = '';
             foreach ($matches[0] as $key => $value) {
@@ -238,7 +234,7 @@ class QueryScanner
         // removed duplicate spaces
         $input = preg_replace('/\s+/', ' ', $input);
 
-        // todo: close quotes if open at the end
+        // todo: close quotes or brackets if open at the end
 
         $this->input = $input;
         $this->processed = '';
@@ -246,7 +242,7 @@ class QueryScanner
     }
 
     /**
-     * Gives the token type (constant) back from the last processed token.
+     * Return the current token type.
      *
      * @return int
      */
@@ -256,7 +252,7 @@ class QueryScanner
     }
 
     /**
-     * The textual name of the token type back:
+     * Returns a textual verion of the token type:
      * - the token type (constant) if given
      * - the last processed token if no parameter is passed
      *
@@ -274,7 +270,7 @@ class QueryScanner
     }
 
     /**
-     * Gives the token (text) back from the last processed token.
+     * Returns the current token.
      *
      * @return int
      */
@@ -284,13 +280,13 @@ class QueryScanner
     }
 
     /**
-     * Processes the following token and indicates the type of back .
+     * Processes the all tokens and indicates the current type.
      *
      * @return int
      */
     public function next()
     {
-        // test for each token type in turn
+        // test each token type
         foreach ($this->regEx as $tokenType => $reg) {
             if ($this->testToken($reg, $tokenType) &&($this->getTokenType() != self::T_WSPC)) {
                 return $this->getTokenType();
@@ -298,7 +294,7 @@ class QueryScanner
         }
 
         // if no token matches, we are probably at the end. The control is
-        // still entered, was the "match all" expression failure for illegal
+        // still entered, the "preg_match" expression failure for illegal
         // characters.
         if ($this->input != '') {
             $this->tokenType = self::T_ILLEGAL;
@@ -307,14 +303,14 @@ class QueryScanner
             return self::T_ILLEGAL;
         }
 
-        $this->tokenType = self::T_EOL;
+        $this->tokenType = self::T_EOI;
         $this->token = null;
 
-        return self::T_EOL;
+        return self::T_EOI;
     }
 
     /**
-     * Auxiliary Function to test an expression for a match and process as token.
+     * Test an expression for a match and process as token.
      *
      * @param string $regEx
      * @param int    $tokenType
