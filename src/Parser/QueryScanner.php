@@ -21,22 +21,22 @@ namespace Gdbots\QueryParser\Parser;
  */
 class QueryScanner
 {
-    const T_EOI          = 0; // end of input
-    const T_WORD         = 1; // word
-    const T_OPEN_PARENTHESIS       = 2; // "("
-    const T_CLOSE_PARENTHESIS       = 3; // ")"
-    const T_EXCLUDE      = 4; // "-"
-    const T_INCLUDE      = 5; // "+"
-    const T_HASHTAG      = 6; // "#"
-    const T_MENTION      = 7; // "@"
-    const T_COLON        = 8; // ":"
-    const T_BOOST        = 9; // "^"
-    const T_OR_OPERATOR  = 10; // "OR"
-    const T_AND_OPERATOR = 11; // "AND"
-    const T_WSPC         = 12; // white-space
-    const T_TEXT         = 13; // text between two quotes (parentheses)
-    const T_QUOTE        = 14; // double parentheses
-    const T_ILLEGAL      = 15; // illegal character
+    const T_EOI                 = 0; // end of input
+    const T_WORD                = 1; // word
+    const T_OPEN_PARENTHESIS    = 2; // "("
+    const T_CLOSE_PARENTHESIS   = 3; // ")"
+    const T_EXCLUDE             = 4; // "-"
+    const T_INCLUDE             = 5; // "+"
+    const T_HASHTAG             = 6; // "#"
+    const T_MENTION             = 7; // "@"
+    const T_COLON               = 8; // ":"
+    const T_BOOST               = 9; // "^"
+    const T_OR_OPERATOR         = 10; // "OR"
+    const T_AND_OPERATOR        = 11; // "AND"
+    const T_WSPC                = 12; // white-space
+    const T_TEXT                = 13; // text between two quotes (parentheses)
+    const T_QUOTE               = 14; // double parentheses
+    const T_ILLEGAL             = 15; // illegal character
 
     /**
      * The input string which has already been processed and data back into tokens.
