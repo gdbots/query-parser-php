@@ -213,20 +213,17 @@ class QueryScanner
 
                 if (
                     isset($matches[0][$key+1]) &&
-                    $matches[0][$key+1] != 'AND' &&
-                    $matches[0][$key+1] != 'OR' &&
-                    substr($matches[0][$key+1], 0, 1) != '^' &&
-                    $value != 'AND' &&
-                    $value != 'OR' &&
-                    $value != '(' &&
-                    substr($value, -1) != ':'
+                    !in_array(substr($matches[0][$key+1], 0, 1), array(':', '^')) &&
+                    !in_array(substr($value, -1), array(':', '^'))
                 ) {
-                    $input .= ' OR ';
-                } elseif (
-                    isset($matches[0][$key+1]) &&
-                    substr($matches[0][$key+1], 0, 1) != '^'
-                ) {
-                    $input .= ' ';
+                    if (
+                        !in_array($matches[0][$key+1], array('AND', 'OR')) &&
+                        !in_array($value, array('AND', 'OR', '('))
+                    ) {
+                        $input .= ' OR ';
+                    } else {
+                        $input .= ' ';
+                    }
                 }
             }
         }
@@ -288,7 +285,7 @@ class QueryScanner
     {
         // test each token type
         foreach ($this->regEx as $tokenType => $reg) {
-            if ($this->testToken($reg, $tokenType) &&($this->getTokenType() != self::T_WSPC)) {
+            if ($this->testToken($reg, $tokenType) && $this->getTokenType() != self::T_WSPC) {
                 return $this->getTokenType();
             }
         }
