@@ -223,7 +223,7 @@ class QueryScanner
                 if (
                     isset($matches[0][$key+1]) &&
                     !in_array(substr($matches[0][$key+1], 0, 1), array(':', '^', ')')) &&
-                    !in_array(substr($value, -1), array(':', '^', ')'))
+                    !in_array(substr($value, -1), array(':', '^'))
                 ) {
                     if (
                         !in_array($matches[0][$key+1], array('AND', 'OR')) &&
