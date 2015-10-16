@@ -199,6 +199,7 @@ class QueryScanner
         // find all strings and rebuild input string with "OR"
         if (preg_match_all('/[^\\s\"\']+|\"([^\"]*)\"|\'([^\']*)\'/', $input, $matches)) {
             $input = '';
+            $openParenthesis = 0;
             foreach ($matches[0] as $key => $value) {
                 if ($ignoreOperator) {
                     if ($value == 'AND') {
@@ -210,6 +211,13 @@ class QueryScanner
                 }
 
                 $input .= $value;
+
+                if (preg_match_all('/(\()/', $value, $m)) {
+                    $openParenthesis += count($m[0]);
+                }
+                if (preg_match_all('/(\))/', $value, $m)) {
+                    $openParenthesis -= count($m[0]);
+                }
 
                 if (
                     isset($matches[0][$key+1]) &&
@@ -226,6 +234,11 @@ class QueryScanner
                     }
                 }
             }
+        }
+
+        // add missing close parentheses
+        for (; $openParenthesis>0; $openParenthesis--) {
+            $input .= ')';
         }
 
         // removed duplicate spaces
