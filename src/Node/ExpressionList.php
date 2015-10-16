@@ -2,7 +2,9 @@
 
 namespace Gdbots\QueryParser\Node;
 
-abstract class ExpressionList extends QueryItem implements \IteratorAggregate, \Countable
+use Gdbots\QueryParser\Parser\QueryScanner;
+
+abstract class ExpressionList extends QueryItem implements \Countable
 {
     /**
      * @var array
@@ -18,19 +20,54 @@ abstract class ExpressionList extends QueryItem implements \IteratorAggregate, \
     }
 
     /**
+     * @param int        $tokenType
+     * @param QueryItem $queryItem
+     *
      * @return array
      */
-    public function getExpressions()
+    public function getExpressions($tokenType = null, QueryItem $queryItem = null)
     {
-        return $this->expressions;
-    }
+        if ($tokenType) {
+            $expressions = [];
 
-    /**
-     * @return \ArrayIterator
-     */
-    public function getIterator()
-    {
-        return new \ArrayIterator($this->expressions);
+            if (!$queryItem) {
+                $queryItem = $this->getExpressions();
+            }
+
+            foreach ($queryItem as $expr) {
+                if (method_exists($expr, 'getTokenType') && $expr->getTokenType() == $tokenType) {
+                    $expressions[] = $expr;
+
+                } elseif ($expr instanceof ExpressionList) {
+                    $expressions = array_merge($expressions, $expr->getExpressions($tokenType));
+
+                } elseif ($expr instanceof CompositeExpression) {
+                    if (
+                        ($expr instanceof Mention && $tokenType == QueryScanner::T_MENTION) ||
+                        ($expr instanceof Hashtag && $tokenType == QueryScanner::T_HASHTAG) ||
+                        ($expr instanceof ExcludeTerm && $tokenType == QueryScanner::T_EXCLUDE) ||
+                        ($expr instanceof IncludeTerm && $tokenType == QueryScanner::T_INCLUDE)
+                    ) {
+                        $expressions[] = $expr;
+                    }
+
+                    $this->getExpressions($tokenType, $expr->getSubExpression());
+
+                } elseif ($expr instanceof ExplicitTerm) {
+                    if ($expr->getNominator()->getTokenType() == $tokenType) {
+                        $expressions[] = $expr->getNominator();
+                    }
+                    if ($expr->getTerm()->getTokenType() == $tokenType) {
+                        $expressions[] = $expr->getTerm();
+                    }
+                }
+
+            }
+
+            return $expressions;
+        }
+
+        return $this->expressions;
     }
 
     /**
