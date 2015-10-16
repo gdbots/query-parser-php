@@ -3,6 +3,7 @@
 namespace Gdbots\Tests\QueryParser\Parser;
 
 use Gdbots\QueryParser\Parser\QueryParser;
+use Gdbots\QueryParser\Parser\QueryScanner;
 
 class QueryParserTest extends \PHPUnit_Framework_TestCase
 {
@@ -22,12 +23,14 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
     /**
      * @dataProvider getTestParseWithOneClassDataprovider
      */
-    public function testParseNode($string, $class)
+    public function testParseNode($string, $class, $isList = false)
     {
         $this->parser->readString($string);
         $result = $this->parser->parse();
 
-        $this->assertInstanceOf($class, $result);
+        $expressions = $result->getExpressions();
+
+        $this->assertInstanceOf($class, $isList ? $result : $expressions[0]);
     }
 
     public function getTestParseWithOneClassDataprovider()
@@ -41,9 +44,9 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
             ['+phrase', 'Gdbots\QueryParser\Node\IncludeTerm'],
             ['#phrase', 'Gdbots\QueryParser\Node\Hashtag'],
             ['@phrase', 'Gdbots\QueryParser\Node\Mention'],
-            ['phrase word', 'Gdbots\QueryParser\Node\OrExpressionList'],
-            ['phrase OR word', 'Gdbots\QueryParser\Node\OrExpressionList'],
-            ['phrase AND word', 'Gdbots\QueryParser\Node\AndExpressionList'],
+            ['phrase word', 'Gdbots\QueryParser\Node\OrExpressionList', true],
+            ['phrase OR word', 'Gdbots\QueryParser\Node\OrExpressionList', true],
+            ['phrase AND word', 'Gdbots\QueryParser\Node\AndExpressionList', true],
             ['(phrase)', 'Gdbots\QueryParser\Node\Subexpression']
         ];
     }
@@ -52,7 +55,8 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
     {
         $this->parser->readString('"phrase');
         $result = $this->parser->parse();
-        $this->assertInstanceOf('Gdbots\QueryParser\Node\Word', $result);
+        $expressions = $result->getExpressions(QueryScanner::T_WORD);
+        $this->assertInstanceOf('Gdbots\QueryParser\Node\Word', $expressions[0]);
     }
 
     public function testParseInvalidExcludeTermError()
