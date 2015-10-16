@@ -22,6 +22,6 @@ class Mention extends CompositeExpression
      */
     public function accept(QueryItemVisitorinterface $visitor)
     {
-        $visitor->visitHashtag($this);
+        $visitor->visitMention($this);
     }
 }
