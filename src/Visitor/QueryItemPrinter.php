@@ -2,17 +2,7 @@
 
 namespace Gdbots\QueryParser\Visitor;
 
-use Gdbots\QueryParser\Node\Item;
-use Gdbots\QueryParser\Node\Word;
-use Gdbots\QueryParser\Node\Text;
-use Gdbots\QueryParser\Node\ExplicitTerm;
-use Gdbots\QueryParser\Node\SubExpression;
-use Gdbots\QueryParser\Node\ExcludeTerm;
-use Gdbots\QueryParser\Node\IncludeTerm;
-use Gdbots\QueryParser\Node\Hashtag;
-use Gdbots\QueryParser\Node\Mention;
-use Gdbots\QueryParser\Node\OrExpressionList;
-use Gdbots\QueryParser\Node\AndExpressionList;
+use Gdbots\QueryParser\Node;
 
 class QueryItemPrinter implements QueryItemVisitorinterface
 {
@@ -26,7 +16,7 @@ class QueryItemPrinter implements QueryItemVisitorinterface
      */
     private function indent()
     {
-        return str_repeat('>', $this->depth).' ';
+        return sprintf('%s ', str_repeat('>', $this->depth));
     }
 
     /**
@@ -34,7 +24,7 @@ class QueryItemPrinter implements QueryItemVisitorinterface
      */
     private function increaseIndent()
     {
-        $this->depth +=1 ;
+        $this->depth +=1;
     }
 
     /**
@@ -43,7 +33,7 @@ class QueryItemPrinter implements QueryItemVisitorinterface
     private function decreaseIndent()
     {
         if ($this->depth > 0) {
-            $this->depth -=1 ;
+            $this->depth -=1;
         }
     }
 
@@ -58,31 +48,53 @@ class QueryItemPrinter implements QueryItemVisitorinterface
     /**
      * {@inheritDoc}
      */
-    public function visitWord(Word $word)
+    public function visitWord(Node\Word $word)
     {
-        $this->printIndentedLine('Word: '.$word->getToken());
+        $this->printIndentedLine(sprintf('Word: %s', $word->getToken()));
     }
 
     /**
      * {@inheritDoc}
      */
-    public function visitText(Text $text)
+    public function visitText(Node\Text $text)
     {
-        $this->printIndentedLine('Text: '.$text->getToken());
+        $this->printIndentedLine(sprintf('Text: %s', $text->getToken()));
     }
 
     /**
      * {@inheritDoc}
      */
-    public function visitExplicitTerm(ExplicitTerm $term)
+    public function visitExplicitTerm(Node\ExplicitTerm $term)
     {
-        $this->printIndentedLine('Term: '.$term->getNominator()->getToken().' - '.$term->getTerm()->getToken());
+        if ($term->getNominator() instanceof Node\SimpleTerm) {
+            $this->printIndentedLine(sprintf('Term: %s %s %s', $term->getNominator()->getToken(), $term->getTokenTypeText(), $term->getTerm()->getToken()));
+
+        } else {
+            $this->printIndentedLine(sprintf('Term: %s %s', $term->getTokenTypeText(), $term->getTerm()->getToken()));
+            $this->increaseIndent();
+
+            if ($term->getNominator() instanceof Node\SubExpression) {
+                $this->visitSubExpression($term->getNominator());
+            } elseif ($term->getNominator() instanceof Node\ExcludeTerm) {
+                $this->visitExcludeTerm($term->getNominator());
+            } elseif ($term->getNominator() instanceof Node\IncludeTerm) {
+                $this->visitIncludeTerm($term->getNominator());
+            } elseif ($term->getNominator() instanceof Node\Hashtag) {
+                $this->visitHashtag($term->getNominator());
+            } elseif ($term->getNominator() instanceof Node\Mention) {
+                $this->visitMention($term->getNominator());
+            } elseif ($term->getNominator() instanceof Node\ExplicitTerm) {
+                $this->visitExplicitTerm($term->getNominator());
+            }
+
+            $this->decreaseIndent();
+        }
     }
 
     /**
      * {@inheritDoc}
      */
-    public function visitSubExpression(SubExpression $sub)
+    public function visitSubExpression(Node\SubExpression $sub)
     {
         $this->printIndentedLine('Subexpression');
         $this->increaseIndent();
@@ -93,7 +105,7 @@ class QueryItemPrinter implements QueryItemVisitorinterface
     /**
      * {@inheritDoc}
      */
-    public function visitExcludeTerm(ExcludeTerm $term)
+    public function visitExcludeTerm(Node\ExcludeTerm $term)
     {
         $this->printIndentedLine('ExcludeTerm');
         $this->increaseIndent();
@@ -104,7 +116,7 @@ class QueryItemPrinter implements QueryItemVisitorinterface
     /**
      * {@inheritDoc}
      */
-    public function visitIncludeTerm(IncludeTerm $term)
+    public function visitIncludeTerm(Node\IncludeTerm $term)
     {
         $this->printIndentedLine('IncludeTerm');
         $this->increaseIndent();
@@ -115,7 +127,7 @@ class QueryItemPrinter implements QueryItemVisitorinterface
     /**
      * {@inheritDoc}
      */
-    public function visitHashtag(Hashtag $hashtag)
+    public function visitHashtag(Node\Hashtag $hashtag)
     {
         $this->printIndentedLine('Hashtag');
         $this->increaseIndent();
@@ -126,7 +138,7 @@ class QueryItemPrinter implements QueryItemVisitorinterface
     /**
      * {@inheritDoc}
      */
-    public function visitMention(Mention $mention)
+    public function visitMention(Node\Mention $mention)
     {
         $this->printIndentedLine('Mention');
         $this->increaseIndent();
@@ -137,11 +149,11 @@ class QueryItemPrinter implements QueryItemVisitorinterface
     /**
      * {@inheritDoc}
      */
-    public function visitOrExpressionList(OrExpressionList $list)
+    public function visitOrExpressionList(Node\OrExpressionList $list)
     {
         $this->printIndentedLine('Or');
         $this->increaseIndent();
-        foreach($list->getExpressions() as $expression) {
+        foreach ($list->getExpressions() as $expression) {
             $expression->accept($this);
         }
         $this->decreaseIndent();
@@ -150,11 +162,11 @@ class QueryItemPrinter implements QueryItemVisitorinterface
     /**
      * {@inheritDoc}
      */
-    public function visitAndExpressionList(AndExpressionList $list)
+    public function visitAndExpressionList(Node\AndExpressionList $list)
     {
         $this->printIndentedLine('And');
         $this->increaseIndent();
-        foreach($list->getExpressions() as $expression) {
+        foreach ($list->getExpressions() as $expression) {
             $expression->accept($this);
         }
         $this->decreaseIndent();

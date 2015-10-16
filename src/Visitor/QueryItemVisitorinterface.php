@@ -2,66 +2,57 @@
 
 namespace Gdbots\QueryParser\Visitor;
 
-use Gdbots\QueryParser\Node\Word;
-use Gdbots\QueryParser\Node\Text;
-use Gdbots\QueryParser\Node\ExplicitTerm;
-use Gdbots\QueryParser\Node\SubExpression;
-use Gdbots\QueryParser\Node\ExcludeTerm;
-use Gdbots\QueryParser\Node\IncludeTerm;
-use Gdbots\QueryParser\Node\Hashtag;
-use Gdbots\QueryParser\Node\Mention;
-use Gdbots\QueryParser\Node\OrExpressionList;
-use Gdbots\QueryParser\Node\AndExpressionList;
+use Gdbots\QueryParser\Node;
 
 interface QueryItemVisitorinterface
 {
     /**
-     * @param Word $word
+     * @param Node\Word $word
      */
-    public function visitWord(Word $word);
+    public function visitWord(Node\Word $word);
 
     /**
-     * @param Text $text
+     * @param Node\Text $text
      */
-    public function visitText(Text $text);
+    public function visitText(Node\Text $text);
 
     /**
-     * @param ExplicitTerm $term
+     * @param Node\ExplicitTerm $term
      */
-    public function visitExplicitTerm(ExplicitTerm $term);
+    public function visitExplicitTerm(Node\ExplicitTerm $term);
 
     /**
-     * @param SubExpression $sub
+     * @param Node\SubExpression $sub
      */
-    public function visitSubExpression(SubExpression $sub);
+    public function visitSubExpression(Node\SubExpression $sub);
 
     /**
-     * @param ExcludeTerm $term
+     * @param Node\ExcludeTerm $term
      */
-    public function visitExcludeTerm(ExcludeTerm $term);
+    public function visitExcludeTerm(Node\ExcludeTerm $term);
 
     /**
-     * @param IncludeTerm $term
+     * @param Node\IncludeTerm $term
      */
-    public function visitIncludeTerm(IncludeTerm $term);
+    public function visitIncludeTerm(Node\IncludeTerm $term);
 
     /**
-     * @param Hashtag $hashtag
+     * @param Node\Hashtag $hashtag
      */
-    public function visitHashtag(Hashtag $hashtag);
+    public function visitHashtag(Node\Hashtag $hashtag);
 
     /**
-     * @param Mention $mention
+     * @param Node\Mention $mention
      */
-    public function visitMention(Mention $mention);
+    public function visitMention(Node\Mention $mention);
 
     /**
-     * @param OrExpressionList $list
+     * @param Node\OrExpressionList $list
      */
-    public function visitOrExpressionList(OrExpressionList $list);
+    public function visitOrExpressionList(Node\OrExpressionList $list);
 
     /**
-     * @param QueryAndExpressionList $list
+     * @param Node\AndExpressionList $list
      */
-    public function visitAndExpressionList(AndExpressionList $list);
+    public function visitAndExpressionList(Node\AndExpressionList $list);
 }

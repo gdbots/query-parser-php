@@ -80,20 +80,20 @@ class QueryParser
      * Makes the parser read a single term. This can be a word, text, or explicit term.
      *
      * @param int    $tokenType
-     * @param string $word
+     * @param string $term
      *
      * @return \Gdbots\QueryParser\Node\QueryItem|null
      */
-    protected function readTerm($tokenType, $word)
+    protected function readTerm($tokenType, $term)
     {
         if (!in_array($tokenType, array(QueryScanner::T_COLON, QueryScanner::T_BOOST))) {
-            return $word;
+            return $term;
         }
 
-        if ($tokenType == QueryScanner::T_COLON && $word->getTokenType() == QueryScanner::T_TEXT) {
+        if ($tokenType == QueryScanner::T_COLON && $term->getTokenType() == QueryScanner::T_TEXT) {
             $this->addError(sprintf('Error: COLON only support Word. Found: "%s"', $this->scanner->getTokenTypeText()));
 
-            return $word;
+            return $term;
         }
 
         $value = null;
@@ -117,7 +117,7 @@ class QueryParser
 
         $this->scanner->next();
 
-        return new Node\ExplicitTerm($word, $tokenType, $value);
+        return new Node\ExplicitTerm($term, $tokenType, $value);
     }
 
     /**
@@ -147,7 +147,7 @@ class QueryParser
                 return $this->readTerm($this->scanner->next(), $text);
 
             case QueryScanner::T_WORD:
-                $word =  new Node\Word($this->scanner->getToken());
+                $word = new Node\Word($this->scanner->getToken());
                 return $this->readTerm($this->scanner->next(), $word);
 
             case QueryScanner::T_EXCLUDE:
@@ -266,7 +266,13 @@ class QueryParser
         $lastExpression = false;
 
         do {
-            $lastExpression =  $this->readExpression($this->scanner->getTokenType());
+            $lastExpression = $this->readExpression($this->scanner->getTokenType());
+
+            if ($this->scanner->getTokenType() == QueryScanner::T_BOOST) {
+                $expression = $this->readExpression($this->scanner->next());;
+                $lastExpression = new Node\ExplicitTerm($lastExpression, QueryScanner::T_BOOST, $expression);
+            }
+
             $expressions[] = $lastExpression;
 
         } while ($lastExpression && $this->scanner->getTokenType() == QueryScanner::T_OR_OPERATOR && $this->scanner->next());

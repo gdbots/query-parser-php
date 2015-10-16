@@ -2,6 +2,7 @@
 
 namespace Gdbots\QueryParser\Node;
 
+use Gdbots\QueryParser\Parser\QueryScanner;
 use Gdbots\QueryParser\Visitor\QueryItemVisitorinterface;
 
 class ExplicitTerm extends QueryItem
@@ -38,10 +39,6 @@ class ExplicitTerm extends QueryItem
      */
     public function getNominator()
     {
-        if ($this->nominator instanceof CompositeExpression) {
-            return $this->nominator->getSubExpression();
-        }
-
         return $this->nominator;
     }
 
@@ -51,6 +48,19 @@ class ExplicitTerm extends QueryItem
     public function getTokenType()
     {
         return $this->tokenType;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTokenTypeText()
+    {
+        switch ($this->tokenType) {
+            case QueryScanner::T_COLON: return ':';
+            case QueryScanner::T_BOOST: return '^';
+        }
+
+        return '-';
     }
 
     /**
