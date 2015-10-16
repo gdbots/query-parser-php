@@ -278,11 +278,7 @@ class QueryParser
         } while ($lastExpression && $this->scanner->getTokenType() == QueryScanner::T_OR_OPERATOR && $this->scanner->next());
 
         if ($lastExpression) {
-            if (sizeof($expressions) === 1) {
-                return $expressions[0];
-            } else {
-                return new Node\OrExpressionList($expressions);
-            }
+            return new Node\OrExpressionList($expressions);
         }
 
         return null;
