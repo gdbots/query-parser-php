@@ -144,18 +144,21 @@ class QueryParser
 
             case QueryScanner::T_TEXT:
                 $text = new Node\Text($this->scanner->getToken());
-
                 return $this->readTerm($this->scanner->next(), $text);
 
             case QueryScanner::T_WORD:
                 $word =  new Node\Word($this->scanner->getToken());
-
                 return $this->readTerm($this->scanner->next(), $word);
 
             case QueryScanner::T_EXCLUDE:
                 $expression = $this->readExpression($this->scanner->next());
                 if ($expression) {
-                    return new Node\ExcludeTerm($expression);
+                    if ($expression->getTokenType() == QueryScanner::T_BOOST) {
+                        $term = new Node\ExcludeTerm($expression->getNominator());
+                        return new Node\ExplicitTerm($term, $expression->getTokenType(), $expression->getTerm());
+                    } else {
+                        return new Node\ExcludeTerm($expression);
+                    }
                 } else {
                     $this->addError('Error: EXCLUDE not followed by a valid expression.');
                 }
@@ -165,7 +168,12 @@ class QueryParser
             case QueryScanner::T_INCLUDE:
                 $expression = $this->readExpression($this->scanner->next());
                 if ($expression) {
-                    return new Node\IncludeTerm($expression);
+                    if ($expression->getTokenType() == QueryScanner::T_BOOST) {
+                        $term = new Node\IncludeTerm($expression->getNominator());
+                        return new Node\ExplicitTerm($term, $expression->getTokenType(), $expression->getTerm());
+                    } else {
+                        return new Node\IncludeTerm($expression);
+                    }
                 } else {
                     $this->addError('Error: INCLUDE not followed by a valid expression.');
                 }
@@ -175,7 +183,12 @@ class QueryParser
             case QueryScanner::T_HASHTAG:
                 $expression = $this->readExpression($this->scanner->next());
                 if ($expression) {
-                    return new Node\Hashtag($expression);
+                    if ($expression->getTokenType() == QueryScanner::T_BOOST) {
+                        $term = new Node\Hashtag($expression->getNominator());
+                        return new Node\ExplicitTerm($term, $expression->getTokenType(), $expression->getTerm());
+                    } else {
+                        return new Node\Hashtag($expression);
+                    }
                 } else {
                     $this->addError('Error: HASHTAG not followed by a valid expression.');
                 }
@@ -185,7 +198,12 @@ class QueryParser
             case QueryScanner::T_MENTION:
                 $expression = $this->readExpression($this->scanner->next());
                 if ($expression) {
-                    return new Node\Mention($expression);
+                    if ($expression->getTokenType() == QueryScanner::T_BOOST) {
+                        $term = new Node\Mention($expression->getNominator());
+                        return new Node\ExplicitTerm($term, $expression->getTokenType(), $expression->getTerm());
+                    } else {
+                        return new Node\Mention($expression);
+                    }
                 } else {
                     $this->addError('Error: MENTION not followed by a valid expression.');
                 }
