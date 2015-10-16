@@ -60,7 +60,7 @@ class QueryItemPrinter implements QueryItemVisitorinterface
      */
     public function visitWord(Word $word)
     {
-        $this->printIndentedLine('Word: '.$word->getWord());
+        $this->printIndentedLine('Word: '.$word->getToken());
     }
 
     /**
@@ -68,7 +68,7 @@ class QueryItemPrinter implements QueryItemVisitorinterface
      */
     public function visitText(Text $text)
     {
-        $this->printIndentedLine('Text: '.$text->getText());
+        $this->printIndentedLine('Text: '.$text->getToken());
     }
 
     /**
@@ -76,7 +76,7 @@ class QueryItemPrinter implements QueryItemVisitorinterface
      */
     public function visitExplicitTerm(ExplicitTerm $term)
     {
-        $this->printIndentedLine('Term: '.$term->getNominator()->getWord().' - '.$term->getTerm()->getToken());
+        $this->printIndentedLine('Term: '.$term->getNominator()->getToken().' - '.$term->getTerm()->getToken());
     }
 
     /**
