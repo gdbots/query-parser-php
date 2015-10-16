@@ -121,41 +121,41 @@ class QueryScanner
     private $regEx = array(
 
         // WSPC matches in (frequent) spaces, tabs and newlines.
-        self::T_WSPC => '#^([ \t\n]+)(.*)#',
+        self::T_WSPC => '/^([ \t\n]+)(.*)/',
 
         // TEXT matches every possible input between double brackets.
         // Double parentheses are part of the match.
-        self::T_TEXT => '#^(\"[^"]*\")(.*)#',
+        self::T_TEXT => '/^(\"[^"]*\")(.*)/',
 
         // OR matches by keyword "OR" (case sensitive)
         // when no text follows after "OR".
-        self::T_OR_OPERATOR => '#^(OR)(\b.*)#',
+        self::T_OR_OPERATOR => '/^(OR)(\b.*)/',
 
         // AND matches by keyword "AND" (case sensitive)
         // when no text follows after "AND".
-        self::T_AND_OPERATOR => '#^(AND)(\b.*)#',
+        self::T_AND_OPERATOR => '/^(AND)(\b.*)/',
 
         // WORD matches letters, numbers, underscores, hyphens and
         // points (think eg. To dibe_relict.101) Can not match up
         // truncation characters and accents, which should be
         // encapsulated in quotes.
-        self::T_WORD => '#^([\w\d_][\w\d\/_\-.]*)(.*)#',
+        self::T_WORD => '/^([\w\d_][\w\d\/_\-.]*)(.*)/',
 
         // parens, brackets
-        self::T_LPAREN => '#^(\()(.*)#',
-        self::T_RPAREN => '#^(\))(.*)#',
+        self::T_LPAREN => '/^(\()(.*)/',
+        self::T_RPAREN => '/^(\))(.*)/',
 
         // hyphen, colon, quote
-        self::T_EXCLUDE => '#^(-)(.*)#',
-        self::T_INCLUDE => '#^(\+)(.*)#',
-        self::T_HASHTAG => '#^(\#)(.*)#',
-        self::T_MENTION => '#^(@)(.*)#',
-        self::T_COLON   => '#^(:)(.*)#',
-        self::T_BOOST   => '#^(\^)(.*)#',
-        self::T_QUOTE   => '#^(\")([^"]*)$#',
+        self::T_EXCLUDE => '/^(-)(.*)/',
+        self::T_INCLUDE => '/^(\+)(.*)/',
+        self::T_HASHTAG => '/^(\#)(.*)/',
+        self::T_MENTION => '/^(@)(.*)/',
+        self::T_COLON   => '/^(:)(.*)/',
+        self::T_BOOST   => '/^(\^)(.*)/',
+        self::T_QUOTE   => '/^(\")([^"]*)$/',
 
         // this should match with each character that is left over.
-        self::T_ILLEGAL => '#^(.)(.*)#'
+        self::T_ILLEGAL => '/^(.)(.*)/'
     );
 
     /**
