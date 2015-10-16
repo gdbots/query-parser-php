@@ -196,10 +196,11 @@ class QueryScanner
      */
     public function readString($input, $ignoreOperator = false)
     {
+        $openParenthesis = 0;
+
         // find all strings and rebuild input string with "OR"
         if (preg_match_all('/[^\\s\"\']+|\"([^\"]*)\"|\'([^\']*)\'/', $input, $matches)) {
             $input = '';
-            $openParenthesis = 0;
             foreach ($matches[0] as $key => $value) {
                 if ($ignoreOperator) {
                     if ($value == 'AND') {
