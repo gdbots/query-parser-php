@@ -90,6 +90,12 @@ class QueryParser
             return $word;
         }
 
+        if ($tokenType == QueryScanner::T_COLON && $word->getTokenType() == QueryScanner::T_TEXT) {
+            $this->addError(sprintf('Error: COLON only support Word. Found: "%s"', $this->scanner->getTokenTypeText()));
+
+            return $word;
+        }
+
         $value = null;
 
         switch ($this->scanner->next()) {
@@ -133,15 +139,13 @@ class QueryParser
     protected function readExpression($tokenType)
     {
         switch ($tokenType) {
-            case QueryScanner::T_LPAREN:
+            case QueryScanner::T_OPEN_PARENTHESIS:
                 return $this->readSubQuery($tokenType);
 
             case QueryScanner::T_TEXT:
                 $text = new Node\Text($this->scanner->getToken());
 
-                $this->scanner->next();
-
-                return $text;
+                return $this->readTerm($this->scanner->next(), $text);
 
             case QueryScanner::T_WORD:
                 $word =  new Node\Word($this->scanner->getToken());
@@ -281,7 +285,7 @@ class QueryParser
         } while ($lastExpression && $this->scanner->getTokenType() == QueryScanner::T_AND_OPERATOR && $this->scanner->next());
 
         switch ($this->scanner->getTokenType()) {
-            case QueryScanner::T_RPAREN:
+            case QueryScanner::T_CLOSE_PARENTHESIS:
             case QueryScanner::T_EOI:
                 if (sizeof($expressions) === 1) {
                     return $expressions[0];
@@ -296,7 +300,7 @@ class QueryParser
     }
 
     /**
-     * Makes the parser read paren closed (sub)query. The passed token should be the left paren.
+     * Makes the parser read expressions between parentheses.
      *
      * @param int $tokenType
      *
@@ -305,12 +309,12 @@ class QueryParser
     protected function readSubQuery($tokenType)
     {
         $expressionlist = $this->readAndExpressionList($this->scanner->next());
-        if ($this->scanner->getTokenType() == QueryScanner::T_RPAREN) {
+        if ($this->scanner->getTokenType() == QueryScanner::T_CLOSE_PARENTHESIS) {
             $this->scanner->next();
             return new Node\SubExpression($expressionlist);
         }
 
-        $this->addError('Error: Expected Right Paren.');
+        $this->addError('Error: Expected `)` but end of stream reached.');
 
         return null;
     }

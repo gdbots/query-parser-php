@@ -23,8 +23,8 @@ class QueryScanner
 {
     const T_EOI          = 0; // end of input
     const T_WORD         = 1; // word
-    const T_LPAREN       = 2; // "("
-    const T_RPAREN       = 3; // ")"
+    const T_OPEN_PARENTHESIS       = 2; // "("
+    const T_CLOSE_PARENTHESIS       = 3; // ")"
     const T_EXCLUDE      = 4; // "-"
     const T_INCLUDE      = 5; // "+"
     const T_HASHTAG      = 6; // "#"
@@ -79,22 +79,22 @@ class QueryScanner
      * @var array
      */
     private $typeStrings = array (
-        self::T_EOI          => 'EOI',
-        self::T_WORD         => 'WORD',
-        self::T_LPAREN       => 'LPAREN',
-        self::T_RPAREN       => 'RPAREN',
-        self::T_EXCLUDE      => 'EXCLUDE',
-        self::T_INCLUDE      => 'INCLUDE',
-        self::T_HASHTAG      => 'HASHTAG',
-        self::T_MENTION      => 'MENTION',
-        self::T_COLON        => 'COLON',
-        self::T_BOOST        => 'BOOST',
-        self::T_OR_OPERATOR  => 'OR_OPERATOR',
-        self::T_AND_OPERATOR => 'AND_OPERATOR',
-        self::T_WSPC         => 'WHITESPACE',
-        self::T_TEXT         => 'TEXT',
-        self::T_QUOTE        => 'QUOTE',
-        self::T_ILLEGAL      => 'ILLEGAL'
+        self::T_EOI               => 'EOI',
+        self::T_WORD              => 'WORD',
+        self::T_OPEN_PARENTHESIS  => 'OPEN_PARENTHESIS',
+        self::T_CLOSE_PARENTHESIS => 'CLOSE_PARENTHESIS',
+        self::T_EXCLUDE           => 'EXCLUDE',
+        self::T_INCLUDE           => 'INCLUDE',
+        self::T_HASHTAG           => 'HASHTAG',
+        self::T_MENTION           => 'MENTION',
+        self::T_COLON             => 'COLON',
+        self::T_BOOST             => 'BOOST',
+        self::T_OR_OPERATOR       => 'OR_OPERATOR',
+        self::T_AND_OPERATOR      => 'AND_OPERATOR',
+        self::T_WSPC              => 'WHITESPACE',
+        self::T_TEXT              => 'TEXT',
+        self::T_QUOTE             => 'QUOTE',
+        self::T_ILLEGAL           => 'ILLEGAL'
     );
 
     /**
@@ -141,9 +141,9 @@ class QueryScanner
         // encapsulated in quotes.
         self::T_WORD => '/^([\w\d_][\w\d\/_\-.]*)(.*)/',
 
-        // parens, brackets
-        self::T_LPAREN => '/^(\()(.*)/',
-        self::T_RPAREN => '/^(\))(.*)/',
+        // parentheses
+        self::T_OPEN_PARENTHESIS => '/^(\()(.*)/',
+        self::T_CLOSE_PARENTHESIS => '/^(\))(.*)/',
 
         // hyphen, colon, quote
         self::T_EXCLUDE => '/^(-)(.*)/',
@@ -204,17 +204,17 @@ class QueryScanner
                     if ($value == 'AND') {
                         $value = 'OR';
                     }
-                    if ($value == '(' || $value == ')') {
-                        continue;
-                    }
+
+                    $value = str_replace('(', '', $value);
+                    $value = str_replace(')', '', $value);
                 }
 
                 $input .= $value;
 
                 if (
                     isset($matches[0][$key+1]) &&
-                    !in_array(substr($matches[0][$key+1], 0, 1), array(':', '^')) &&
-                    !in_array(substr($value, -1), array(':', '^'))
+                    !in_array(substr($matches[0][$key+1], 0, 1), array(':', '^', ')')) &&
+                    !in_array(substr($value, -1), array(':', '^', ')'))
                 ) {
                     if (
                         !in_array($matches[0][$key+1], array('AND', 'OR')) &&
@@ -230,8 +230,6 @@ class QueryScanner
 
         // removed duplicate spaces
         $input = preg_replace('/\s+/', ' ', $input);
-
-        // todo: close quotes or brackets if open at the end
 
         $this->input = $input;
         $this->processed = '';
