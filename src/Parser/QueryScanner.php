@@ -217,21 +217,21 @@ class QueryScanner
                     $value = str_replace(')', '', $value);
                 }
 
-                // add quotes to emoticons
-                foreach ([self::REGEX_EMOTICONS_BASIC, self::REGEX_EMOTICONS_UTF8] as $regEx) {
-                    if (preg_match($regEx, $value, $m)) {
-                        $value = str_replace($m[0], '', $value) == ')'
-                            ? sprintf('"%s")', substr($value, 0, -1))
-                            : sprintf('"%s"', $value);
-                    }
-                }
-
                 // remove entities chat if invalid
                 foreach ([self::T_HASHTAG, self::T_MENTION] as $regEx) {
                     if (preg_match($this->regEx[$regEx], $value, $m)) {
                         if (!preg_match('/^([\w\d\-_.])/', $m[2], $m1)) {
                             $value = substr($value, 1);
                         }
+                    }
+                }
+
+                // add quotes to emoticons
+                foreach ([self::REGEX_EMOTICONS_BASIC, self::REGEX_EMOTICONS_UTF8] as $regEx) {
+                    if (preg_match($regEx, $value, $m)) {
+                        $value = str_replace($m[0], '', $value) == ')'
+                            ? sprintf('"%s")', substr($value, 0, -1))
+                            : sprintf('"%s"', $value);
                     }
                 }
 
