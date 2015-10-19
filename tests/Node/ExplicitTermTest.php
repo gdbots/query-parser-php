@@ -17,7 +17,7 @@ class ExplicitTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->word = new Word('John');
-        $this->explicitTerm = new ExplicitTerm('people', QueryScanner::T_COLON, $this->word);
+        $this->explicitTerm = new ExplicitTerm('people', QueryScanner::T_COMPARE, ':', $this->word);
     }
 
     public function tearDown()
@@ -42,7 +42,8 @@ class ExplicitTest extends \PHPUnit_Framework_TestCase
             'Expression' => 'Explicit Term',
             'Nominator' => 'people',
             'Term' => $this->word,
-            'TokenType' => QueryScanner::T_COLON
+            'TokenType' => QueryScanner::T_COMPARE,
+            'TokenTypeText' => ':'
         ];
 
         $this->assertEquals($array, $this->explicitTerm->toArray());

@@ -98,7 +98,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
     {
         ob_start();
 
-        $result->accept($this->printer);
+        $query->accept($this->printer);
 
         $output = ob_get_contents();
 
