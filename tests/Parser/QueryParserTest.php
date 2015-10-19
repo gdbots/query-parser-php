@@ -2,22 +2,29 @@
 
 namespace Gdbots\Tests\QueryParser\Parser;
 
+use Gdbots\QueryParser\Node\QueryItem;
 use Gdbots\QueryParser\Parser\QueryParser;
 use Gdbots\QueryParser\Parser\QueryScanner;
+use Gdbots\QueryParser\Visitor\QueryItemPrinter;
 
 class QueryParserTest extends \PHPUnit_Framework_TestCase
 {
     /** QueryParser */
     protected $parser;
 
+    /** QueryItemPrinter */
+    protected $printer;
+
     public function setUp()
     {
         $this->parser = new QueryParser();
+        $this->printer = new QueryItemPrinter();
     }
 
     public function tearDown()
     {
         $this->parser = null;
+        $this->printer = null;
     }
 
     /**
@@ -65,5 +72,38 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
         $result = $this->parser->parse();
         $this->assertNull($result);
         $this->assertTrue($this->parser->hasErrors());
+    }
+
+    public function testParseMultiHashtags()
+    {
+        $this->parser->readString('#one #two #three');
+        $result = $this->parser->parse();
+
+        $output = " Or
+> Hashtag
+>> Word: one
+> Hashtag
+>> Word: two
+> Hashtag
+>> Word: three
+";
+
+        $this->assertEquals($output, $this->getPrintContent($result));
+    }
+
+    /**
+     * @return string
+     */
+    private function getPrintContent(QueryItem $query)
+    {
+        ob_start();
+
+        $result->accept($this->printer);
+
+        $output = ob_get_contents();
+
+        ob_end_clean();
+
+        return $output;
     }
 }
