@@ -235,9 +235,9 @@ class QueryScanner
                     $openParenthesis += count($m[0]);
                 }
                 if (preg_match_all('/(\))/', $value, $m)) {
-                    if (preg_match($this->regEx[self::T_TEXT], $value, $m)) {
-                        if (preg_match_all('/(\))/', str_replace($m[1], '', $value), $m)) {
-                            $openParenthesis -= count($m[0]);
+                    if (preg_match($this->regEx[self::T_TEXT], $value, $m1)) {
+                        if (preg_match_all('/(\))/', str_replace($m1[1], '', $value), $m2)) {
+                            $openParenthesis -= count($m2[0]);
                         }
                     } else {
                         $openParenthesis -= count($m[0]);
