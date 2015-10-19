@@ -29,7 +29,7 @@ class QueryScanner
     const T_INCLUDE             = 5; // "+"
     const T_HASHTAG             = 6; // "#"
     const T_MENTION             = 7; // "@"
-    const T_COLON               = 8; // ":"
+    const T_COMPARE             = 8; // ":", ":>", ":<" or ":!"
     const T_BOOST               = 9; // "^"
     const T_OR_OPERATOR         = 10; // "OR"
     const T_AND_OPERATOR        = 11; // "AND"
@@ -93,7 +93,7 @@ class QueryScanner
         self::T_INCLUDE           => 'INCLUDE',
         self::T_HASHTAG           => 'HASHTAG',
         self::T_MENTION           => 'MENTION',
-        self::T_COLON             => 'COLON',
+        self::T_COMPARE           => 'COMPARE',
         self::T_BOOST             => 'BOOST',
         self::T_OR_OPERATOR       => 'OR_OPERATOR',
         self::T_AND_OPERATOR      => 'AND_OPERATOR',
@@ -156,7 +156,7 @@ class QueryScanner
         self::T_INCLUDE => '/^(\+)(.*)/',
         self::T_HASHTAG => '/^(\#)(.*)/',
         self::T_MENTION => '/^(\@)(.*)/',
-        self::T_COLON   => '/^(\:)(.*)/',
+        self::T_COMPARE => '/^(\:[\>|\<|\!]?)(.*)/',
         self::T_BOOST   => '/^(\^)(.*)/',
         self::T_QUOTE   => '/^(\")([^"]*)$/',
 

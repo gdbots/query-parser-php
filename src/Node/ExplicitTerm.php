@@ -13,9 +13,14 @@ class ExplicitTerm extends QueryItem
     protected $nominator;
 
     /**
-     * @var string
+     * @var int
      */
     protected $tokenType;
+
+    /**
+     * @var string
+     */
+    protected $tokenTypeText;
 
     /**
      * @var SimpleTerm
@@ -24,13 +29,15 @@ class ExplicitTerm extends QueryItem
 
     /**
      * @param string     $nominator
-     * @param string     $tokenType
+     * @param int        $tokenType
+     * @param string     $tokenTypeText
      * @param SimpleTerm $term
      */
-    public function __construct($nominator, $tokenType, SimpleTerm $term)
+    public function __construct($nominator, $tokenType, $tokenTypeText, SimpleTerm $term)
     {
         $this->nominator = $nominator;
         $this->tokenType = $tokenType;
+        $this->tokenTypeText = $tokenTypeText;
         $this->term = $term;
     }
 
@@ -55,12 +62,7 @@ class ExplicitTerm extends QueryItem
      */
     public function getTokenTypeText()
     {
-        switch ($this->tokenType) {
-            case QueryScanner::T_COLON: return ':';
-            case QueryScanner::T_BOOST: return '^';
-        }
-
-        return '-';
+        return $this->tokenTypeText ?: '-';
     }
 
     /**
@@ -80,6 +82,7 @@ class ExplicitTerm extends QueryItem
             'Expression' => 'Explicit Term',
             'Nominator' => $this->nominator,
             'TokenType' => $this->tokenType,
+            'TokenTypeText' => $this->tokenTypeText,
             'Term' => $this->term
         ];
     }
