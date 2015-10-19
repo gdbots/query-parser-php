@@ -152,11 +152,11 @@ class QueryScanner
         self::T_CLOSE_PARENTHESIS => '/^(\))(.*)/',
 
         // hyphen, colon, quote
-        self::T_EXCLUDE => '/^(-)(.*)/',
+        self::T_EXCLUDE => '/^(\-)(.*)/',
         self::T_INCLUDE => '/^(\+)(.*)/',
         self::T_HASHTAG => '/^(\#)(.*)/',
-        self::T_MENTION => '/^(@)(.*)/',
-        self::T_COLON   => '/^(:)(.*)/',
+        self::T_MENTION => '/^(\@)(.*)/',
+        self::T_COLON   => '/^(\:)(.*)/',
         self::T_BOOST   => '/^(\^)(.*)/',
         self::T_QUOTE   => '/^(\")([^"]*)$/',
 
@@ -274,8 +274,11 @@ class QueryScanner
 
         // removed duplicate charactors and spces
         $input = preg_replace('/\s+/', ' ', $input);
-        $input = preg_replace('/(?>@)\K@*/', '', $input);
-        $input = preg_replace('/(?>#)\K#*/', '', $input);
+        $input = preg_replace('/(?>\-)\K\-*/', '', $input);
+        $input = preg_replace('/(?>\+)\K\+*/', '', $input);
+        $input = preg_replace('/(?>\#)\K\#*/', '', $input);
+        $input = preg_replace('/(?>\@)\K\@*/', '', $input);
+        $input = preg_replace('/(?>\^)\K\^*/', '', $input);
         $input = preg_replace('/(\()(\s)/', '$1', $input);
         $input = preg_replace('/(\s)(\))/', '$1', $input);
 
