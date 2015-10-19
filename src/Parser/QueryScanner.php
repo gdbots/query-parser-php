@@ -222,6 +222,8 @@ class QueryScanner
                     if (preg_match($this->regEx[$regEx], $value, $m)) {
                         if (!preg_match('/^([\w\d\-_.])/', $m[2], $m1)) {
                             $value = substr($value, 1);
+                        } else {
+                            $value = substr($value, 0, 1).preg_replace('/[^\w\d\-_.]/', '', $value);
                         }
                     }
                 }
