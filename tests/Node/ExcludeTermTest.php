@@ -25,9 +25,9 @@ class ExcludeTermTest extends \PHPUnit_Framework_TestCase
         $this->excludeTerm = null;
     }
 
-    public function testGetSubexpression()
+    public function testGetExpression()
     {
-        $this->assertSame($this->word, $this->excludeTerm->getSubexpression());
+        $this->assertSame($this->word, $this->excludeTerm->getExpression());
     }
 
     public function testToArray()

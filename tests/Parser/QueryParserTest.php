@@ -30,14 +30,12 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
     /**
      * @dataProvider getTestParseWithOneClassDataprovider
      */
-    public function testParseNode($string, $class, $isList = false)
+    public function testParseNode($string, $class)
     {
         $this->parser->readString($string);
-        $result = $this->parser->parse();
+        $query = $this->parser->parse();
 
-        $expressions = $result->getExpressions();
-
-        $this->assertInstanceOf($class, $isList ? $result : $expressions[0]);
+        $this->assertInstanceOf($class, $query);
     }
 
     public function getTestParseWithOneClassDataprovider()
@@ -51,98 +49,14 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
             ['+phrase', 'Gdbots\QueryParser\Node\IncludeTerm'],
             ['#phrase', 'Gdbots\QueryParser\Node\Hashtag'],
             ['@phrase', 'Gdbots\QueryParser\Node\Mention'],
-            ['phrase word', 'Gdbots\QueryParser\Node\OrExpressionList', true],
-            ['phrase OR word', 'Gdbots\QueryParser\Node\OrExpressionList', true],
-            ['phrase AND word', 'Gdbots\QueryParser\Node\AndExpressionList', true],
-            ['(phrase)', 'Gdbots\QueryParser\Node\Subexpression']
+            ['phrase word', 'Gdbots\QueryParser\Node\OrExpressionList'],
+            ['phrase OR word', 'Gdbots\QueryParser\Node\OrExpressionList'],
+            ['phrase AND word', 'Gdbots\QueryParser\Node\AndExpressionList'],
+            ['(phrase OR word)', 'Gdbots\QueryParser\Node\Subexpression']
         ];
     }
 
-    public function testMulipleHashtagSymbols()
-    {
-        $expectedResult = "Or>Hashtag>>Word:one";
-
-        $this->parser->readString('##one');
-        $results = $this->parser->parse();
-        $this->assertInstanceOf('Gdbots\QueryParser\Node\OrExpressionList', $results);
-
-
-
-        $output = $this->getPrintContent($results);
-
-        $output = preg_replace("/[\r\n]+/", "", $output);
-        $output = preg_replace("/\s+/", '', $output);
-
-        $this->assertEquals($expectedResult, $output);
-    }
-
-   public function testMultipleHashtagsNoSpace()
-    {
-     $expectedResult = "Or>Hashtag>>Word:one>Hashtag>>Word:two>Hashtag>>Word:three";
-
-     $this->parser->readString('#one#two##three');
-     $results = $this->parser->parse();
-     $this->assertInstanceOf('Gdbots\QueryParser\Node\OrExpressionList', $results);
-
-     $output = $this->getPrintContent($results);
-
-     $output = preg_replace("/[\r\n]+/", "", $output);
-     $output = preg_replace("/\s+/", '', $output);
-
-     $this->assertEquals($expectedResult, $output);
-
-    }
-
-    public function testInvalidHashtagCharacter()
-    {
-        $expectedResult = "Or>Hashtag>>Word:one";
-
-        $this->parser->readString('#one!');
-        $results = $this->parser->parse();
-        $this->assertInstanceOf('Gdbots\QueryParser\Node\OrExpressionList', $results);
-
-        $output = $this->getPrintContent($results);
-
-        $output = preg_replace("/[\r\n]+/", "", $output);
-        $output = preg_replace("/\s+/", '', $output);
-
-        $this->assertEquals($expectedResult, $output);
-    }
-
-    public function testHashtagInQuotes()
-    {
-        $expectedResult = "Or>Text:#one #two#three ##four";
-
-        $this->parser->readString('"#one #two#three ##four"');
-        $results = $this->parser->parse();
-
-        $this->assertInstanceOf('Gdbots\QueryParser\Node\OrExpressionList', $results);
-
-        $output = $this->getPrintContent($results);
-
-        $output = preg_replace("/[\r\n]+/", "", $output);
-        $output = preg_replace("/\s+/", '', $output);
-
-        $this->assertEquals($expectedResult, $output);
-    }
-
-    public function testBoostHashtag()
-    {
-        $expectedResult = "Or>Term:^1>>Hashtag>>>Word:one";
-
-        $this->parser->readString('#one^1');
-        $results = $this->parser->parse();
-        $this->assertInstanceOf('Gdbots\QueryParser\Node\OrExpressionList', $results);
-
-        $output = $this->getPrintContent($results);
-
-        $output = preg_replace("/[\r\n]+/", "", $output);
-        $output = preg_replace("/\s+/", '', $output);
-
-        $this->assertEquals($expectedResult, $output);
-    }
-
-    public function testMultipleBoostSymbolsOnKeyword()
+   /* public function testMultipleBoostSymbolsOnKeyword()
     {
         $expectedResult = "Or>Term:one^1";
 
@@ -192,7 +106,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expectedResult, $output);
     }
 
-/* public function testParseTextWithUnclosedQuotes()
+ public function testParseTextWithUnclosedQuotes()
  {
      $this->parser->readString('"phrase');
      $result = $this->parser->parse();
@@ -206,12 +120,14 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
      $result = $this->parser->parse();
      $this->assertNull($result);
      $this->assertTrue($this->parser->hasErrors());
- }
+ }*/
+
+
 
  public function testParseMultiHashtags()
  {
      $this->parser->readString('#one #two #three');
-     $result = $this->parser->parse();
+     $query = $this->parser->parse();
 
      $output = " Or
 > Hashtag
@@ -222,8 +138,189 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
 >> Word: three
 ";
 
-     $this->assertEquals($output, $this->getPrintContent($result));
- }*/
+     $this->assertEquals($output, $this->getPrintContent($query));
+ }
+
+    public function testParseDuplicateHashtags()
+    {
+        $this->parser->readString('##phrase');
+        $query = $this->parser->parse();
+
+        $output = " Hashtag
+> Word: phrase
+";
+
+        $this->assertEquals($output, $this->getPrintContent($query));
+    }
+
+    public function testParseMultiHashtagsNoSpace()
+    {
+
+        $this->parser->readString('#one#two##three');
+        $query = $this->parser->parse();
+
+        $output = " Or
+> Hashtag
+>> Word: one
+> Hashtag
+>> Word: two
+> Hashtag
+>> Word: three
+";
+
+        $this->assertEquals($output, $this->getPrintContent($query));
+
+    }
+
+   /* public function testInvalidHashtagCharacter()
+    {
+        $expectedResult = "Or>Hashtag>>Word:one";
+
+        $this->parser->readString('#one!');
+        $results = $this->parser->parse();
+        $this->assertInstanceOf('Gdbots\QueryParser\Node\OrExpressionList', $results);
+
+        $output = $this->getPrintContent($results);
+
+        $output = preg_replace("/[\r\n]+/", "", $output);
+        $output = preg_replace("/\s+/", '', $output);
+
+        $this->assertEquals($expectedResult, $output);
+    }
+
+    public function testHashtagInQuotes()
+    {
+        $expectedResult = "Or>Text:#one #two#three ##four";
+
+        $this->parser->readString('"#one #two#three ##four"');
+        $results = $this->parser->parse();
+
+        $this->assertInstanceOf('Gdbots\QueryParser\Node\OrExpressionList', $results);
+
+        $output = $this->getPrintContent($results);
+
+        $output = preg_replace("/[\r\n]+/", "", $output);
+        $output = preg_replace("/\s+/", '', $output);
+
+        $this->assertEquals($expectedResult, $output);
+    }
+
+    public function testBoostHashtag()
+    {
+        $expectedResult = "Or>Term:^1>>Hashtag>>>Word:one";
+
+        $this->parser->readString('#one #two #three');
+        $query = $this->parser->parse();
+
+
+        $this->parser->readString('#one^1');
+        $results = $this->parser->parse();
+        $this->assertInstanceOf('Gdbots\QueryParser\Node\OrExpressionList', $results);
+
+        $output = $this->getPrintContent($results);
+
+        $output = preg_replace("/[\r\n]+/", "", $output);
+        $output = preg_replace("/\s+/", '', $output);
+
+        $this->assertEquals($expectedResult, $output);
+    }
+
+
+    public function testParseCompareWithBoost()
+    {
+        $this->parser->readString('table.fieldName:value^boost');
+        $query = $this->parser->parse();
+
+        $output = " Term: ^ boost
+> Term: table.fieldName : value
+";
+
+        $this->assertEquals($output, $this->getPrintContent($query));
+    }
+
+    public function testParseComplexQuery()
+    {
+        $this->parser->readString('(("phrase" #phrase) table.fieldName:value)^boost');
+        $query = $this->parser->parse();
+
+        $output = " Term: ^ boost
+> Subexpression
+>> Or
+>>> Subexpression
+>>>> Or
+>>>>> Text: phrase
+>>>>> Hashtag
+>>>>>> Word: phrase
+>>> Term: table.fieldName : value
+";
+
+        $this->assertEquals($output, $this->getPrintContent($query));
+    }
+
+    public function testParseComplexQueryUsingOperator()
+    {
+        $this->parser->readString('(("phrase" OR #phrase) AND table.fieldName:value)^boost');
+        $query = $this->parser->parse();
+
+        $output = " Term: ^ boost
+> Subexpression
+>> And
+>>> Subexpression
+>>>> Or
+>>>>> Text: phrase
+>>>>> Hashtag
+>>>>>> Word: phrase
+>>> Term: table.fieldName : value
+";
+
+        $this->assertEquals($output, $this->getPrintContent($query));
+    }
+
+    public function testParseComplexQueryWithIgnoreOperator()
+    {
+        $this->parser->readString('(("phrase" OR #phrase) AND table.fieldName:value)^boost', true);
+        $query = $this->parser->parse();
+
+        $output = " Or
+> Text: phrase
+> Hashtag
+>> Word: phrase
+> Term: ^ boost
+>> Term: table.fieldName : value
+";
+
+        $this->assertEquals($output, $this->getPrintContent($query));
+    }
+
+    public function testParseEmoji()
+    {
+        $this->parser->readString('#emoji 💩 AND 🍦 OR 😳');
+        $query = $this->parser->parse();
+
+        $output = " And
+> Or
+>> Hashtag
+>>> Word: emoji
+>> Text: &#x1f4a9;
+> Or
+>> Text: &#x1f366;
+>> Text: &#x1f633;
+";
+
+        $this->assertEquals($output, $this->getPrintContent($query));
+    }
+
+    public function testParseGetHashtagQueryItems()
+    {
+        $this->parser->readString('(("phrase" OR #phrase) AND table.fieldName:value) #boost');
+        $query = $this->parser->parse();
+
+        $hasttags = $query->getQueryItemsByTokenType(\Gdbots\QueryParser\Parser\QueryScanner::T_HASHTAG);
+
+        $this->assertEquals(2, count($hasttags));
+        $this->assertEquals('phrase', $hasttags[0]->getExpression()->getToken());
+        $this->assertEquals('boost', $hasttags[1]->getExpression()->getToken());
+    }*/
 
     /**
      * @return string

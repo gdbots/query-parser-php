@@ -98,7 +98,7 @@ class QueryItemPrinter implements QueryItemVisitorinterface
     {
         $this->printIndentedLine('Subexpression');
         $this->increaseIndent();
-        $sub->getSubExpression()->accept($this);
+        $sub->getExpression()->accept($this);
         $this->decreaseIndent();
     }
 
@@ -109,7 +109,7 @@ class QueryItemPrinter implements QueryItemVisitorinterface
     {
         $this->printIndentedLine('ExcludeTerm');
         $this->increaseIndent();
-        $term->getSubExpression()->accept($this);
+        $term->getExpression()->accept($this);
         $this->decreaseIndent();
     }
 
@@ -120,7 +120,7 @@ class QueryItemPrinter implements QueryItemVisitorinterface
     {
         $this->printIndentedLine('IncludeTerm');
         $this->increaseIndent();
-        $term->getSubExpression()->accept($this);
+        $term->getExpression()->accept($this);
         $this->decreaseIndent();
     }
 
@@ -131,7 +131,7 @@ class QueryItemPrinter implements QueryItemVisitorinterface
     {
         $this->printIndentedLine('Hashtag');
         $this->increaseIndent();
-        $hashtag->getSubExpression()->accept($this);
+        $hashtag->getExpression()->accept($this);
         $this->decreaseIndent();
     }
 
@@ -142,7 +142,7 @@ class QueryItemPrinter implements QueryItemVisitorinterface
     {
         $this->printIndentedLine('Mention');
         $this->increaseIndent();
-        $mention->getSubExpression()->accept($this);
+        $mention->getExpression()->accept($this);
         $this->decreaseIndent();
     }
 

@@ -29,7 +29,7 @@ class QueryScanner
     const T_INCLUDE             = 5; // "+"
     const T_HASHTAG             = 6; // "#"
     const T_MENTION             = 7; // "@"
-    const T_COLON               = 8; // ":"
+    const T_COMPARE             = 8; // ":", ":>", ":<" or ":!"
     const T_BOOST               = 9; // "^"
     const T_OR_OPERATOR         = 10; // "OR"
     const T_AND_OPERATOR        = 11; // "AND"
@@ -93,7 +93,7 @@ class QueryScanner
         self::T_INCLUDE           => 'INCLUDE',
         self::T_HASHTAG           => 'HASHTAG',
         self::T_MENTION           => 'MENTION',
-        self::T_COLON             => 'COLON',
+        self::T_COMPARE           => 'COMPARE',
         self::T_BOOST             => 'BOOST',
         self::T_OR_OPERATOR       => 'OR_OPERATOR',
         self::T_AND_OPERATOR      => 'AND_OPERATOR',
@@ -156,7 +156,7 @@ class QueryScanner
         self::T_INCLUDE => '/^(\+)(.*)/',
         self::T_HASHTAG => '/^(\#)(.*)/',
         self::T_MENTION => '/^(\@)(.*)/',
-        self::T_COLON   => '/^(\:)(.*)/',
+        self::T_COMPARE => '/^(\:[\>|\<|\!]?)(.*)/',
         self::T_BOOST   => '/^(\^)(.*)/',
         self::T_QUOTE   => '/^(\")([^"]*)$/',
 
@@ -205,7 +205,7 @@ class QueryScanner
         $openParenthesis = 0;
 
         // find all strings and rebuild input string with "OR"
-        if (preg_match_all('/[^\s\"\'\#\@]+|(\#[^\#\s]*)|(\@[^\@\s]*)|\"([^\"]*)\"|\'([^\']*)\'/', $input, $matches)) {
+        if (preg_match_all('/[^\s\"\'\#\@]+|(\#[^\#\s\)]*)|(\@[^\@\s\)]*)|\"([^\"]*)\"|\'([^\']*)\'/', $input, $matches)) {
             $input = '';
 
             foreach ($matches[0] as $key => $value) {
@@ -221,12 +221,15 @@ class QueryScanner
                 // remove entities chat if invalid
                 foreach ([self::T_HASHTAG, self::T_MENTION] as $regEx) {
                     if (preg_match($this->regEx[$regEx], $value, $m)) {
-                        if (!preg_match('/^([\w\d\-_.])/', $m[2], $m1)) {
+                        if (!preg_match('/^([\w\d\-\^_.])/', $m[2], $m1)) {
                             $value = substr($value, 1);
                         } else {
-                            $value = substr($value, 0, 1).preg_replace('/[^\w\d\-_.]/', '', $value);
+                            $value = substr($value, 0, 1).preg_replace('/[^\w\d\-\^_.]/', '', $value);
                         }
                     }
+                }
+                if (in_array($value, ['#', '@'])) {
+                    $value = sprintf('"%s"', $value);
                 }
 
                 echo $value;
@@ -239,6 +242,12 @@ class QueryScanner
                             ? sprintf('"%s")', substr($value, 0, -1))
                             : sprintf('"%s"', $value);
                     }
+                }
+
+                if (empty($value)) {
+                    $input .= ' ';
+
+                    continue;
                 }
 
                 $input .= $value;
@@ -280,6 +289,9 @@ class QueryScanner
         }
 
         // add missing close parentheses
+        for (; $openParenthesis<0; $openParenthesis++) {
+            $input = '('.$input;
+        }
         for (; $openParenthesis>0; $openParenthesis--) {
             $input .= ')';
         }
@@ -291,6 +303,8 @@ class QueryScanner
         $input = preg_replace('/(?>\#)\K\#*/', '', $input);
         $input = preg_replace('/(?>\@)\K\@*/', '', $input);
         $input = preg_replace('/(?>\^)\K\^*/', '', $input);
+        $input = preg_replace('/(\()(\s?)(OR|AND)(\s?)/', '$1', $input);
+        $input = preg_replace('/(\(\))(\s?)(OR|AND)(\s?)/', '', $input);
         $input = preg_replace('/(\()(\s)/', '$1', $input);
         $input = preg_replace('/(\s)(\))/', '$1', $input);
 

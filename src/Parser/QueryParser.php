@@ -86,17 +86,18 @@ class QueryParser
      */
     protected function readTerm($tokenType, $term)
     {
-        if (!in_array($tokenType, [QueryScanner::T_COLON, QueryScanner::T_BOOST])) {
+        if (!in_array($tokenType, [QueryScanner::T_COMPARE, QueryScanner::T_BOOST])) {
             return $term;
         }
 
-        if ($tokenType == QueryScanner::T_COLON && $term->getTokenType() == QueryScanner::T_TEXT) {
-            $this->addError(sprintf('Error: COLON only support Word. Found: "%s"', $this->scanner->getTokenTypeText()));
+        if ($tokenType == QueryScanner::T_COMPARE && $term->getTokenType() == QueryScanner::T_TEXT) {
+            $this->addError(sprintf('Error: COMPARE only support Word. Found: "%s"', $this->scanner->getTokenTypeText()));
 
             return $term;
         }
 
         $value = null;
+        $tokenTypeText = $this->scanner->getToken();
 
         switch ($this->scanner->next()) {
             case QueryScanner::T_TEXT:
@@ -117,7 +118,7 @@ class QueryParser
 
         $this->scanner->next();
 
-        return new Node\ExplicitTerm($term, $tokenType, $value);
+        return new Node\ExplicitTerm($term, $tokenType, $tokenTypeText, $value);
     }
 
     /**
@@ -155,7 +156,7 @@ class QueryParser
                 if ($expression) {
                     if ($expression->getTokenType() == QueryScanner::T_BOOST) {
                         $term = new Node\ExcludeTerm($expression->getNominator());
-                        return new Node\ExplicitTerm($term, $expression->getTokenType(), $expression->getTerm());
+                        return new Node\ExplicitTerm($term, $expression->getTokenType(), '^', $expression->getTerm());
                     } else {
                         return new Node\ExcludeTerm($expression);
                     }
@@ -170,7 +171,7 @@ class QueryParser
                 if ($expression) {
                     if ($expression->getTokenType() == QueryScanner::T_BOOST) {
                         $term = new Node\IncludeTerm($expression->getNominator());
-                        return new Node\ExplicitTerm($term, $expression->getTokenType(), $expression->getTerm());
+                        return new Node\ExplicitTerm($term, $expression->getTokenType(), '^', $expression->getTerm());
                     } else {
                         return new Node\IncludeTerm($expression);
                     }
@@ -185,7 +186,7 @@ class QueryParser
                 if ($expression) {
                     if ($expression->getTokenType() == QueryScanner::T_BOOST) {
                         $term = new Node\Hashtag($expression->getNominator());
-                        return new Node\ExplicitTerm($term, $expression->getTokenType(), $expression->getTerm());
+                        return new Node\ExplicitTerm($term, $expression->getTokenType(), '^', $expression->getTerm());
                     } else {
                         return new Node\Hashtag($expression);
                     }
@@ -200,7 +201,7 @@ class QueryParser
                 if ($expression) {
                     if ($expression->getTokenType() == QueryScanner::T_BOOST) {
                         $term = new Node\Mention($expression->getNominator());
-                        return new Node\ExplicitTerm($term, $expression->getTokenType(), $expression->getTerm());
+                        return new Node\ExplicitTerm($term, $expression->getTokenType(), '^', $expression->getTerm());
                     } else {
                         return new Node\Mention($expression);
                     }
@@ -270,7 +271,7 @@ class QueryParser
 
             if ($this->scanner->getTokenType() == QueryScanner::T_BOOST) {
                 $expression = $this->readExpression($this->scanner->next());;
-                $lastExpression = new Node\ExplicitTerm($lastExpression, QueryScanner::T_BOOST, $expression);
+                $lastExpression = new Node\ExplicitTerm($lastExpression, QueryScanner::T_BOOST, '^', $expression);
             }
 
             $expressions[] = $lastExpression;
@@ -278,7 +279,11 @@ class QueryParser
         } while ($lastExpression && $this->scanner->getTokenType() == QueryScanner::T_OR_OPERATOR && $this->scanner->next());
 
         if ($lastExpression) {
-            return new Node\OrExpressionList($expressions);
+            if (count($expressions) === 1) {
+                return $expressions[0];
+            } else {
+                return new Node\OrExpressionList($expressions);
+            }
         }
 
         return null;
@@ -307,7 +312,7 @@ class QueryParser
         switch ($this->scanner->getTokenType()) {
             case QueryScanner::T_CLOSE_PARENTHESIS:
             case QueryScanner::T_EOI:
-                if (sizeof($expressions) === 1) {
+                if (count($expressions) === 1) {
                     return $expressions[0];
                 } else {
                     return new Node\AndExpressionList($expressions);
@@ -331,6 +336,11 @@ class QueryParser
         $expressionlist = $this->readAndExpressionList($this->scanner->next());
         if ($this->scanner->getTokenType() == QueryScanner::T_CLOSE_PARENTHESIS) {
             $this->scanner->next();
+
+            if (!($expressionlist instanceof Node\ExpressionList)) {
+                return $expressionlist;
+            }
+
             return new Node\SubExpression($expressionlist);
         }
 
