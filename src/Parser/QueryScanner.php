@@ -241,6 +241,8 @@ class QueryScanner
                 }
 
                 if (empty($value)) {
+                    $input .= ' ';
+
                     continue;
                 }
 
@@ -283,7 +285,6 @@ class QueryScanner
         }
 
         // add missing close parentheses
-
         for (; $openParenthesis<0; $openParenthesis++) {
             $input = '('.$input;
         }
