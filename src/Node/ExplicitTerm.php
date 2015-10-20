@@ -90,6 +90,18 @@ class ExplicitTerm extends QueryItem
     /**
      * {@inheritDoc}
      */
+    public function getQueryItemsByTokenType($tokenType)
+    {
+        $items = [];
+        $items = array_merge($items, $this->getNominator()->getQueryItemsByTokenType($tokenType));
+        $items = array_merge($items, $this->getTerm()->getQueryItemsByTokenType($tokenType));
+
+        return $items;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function accept(QueryItemVisitorinterface $visitor)
     {
         $visitor->visitExplicitTerm($this);

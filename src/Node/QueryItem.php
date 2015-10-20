@@ -15,6 +15,16 @@ abstract class QueryItem
     }
 
     /**
+     * @param int $tokenType
+     *
+     * @return array
+     */
+    public function getQueryItemsByTokenType($tokenType)
+    {
+        return [];
+    }
+
+    /**
      * @param QueryItemVisitorinterface $visitor
      */
     abstract public function accept(QueryItemVisitorinterface $visitor);

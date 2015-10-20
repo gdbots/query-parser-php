@@ -39,4 +39,16 @@ abstract class SimpleTerm extends QueryItem
     {
         return $this->token;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getQueryItemsByTokenType($tokenType)
+    {
+        if ($this->tokenType == $tokenType) {
+            return [$this];
+        }
+
+        return [];
+    }
 }
