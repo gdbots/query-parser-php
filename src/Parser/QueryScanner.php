@@ -205,7 +205,7 @@ class QueryScanner
         $openParenthesis = 0;
 
         // find all strings and rebuild input string with "OR"
-        if (preg_match_all('/[^\s\"\'\#\@]+|(\#[^\#\s]*)|(\@[^\@\s]*)|\"([^\"]*)\"|\'([^\']*)\'/', $input, $matches)) {
+        if (preg_match_all('/[^\s\"\'\#\@]+|(\#[^\#\s\)]*)|(\@[^\@\s\)]*)|\"([^\"]*)\"|\'([^\']*)\'/', $input, $matches)) {
             $input = '';
             foreach ($matches[0] as $key => $value) {
                 if ($ignoreOperator) {
@@ -283,6 +283,10 @@ class QueryScanner
         }
 
         // add missing close parentheses
+
+        for (; $openParenthesis<0; $openParenthesis++) {
+            $input = '('.$input;
+        }
         for (; $openParenthesis>0; $openParenthesis--) {
             $input .= ')';
         }
@@ -295,6 +299,7 @@ class QueryScanner
         $input = preg_replace('/(?>\@)\K\@*/', '', $input);
         $input = preg_replace('/(?>\^)\K\^*/', '', $input);
         $input = preg_replace('/(\()(\s?)(OR|AND)(\s?)/', '$1', $input);
+        $input = preg_replace('/(\(\))(\s?)(OR|AND)(\s?)/', '', $input);
         $input = preg_replace('/(\()(\s)/', '$1', $input);
         $input = preg_replace('/(\s)(\))/', '$1', $input);
 
