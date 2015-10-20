@@ -64,6 +64,19 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Gdbots\QueryParser\Node\Word', $query);
     }
 
+    public function testParseIllegalCharacterError()
+    {
+        $this->parser->readString('$phrase');
+        $query = $this->parser->parse();
+        $this->assertNull($query);
+        $this->assertTrue($this->parser->hasErrors());
+
+        $this->parser->readString('phrase && word || "text"');
+        $query = $this->parser->parse();
+        $this->assertNull($query);
+        $this->assertTrue($this->parser->hasErrors());
+    }
+
     public function testParseInvalidExcludeTermError()
     {
         $this->parser->readString('-"phrase');
