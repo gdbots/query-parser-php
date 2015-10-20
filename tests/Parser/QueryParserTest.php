@@ -167,6 +167,24 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($output, $this->getPrintContent($query));
     }
 
+    public function testParseEmoji()
+    {
+        $this->parser->readString('#emoji 💩 AND 🍦 OR 😳');
+        $query = $this->parser->parse();
+
+        $output = " And
+> Or
+>> Hashtag
+>>> Word: emoji
+>> Text: &#x1f4a9;
+> Or
+>> Text: &#x1f366;
+>> Text: &#x1f633;
+";
+
+        $this->assertEquals($output, $this->getPrintContent($query));
+    }
+
     public function testParseGetHashtagQueryItems()
     {
         $this->parser->readString('(("phrase" OR #phrase) AND table.fieldName:value) #boost');
