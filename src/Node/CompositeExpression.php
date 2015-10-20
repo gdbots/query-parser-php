@@ -43,7 +43,9 @@ abstract class CompositeExpression extends QueryItem
             $items[] = $this;
         }
 
-        $items = array_merge($items, $this->getExpression()->getQueryItemsByTokenType($tokenType));
+        if (!($this->getExpression() instanceof SimpleTerm)) {
+            $items = array_merge($items, $this->getExpression()->getQueryItemsByTokenType($tokenType));
+        }
 
         return $items;
     }

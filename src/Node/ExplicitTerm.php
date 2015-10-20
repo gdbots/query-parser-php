@@ -93,8 +93,13 @@ class ExplicitTerm extends QueryItem
     public function getQueryItemsByTokenType($tokenType)
     {
         $items = [];
-        $items = array_merge($items, $this->getNominator()->getQueryItemsByTokenType($tokenType));
-        $items = array_merge($items, $this->getTerm()->getQueryItemsByTokenType($tokenType));
+
+        if (!($this->getNominator() instanceof SimpleTerm)) {
+            $items = array_merge($items, $this->getNominator()->getQueryItemsByTokenType($tokenType));
+        }
+        if (!($this->getTerm() instanceof SimpleTerm)) {
+            $items = array_merge($items, $this->getTerm()->getQueryItemsByTokenType($tokenType));
+        }
 
         return $items;
     }
