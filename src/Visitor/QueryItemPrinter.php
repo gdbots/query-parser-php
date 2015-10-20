@@ -73,18 +73,9 @@ class QueryItemPrinter implements QueryItemVisitorinterface
             $this->printIndentedLine(sprintf('Term: %s %s', $term->getTokenTypeText(), $term->getTerm()->getToken()));
             $this->increaseIndent();
 
-            if ($term->getNominator() instanceof Node\SubExpression) {
-                $this->visitSubExpression($term->getNominator());
-            } elseif ($term->getNominator() instanceof Node\ExcludeTerm) {
-                $this->visitExcludeTerm($term->getNominator());
-            } elseif ($term->getNominator() instanceof Node\IncludeTerm) {
-                $this->visitIncludeTerm($term->getNominator());
-            } elseif ($term->getNominator() instanceof Node\Hashtag) {
-                $this->visitHashtag($term->getNominator());
-            } elseif ($term->getNominator() instanceof Node\Mention) {
-                $this->visitMention($term->getNominator());
-            } elseif ($term->getNominator() instanceof Node\ExplicitTerm) {
-                $this->visitExplicitTerm($term->getNominator());
+            $method = sprintf('visit%s', ucfirst(substr(get_class($term->getNominator()), 24)));
+            if (method_exists($this, $method)) {
+                $this->$method($term->getNominator());
             }
 
             $this->decreaseIndent();
