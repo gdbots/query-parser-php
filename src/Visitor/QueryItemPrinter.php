@@ -56,9 +56,9 @@ class QueryItemPrinter implements QueryItemVisitorinterface
     /**
      * {@inheritDoc}
      */
-    public function visitText(Node\Text $text)
+    public function visitPhrase(Node\Phrase $phrase)
     {
-        $this->printIndentedLine(sprintf('Text: %s', $text->getToken()));
+        $this->printIndentedLine(sprintf('Phrase: %s', $phrase->getToken()));
     }
 
     /**

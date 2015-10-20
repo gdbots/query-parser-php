@@ -12,9 +12,9 @@ interface QueryItemVisitorinterface
     public function visitWord(Node\Word $word);
 
     /**
-     * @param Node\Text $text
+     * @param Node\Phrase $phrase
      */
-    public function visitText(Node\Text $text);
+    public function visitPhrase(Node\Phrase $phrase);
 
     /**
      * @param Node\ExplicitTerm $term

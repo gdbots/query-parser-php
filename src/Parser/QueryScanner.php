@@ -29,12 +29,12 @@ class QueryScanner
     const T_INCLUDE             = 5; // "+"
     const T_HASHTAG             = 6; // "#"
     const T_MENTION             = 7; // "@"
-    const T_COMPARE             = 8; // ":", ":>", ":<" or ":!"
+    const T_FILTER              = 8; // ":", ":>", ":<" or ":!"
     const T_BOOST               = 9; // "^"
     const T_OR_OPERATOR         = 10; // "OR"
     const T_AND_OPERATOR        = 11; // "AND"
     const T_WSPC                = 12; // white-space
-    const T_TEXT                = 13; // text between two quotes (parentheses)
+    const T_PHRASE              = 13; // text between two quotes (parentheses)
     const T_QUOTE               = 14; // double parentheses
     const T_ILLEGAL             = 15; // illegal character
 
@@ -93,12 +93,12 @@ class QueryScanner
         self::T_INCLUDE           => 'INCLUDE',
         self::T_HASHTAG           => 'HASHTAG',
         self::T_MENTION           => 'MENTION',
-        self::T_COMPARE           => 'COMPARE',
+        self::T_FILTER            => 'FILTER',
         self::T_BOOST             => 'BOOST',
         self::T_OR_OPERATOR       => 'OR_OPERATOR',
         self::T_AND_OPERATOR      => 'AND_OPERATOR',
         self::T_WSPC              => 'WHITESPACE',
-        self::T_TEXT              => 'TEXT',
+        self::T_PHRASE            => 'PHRASE',
         self::T_QUOTE             => 'QUOTE',
         self::T_ILLEGAL           => 'ILLEGAL'
     );
@@ -129,9 +129,9 @@ class QueryScanner
         // WSPC matches in (frequent) spaces, tabs and newlines.
         self::T_WSPC => '/^([ \t\n]+)(.*)/',
 
-        // TEXT matches every possible input between double brackets.
+        // PHRASE matches every possible input between double brackets.
         // Double parentheses are part of the match.
-        self::T_TEXT => '/^(\"[^"]*\")(.*)/',
+        self::T_PHRASE => '/^(\"[^"]*\")(.*)/',
 
         // OR matches by keyword "OR" (case sensitive)
         // when no text follows after "OR".
@@ -156,7 +156,7 @@ class QueryScanner
         self::T_INCLUDE => '/^(\+)(.*)/',
         self::T_HASHTAG => '/^(\#)(.*)/',
         self::T_MENTION => '/^(\@)(.*)/',
-        self::T_COMPARE => '/^(\:[\>|\<|\!]?)(.*)/',
+        self::T_FILTER  => '/^(\:[\>|\<|\!]?)(.*)/',
         self::T_BOOST   => '/^(\^)(.*)/',
         self::T_QUOTE   => '/^(\")([^"]*)$/',
 
@@ -250,7 +250,7 @@ class QueryScanner
                     $openParenthesis += count($m[0]);
                 }
                 if (preg_match_all('/(\))/', $value, $m)) {
-                    if (preg_match($this->regEx[self::T_TEXT], $value, $m1)) {
+                    if (preg_match($this->regEx[self::T_PHRASE], $value, $m1)) {
                         if (preg_match_all('/(\))/', str_replace($m1[1], '', $value), $m2)) {
                             $openParenthesis -= count($m2[0]);
                         }
@@ -332,7 +332,7 @@ class QueryScanner
             $tokenType = $this->tokenType;
         }
 
-        return $this->typeStrings[$tokenType];
+        return self::$typeStrings[$tokenType];
     }
 
     /**

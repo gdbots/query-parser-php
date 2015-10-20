@@ -48,17 +48,20 @@ class QueryScannerTest extends \PHPUnit_Framework_TestCase
             ['#phrase', QueryScanner::T_HASHTAG],
             ['@phrase', QueryScanner::T_MENTION],
             ['^', QueryScanner::T_BOOST],
-            [':', QueryScanner::T_COMPARE],
+            [':', QueryScanner::T_FILTER],
+            [':>', QueryScanner::T_FILTER],
+            [':<', QueryScanner::T_FILTER],
+            [':!', QueryScanner::T_FILTER],
             ['OR', QueryScanner::T_OR_OPERATOR],
             ['AND', QueryScanner::T_AND_OPERATOR],
-            ['"phrase"', QueryScanner::T_TEXT],
+            ['"phrase"', QueryScanner::T_PHRASE],
             ['"', QueryScanner::T_QUOTE]
        ];
     }
 
     public function testGetTokenTypeText()
     {
-        $this->assertEquals('TEXT', $this->scanner->getTokenTypeText(QueryScanner::T_TEXT));
+        $this->assertEquals('PHRASE', $this->scanner->getTokenTypeText(QueryScanner::T_PHRASE));
     }
 
     public function testGetTokenTypeTextCurrenToken()

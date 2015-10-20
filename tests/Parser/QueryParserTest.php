@@ -42,7 +42,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
     {
         return [
             ['phrase', 'Gdbots\QueryParser\Node\Word'],
-            ['"phrase"', 'Gdbots\QueryParser\Node\Text'],
+            ['"phrase"', 'Gdbots\QueryParser\Node\Phrase'],
             ['country:"United State"', 'Gdbots\QueryParser\Node\ExplicitTerm'],
             ['phrase^boost', 'Gdbots\QueryParser\Node\ExplicitTerm'],
             ['-phrase', 'Gdbots\QueryParser\Node\ExcludeTerm'],
@@ -114,7 +114,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($output, $this->getPrintContent($query));
     }
 
-    public function testParseCompareWithBoost()
+    public function testParseFilterWithBoost()
     {
         $this->parser->readString('table.fieldName:value^boost');
         $query = $this->parser->parse();
@@ -136,7 +136,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
 >> Or
 >>> Subexpression
 >>>> Or
->>>>> Text: phrase
+>>>>> Phrase: phrase
 >>>>> Hashtag
 >>>>>> Word: phrase
 >>> Term: table.fieldName : value
@@ -155,7 +155,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
 >> And
 >>> Subexpression
 >>>> Or
->>>>> Text: phrase
+>>>>> Phrase: phrase
 >>>>> Hashtag
 >>>>>> Word: phrase
 >>> Term: table.fieldName : value
@@ -170,7 +170,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
         $query = $this->parser->parse();
 
         $output = " Or
-> Text: phrase
+> Phrase: phrase
 > Hashtag
 >> Word: phrase
 > Term: ^ boost
@@ -189,10 +189,10 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
 > Or
 >> Hashtag
 >>> Word: emoji
->> Text: &#x1f4a9;
+>> Phrase: &#x1f4a9;
 > Or
->> Text: &#x1f366;
->> Text: &#x1f633;
+>> Phrase: &#x1f366;
+>> Phrase: &#x1f633;
 ";
 
         $this->assertEquals($output, $this->getPrintContent($query));
