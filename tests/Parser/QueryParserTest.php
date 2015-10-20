@@ -30,14 +30,12 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
     /**
      * @dataProvider getTestParseWithOneClassDataprovider
      */
-    public function testParseNode($string, $class, $isList = false)
+    public function testParseNode($string, $class)
     {
         $this->parser->readString($string);
-        $result = $this->parser->parse();
+        $query = $this->parser->parse();
 
-        $expressions = $result->getExpressions();
-
-        $this->assertInstanceOf($class, $isList ? $result : $expressions[0]);
+        $this->assertInstanceOf($class, $query);
     }
 
     public function getTestParseWithOneClassDataprovider()
@@ -51,33 +49,33 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
             ['+phrase', 'Gdbots\QueryParser\Node\IncludeTerm'],
             ['#phrase', 'Gdbots\QueryParser\Node\Hashtag'],
             ['@phrase', 'Gdbots\QueryParser\Node\Mention'],
-            ['phrase word', 'Gdbots\QueryParser\Node\OrExpressionList', true],
-            ['phrase OR word', 'Gdbots\QueryParser\Node\OrExpressionList', true],
-            ['phrase AND word', 'Gdbots\QueryParser\Node\AndExpressionList', true],
-            ['(phrase)', 'Gdbots\QueryParser\Node\Subexpression']
+            ['phrase word', 'Gdbots\QueryParser\Node\OrExpressionList'],
+            ['phrase OR word', 'Gdbots\QueryParser\Node\OrExpressionList'],
+            ['phrase AND word', 'Gdbots\QueryParser\Node\AndExpressionList'],
+            ['(phrase OR word)', 'Gdbots\QueryParser\Node\Subexpression']
         ];
     }
 
     public function testParseTextWithUnclosedQuotes()
     {
         $this->parser->readString('"phrase');
-        $result = $this->parser->parse();
-        $expressions = $result->getExpressions(QueryScanner::T_WORD);
-        $this->assertInstanceOf('Gdbots\QueryParser\Node\Word', $expressions[0]);
+        $query = $this->parser->parse();
+
+        $this->assertInstanceOf('Gdbots\QueryParser\Node\Word', $query);
     }
 
     public function testParseInvalidExcludeTermError()
     {
         $this->parser->readString('-"phrase');
-        $result = $this->parser->parse();
-        $this->assertNull($result);
+        $query = $this->parser->parse();
+        $this->assertNull($query);
         $this->assertTrue($this->parser->hasErrors());
     }
 
     public function testParseMultiHashtags()
     {
         $this->parser->readString('#one #two #three');
-        $result = $this->parser->parse();
+        $query = $this->parser->parse();
 
         $output = " Or
 > Hashtag
@@ -88,55 +86,82 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
 >> Word: three
 ";
 
-        $this->assertEquals($output, $this->getPrintContent($result));
+        $this->assertEquals($output, $this->getPrintContent($query));
     }
 
     public function testParseDuplicateHashtags()
     {
         $this->parser->readString('##phrase');
-        $result = $this->parser->parse();
+        $query = $this->parser->parse();
 
-        $output = " Or
-> Hashtag
->> Word: phrase
+        $output = " Hashtag
+> Word: phrase
 ";
 
-        $this->assertEquals($output, $this->getPrintContent($result));
+        $this->assertEquals($output, $this->getPrintContent($query));
     }
 
     public function testParseCompareWithBoost()
     {
         $this->parser->readString('table.fieldName:value^boost');
-        $result = $this->parser->parse();
+        $query = $this->parser->parse();
+
+        $output = " Term: ^ boost
+> Term: table.fieldName : value
+";
+
+        $this->assertEquals($output, $this->getPrintContent($query));
+    }
+
+    public function testParseComplexQuery()
+    {
+        $this->parser->readString('(("phrase" #phrase) table.fieldName:value)^boost');
+        $query = $this->parser->parse();
+
+        $output = " Term: ^ boost
+> Subexpression
+>> Or
+>>> Text: phrase
+>>> Hashtag
+>>>> Word: phrase
+>>> Term: table.fieldName : value
+";
+
+        $this->assertEquals($output, $this->getPrintContent($query));
+    }
+
+    public function testParseComplexQueryUsingOperator()
+    {
+        $this->parser->readString('(("phrase" OR #phrase) AND table.fieldName:value)^boost');
+        $query = $this->parser->parse();
+
+        $output = " Term: ^ boost
+> Subexpression
+>> And
+>>> Or
+>>>> Text: phrase
+>>>> Hashtag
+>>>>> Word: phrase
+>>> Term: table.fieldName : value
+";
+
+        $this->assertEquals($output, $this->getPrintContent($query));
+    }
+
+    public function testParseComplexQueryWithIgnoreOperator()
+    {
+        $this->parser->readString('(("phrase" OR #phrase) AND table.fieldName:value)^boost', true);
+        $query = $this->parser->parse();
 
         $output = " Or
+> Text: phrase
+> Hashtag
+>> Word: phrase
 > Term: ^ boost
 >> Term: table.fieldName : value
 ";
 
-        $this->assertEquals($output, $this->getPrintContent($result));
-    }
-
-    public function testParseExpressionListWithBoost()
-    {
-        $this->parser->readString('(("phrase" OR #phrase) AND table.fieldName:value)^boost');
-        $result = $this->parser->parse();
-
-        $output = " Or
-> Subexpression
->> Or
->>> Term: ^ boost
->>>> Subexpression
->>>>> And
->>>>>> Or
->>>>>>> Text: phrase
->>>>>>> Hashtag
->>>>>>>> Word: phrase
->>>>>> Or
->>>>>>> Term: table.fieldName : value
-";
-
-        $this->assertEquals($output, $this->getPrintContent($result));
+        $this->assertEquals($output, $this->getPrintContent($query));
     }
 
     /**
