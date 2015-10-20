@@ -37,22 +37,66 @@ $query->accept($printer);
 **Result:**
 
 ```
-And
+ And
 > IncludeTerm
 >> Word: mandatoryWord
 > Or
 >> ExcludeTerm
 >>> Word: excludedWord
->> Term: fieldName - value
+>> Term: fieldName : value
 ```
 
 You can also ignore operator by using `$parser->readString('search query here', true)`, which will remove all AND and brackets.
 For the above example the result would be:
 
 ```
-Or
+ Or
 > IncludeTerm
 >> Word: mandatoryWord
 > ExcludeTerm
 >> Word: excludedWord
+> Term: fieldName : value
+```
+
+To pull list of `QueryItem` by token type, use:
+
+``` php
+<?php
+
+use Gdbots\QueryParser\Parser\QueryParser;
+use Gdbots\QueryParser\Parser\QueryScanner;
+
+$parser = new QueryParser();
+$parser->readString('#hashtag1 AND #hashtag2');
+$query = $parser->parse();
+
+$hashtags = $query->getQueryItemsByTokenType(QueryScanner::T_HASHTAG);
+var_dump($hashtags);
+```
+
+**Result:**
+
+```
+array(2) {
+  [0]=>
+  object(Gdbots\QueryParser\Node\Hashtag)#584 (1) {
+    ["expression":protected]=>
+    object(Gdbots\QueryParser\Node\Word)#582 (2) {
+      ["tokenType":protected]=>
+      int(1)
+      ["token":protected]=>
+      string(8) "hashtag1"
+    }
+  }
+  [1]=>
+  object(Gdbots\QueryParser\Node\Hashtag)#586 (1) {
+    ["expression":protected]=>
+    object(Gdbots\QueryParser\Node\Word)#585 (2) {
+      ["tokenType":protected]=>
+      int(1)
+      ["token":protected]=>
+      string(8) "hashtag2"
+    }
+  }
+}
 ```
