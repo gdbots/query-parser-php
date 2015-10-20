@@ -164,6 +164,18 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($output, $this->getPrintContent($query));
     }
 
+    public function testParseGetHashtagQueryItems()
+    {
+        $this->parser->readString('(("phrase" OR #phrase) AND table.fieldName:value) #boost');
+        $query = $this->parser->parse();
+
+        $hasttags = $query->getQueryItemsByTokenType(\Gdbots\QueryParser\Parser\QueryScanner::T_HASHTAG);
+
+        $this->assertEquals(2, count($hasttags));
+        $this->assertEquals('phrase', $hasttags[0]->getExpression()->getToken());
+        $this->assertEquals('boost', $hasttags[1]->getExpression()->getToken());
+    }
+
     /**
      * @return string
      */
