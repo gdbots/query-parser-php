@@ -121,9 +121,11 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
         $output = " Term: ^ boost
 > Subexpression
 >> Or
->>> Text: phrase
->>> Hashtag
->>>> Word: phrase
+>>> Subexpression
+>>>> Or
+>>>>> Text: phrase
+>>>>> Hashtag
+>>>>>> Word: phrase
 >>> Term: table.fieldName : value
 ";
 
@@ -138,10 +140,11 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
         $output = " Term: ^ boost
 > Subexpression
 >> And
->>> Or
->>>> Text: phrase
->>>> Hashtag
->>>>> Word: phrase
+>>> Subexpression
+>>>> Or
+>>>>> Text: phrase
+>>>>> Hashtag
+>>>>>> Word: phrase
 >>> Term: table.fieldName : value
 ";
 

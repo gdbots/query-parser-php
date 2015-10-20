@@ -43,8 +43,6 @@ class QueryScannerTest extends \PHPUnit_Framework_TestCase
         return [
             ['phrase', QueryScanner::T_WORD],
             ['', QueryScanner::T_EOI],
-            ['(', QueryScanner::T_OPEN_PARENTHESIS],
-            [')', QueryScanner::T_CLOSE_PARENTHESIS],
             ['-', QueryScanner::T_EXCLUDE],
             ['+', QueryScanner::T_INCLUDE],
             ['#phrase', QueryScanner::T_HASHTAG],
