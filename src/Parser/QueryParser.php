@@ -156,7 +156,7 @@ class QueryParser
                 if ($expression) {
                     if ($expression->getTokenType() == QueryScanner::T_BOOST) {
                         $term = new Node\ExcludeTerm($expression->getNominator());
-                        return new Node\ExplicitTerm($term, $expression->getTokenType(), '>', $expression->getTerm());
+                        return new Node\ExplicitTerm($term, $expression->getTokenType(), '^', $expression->getTerm());
                     } else {
                         return new Node\ExcludeTerm($expression);
                     }
@@ -171,7 +171,7 @@ class QueryParser
                 if ($expression) {
                     if ($expression->getTokenType() == QueryScanner::T_BOOST) {
                         $term = new Node\IncludeTerm($expression->getNominator());
-                        return new Node\ExplicitTerm($term, $expression->getTokenType(), '>', $expression->getTerm());
+                        return new Node\ExplicitTerm($term, $expression->getTokenType(), '^', $expression->getTerm());
                     } else {
                         return new Node\IncludeTerm($expression);
                     }
@@ -186,7 +186,7 @@ class QueryParser
                 if ($expression) {
                     if ($expression->getTokenType() == QueryScanner::T_BOOST) {
                         $term = new Node\Hashtag($expression->getNominator());
-                        return new Node\ExplicitTerm($term, $expression->getTokenType(), '>', $expression->getTerm());
+                        return new Node\ExplicitTerm($term, $expression->getTokenType(), '^', $expression->getTerm());
                     } else {
                         return new Node\Hashtag($expression);
                     }
@@ -201,7 +201,7 @@ class QueryParser
                 if ($expression) {
                     if ($expression->getTokenType() == QueryScanner::T_BOOST) {
                         $term = new Node\Mention($expression->getNominator());
-                        return new Node\ExplicitTerm($term, $expression->getTokenType(), '>', $expression->getTerm());
+                        return new Node\ExplicitTerm($term, $expression->getTokenType(), '^', $expression->getTerm());
                     } else {
                         return new Node\Mention($expression);
                     }
@@ -271,7 +271,7 @@ class QueryParser
 
             if ($this->scanner->getTokenType() == QueryScanner::T_BOOST) {
                 $expression = $this->readExpression($this->scanner->next());;
-                $lastExpression = new Node\ExplicitTerm($lastExpression, QueryScanner::T_BOOST, $expression);
+                $lastExpression = new Node\ExplicitTerm($lastExpression, QueryScanner::T_BOOST, '^', $expression);
             }
 
             $expressions[] = $lastExpression;
