@@ -19,7 +19,7 @@ abstract class QueryItem
      *
      * @return array
      */
-    public function getQueryItemsByTokenType($tokenType)
+    public function getQueryItemsByTokenType($tokenType = null)
     {
         return [];
     }

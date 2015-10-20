@@ -39,7 +39,6 @@ abstract class SimpleTerm extends QueryItem
      */
     public function getToken()
     {
-
         if (preg_match(QueryScanner::REGEX_EMOTICONS_UTF8, $this->token)) {
             return $this->encodeEmoji($this->token);
         }
@@ -87,9 +86,11 @@ abstract class SimpleTerm extends QueryItem
     /**
      * {@inheritDoc}
      */
-    public function getQueryItemsByTokenType($tokenType)
+    public function getQueryItemsByTokenType($tokenType = null)
     {
-        if ($this->tokenType == $tokenType) {
+        if ($tokenType === null) {
+            return [QueryScanner::$typeStrings[$this->getTokenType()] => [$this]];
+        } elseif ($this->getTokenType() == $tokenType) {
             return [$this];
         }
 

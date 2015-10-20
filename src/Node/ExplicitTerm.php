@@ -90,15 +90,21 @@ class ExplicitTerm extends QueryItem
     /**
      * {@inheritDoc}
      */
-    public function getQueryItemsByTokenType($tokenType)
+    public function getQueryItemsByTokenType($tokenType = null)
     {
         $items = [];
 
+        if ($tokenType === null) {
+            $items[QueryScanner::$typeStrings[$this->getTokenType()]][] = $this;
+        } elseif ($this->getTokenType() == $tokenType) {
+            $item[] = $this;
+        }
+
         if (!($this->getNominator() instanceof SimpleTerm)) {
-            $items = array_merge($items, $this->getNominator()->getQueryItemsByTokenType($tokenType));
+            $items = array_merge_recursive($items, $this->getNominator()->getQueryItemsByTokenType($tokenType));
         }
         if (!($this->getTerm() instanceof SimpleTerm)) {
-            $items = array_merge($items, $this->getTerm()->getQueryItemsByTokenType($tokenType));
+            $items = array_merge_recursive($items, $this->getTerm()->getQueryItemsByTokenType($tokenType));
         }
 
         return $items;
