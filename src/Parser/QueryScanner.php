@@ -294,6 +294,7 @@ class QueryScanner
         $input = preg_replace('/(?>\#)\K\#*/', '', $input);
         $input = preg_replace('/(?>\@)\K\@*/', '', $input);
         $input = preg_replace('/(?>\^)\K\^*/', '', $input);
+        $input = preg_replace('/(\()(\s?)(OR|AND)(\s?)/', '$1', $input);
         $input = preg_replace('/(\()(\s)/', '$1', $input);
         $input = preg_replace('/(\s)(\))/', '$1', $input);
 
