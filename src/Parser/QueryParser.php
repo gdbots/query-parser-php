@@ -279,7 +279,11 @@ class QueryParser
         } while ($lastExpression && $this->scanner->getTokenType() == QueryScanner::T_OR_OPERATOR && $this->scanner->next());
 
         if ($lastExpression) {
-            return new Node\OrExpressionList($expressions);
+            if (count($expressions) === 1) {
+                return $expressions[0];
+            } else {
+                return new Node\OrExpressionList($expressions);
+            }
         }
 
         return null;
@@ -308,7 +312,7 @@ class QueryParser
         switch ($this->scanner->getTokenType()) {
             case QueryScanner::T_CLOSE_PARENTHESIS:
             case QueryScanner::T_EOI:
-                if (sizeof($expressions) === 1) {
+                if (count($expressions) === 1) {
                     return $expressions[0];
                 } else {
                     return new Node\AndExpressionList($expressions);
@@ -332,6 +336,11 @@ class QueryParser
         $expressionlist = $this->readAndExpressionList($this->scanner->next());
         if ($this->scanner->getTokenType() == QueryScanner::T_CLOSE_PARENTHESIS) {
             $this->scanner->next();
+
+            if (!($expressionlist instanceof Node\ExpressionList)) {
+                return $expressionlist;
+            }
+
             return new Node\SubExpression($expressionlist);
         }
 
