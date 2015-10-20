@@ -234,9 +234,7 @@ class QueryScanner
                 // add quotes to emoticons
                 foreach ([self::REGEX_EMOTICONS_BASIC, self::REGEX_EMOTICONS_UTF8] as $regEx) {
                     if (preg_match($regEx, $value, $m)) {
-                        $value = str_replace($m[0], '', $value) == ')'
-                            ? sprintf('"%s")', substr($value, 0, -1))
-                            : sprintf('"%s"', $value);
+                        $value = str_replace($m[0], sprintf('"%s"', $m[0]), $value);
                     }
                 }
 
