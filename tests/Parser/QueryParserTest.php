@@ -58,28 +58,162 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
         ];
     }
 
-    public function testParseTextWithUnclosedQuotes()
+    public function testMulipleHashtagSymbols()
     {
-        $this->parser->readString('"phrase');
-        $result = $this->parser->parse();
-        $expressions = $result->getExpressions(QueryScanner::T_WORD);
-        $this->assertInstanceOf('Gdbots\QueryParser\Node\Word', $expressions[0]);
+        $expectedResult = "Or>Hashtag>>Word:one";
+
+        $this->parser->readString('##one');
+        $results = $this->parser->parse();
+        $this->assertInstanceOf('Gdbots\QueryParser\Node\OrExpressionList', $results);
+
+
+
+        $output = $this->getPrintContent($results);
+
+        $output = preg_replace("/[\r\n]+/", "", $output);
+        $output = preg_replace("/\s+/", '', $output);
+
+        $this->assertEquals($expectedResult, $output);
     }
 
-    public function testParseInvalidExcludeTermError()
+   public function testMultipleHashtagsNoSpace()
     {
-        $this->parser->readString('-"phrase');
-        $result = $this->parser->parse();
-        $this->assertNull($result);
-        $this->assertTrue($this->parser->hasErrors());
+     $expectedResult = "Or>Hashtag>>Word:one>Hashtag>>Word:two>Hashtag>>Word:three";
+
+     $this->parser->readString('#one#two##three');
+     $results = $this->parser->parse();
+     $this->assertInstanceOf('Gdbots\QueryParser\Node\OrExpressionList', $results);
+
+     $output = $this->getPrintContent($results);
+
+     $output = preg_replace("/[\r\n]+/", "", $output);
+     $output = preg_replace("/\s+/", '', $output);
+
+     $this->assertEquals($expectedResult, $output);
+
     }
 
-    public function testParseMultiHashtags()
+    public function testInvalidHashtagCharacter()
     {
-        $this->parser->readString('#one #two #three');
-        $result = $this->parser->parse();
+        $expectedResult = "Or>Hashtag>>Word:one";
 
-        $output = " Or
+        $this->parser->readString('#one!');
+        $results = $this->parser->parse();
+        $this->assertInstanceOf('Gdbots\QueryParser\Node\OrExpressionList', $results);
+
+        $output = $this->getPrintContent($results);
+
+        $output = preg_replace("/[\r\n]+/", "", $output);
+        $output = preg_replace("/\s+/", '', $output);
+
+        $this->assertEquals($expectedResult, $output);
+    }
+
+    public function testHashtagInQuotes()
+    {
+        $expectedResult = "Or>Text:#one #two#three ##four";
+
+        $this->parser->readString('"#one #two#three ##four"');
+        $results = $this->parser->parse();
+
+        $this->assertInstanceOf('Gdbots\QueryParser\Node\OrExpressionList', $results);
+
+        $output = $this->getPrintContent($results);
+
+        $output = preg_replace("/[\r\n]+/", "", $output);
+        $output = preg_replace("/\s+/", '', $output);
+
+        $this->assertEquals($expectedResult, $output);
+    }
+
+    public function testBoostHashtag()
+    {
+        $expectedResult = "Or>Term:^1>>Hashtag>>>Word:one";
+
+        $this->parser->readString('#one^1');
+        $results = $this->parser->parse();
+        $this->assertInstanceOf('Gdbots\QueryParser\Node\OrExpressionList', $results);
+
+        $output = $this->getPrintContent($results);
+
+        $output = preg_replace("/[\r\n]+/", "", $output);
+        $output = preg_replace("/\s+/", '', $output);
+
+        $this->assertEquals($expectedResult, $output);
+    }
+
+    public function testMultipleBoostSymbolsOnKeyword()
+    {
+        $expectedResult = "Or>Term:one^1";
+
+        $this->parser->readString('one^^1');
+        $results = $this->parser->parse();
+        $this->assertInstanceOf('Gdbots\QueryParser\Node\OrExpressionList', $results);
+
+        $output = $this->getPrintContent($results);
+
+        $output = preg_replace("/[\r\n]+/", "", $output);
+        $output = preg_replace("/\s+/", '', $output);
+
+        $this->assertEquals($expectedResult, $output);
+    }
+
+    public function testBoostWithDigitAndNonDigit()
+    {
+
+        $expectedResult = "Or>Term:one^1>Word:abc";
+
+        $this->parser->readString('one^1abc');
+        $results = $this->parser->parse();
+        $this->assertInstanceOf('Gdbots\QueryParser\Node\OrExpressionList', $results);
+
+        $output = $this->getPrintContent($results);
+
+        $output = preg_replace("/[\r\n]+/", "", $output);
+        $output = preg_replace("/\s+/", '', $output);
+
+        $this->assertEquals($expectedResult, $output);
+    }
+
+    public function testBoostWithNonDigit()
+    {
+
+        $expectedResult = "Or>Word:one>Word:two";
+
+        $this->parser->readString('one^two');
+        $results = $this->parser->parse();
+        $this->assertInstanceOf('Gdbots\QueryParser\Node\OrExpressionList', $results);
+
+        $output = $this->getPrintContent($results);
+
+        $output = preg_replace("/[\r\n]+/", "", $output);
+        $output = preg_replace("/\s+/", '', $output);
+
+        $this->assertEquals($expectedResult, $output);
+    }
+
+/* public function testParseTextWithUnclosedQuotes()
+ {
+     $this->parser->readString('"phrase');
+     $result = $this->parser->parse();
+     $expressions = $result->getExpressions(QueryScanner::T_WORD);
+     $this->assertInstanceOf('Gdbots\QueryParser\Node\Word', $expressions[0]);
+ }
+
+ public function testParseInvalidExcludeTermError()
+ {
+     $this->parser->readString('-"phrase');
+     $result = $this->parser->parse();
+     $this->assertNull($result);
+     $this->assertTrue($this->parser->hasErrors());
+ }
+
+ public function testParseMultiHashtags()
+ {
+     $this->parser->readString('#one #two #three');
+     $result = $this->parser->parse();
+
+     $output = " Or
 > Hashtag
 >> Word: one
 > Hashtag
@@ -88,8 +222,8 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
 >> Word: three
 ";
 
-        $this->assertEquals($output, $this->getPrintContent($result));
-    }
+     $this->assertEquals($output, $this->getPrintContent($result));
+ }*/
 
     /**
      * @return string
@@ -98,7 +232,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
     {
         ob_start();
 
-        $result->accept($this->printer);
+        $query->accept($this->printer);
 
         $output = ob_get_contents();
 

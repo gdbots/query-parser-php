@@ -207,6 +207,7 @@ class QueryScanner
         // find all strings and rebuild input string with "OR"
         if (preg_match_all('/[^\s\"\'\#\@]+|(\#[^\#\s]*)|(\@[^\@\s]*)|\"([^\"]*)\"|\'([^\']*)\'/', $input, $matches)) {
             $input = '';
+
             foreach ($matches[0] as $key => $value) {
                 if ($ignoreOperator) {
                     if ($value == 'AND') {
@@ -227,6 +228,9 @@ class QueryScanner
                         }
                     }
                 }
+
+                echo $value;
+
 
                 // add quotes to emoticons
                 foreach ([self::REGEX_EMOTICONS_BASIC, self::REGEX_EMOTICONS_UTF8] as $regEx) {
@@ -291,6 +295,7 @@ class QueryScanner
         $input = preg_replace('/(\s)(\))/', '$1', $input);
 
         $this->input = $input;
+
         $this->processed = '';
         $this->position = 0;
     }
