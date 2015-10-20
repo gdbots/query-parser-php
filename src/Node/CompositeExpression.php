@@ -22,7 +22,7 @@ abstract class CompositeExpression extends QueryItem
     /**
      * @return QueryItem
      */
-    public function getSubExpression()
+    public function getExpression()
     {
         return $this->expression;
     }
@@ -43,7 +43,7 @@ abstract class CompositeExpression extends QueryItem
             $items[] = $this;
         }
 
-        $items = array_merge($items, $this->getSubExpression()->getQueryItemsByTokenType($tokenType));
+        $items = array_merge($items, $this->getExpression()->getQueryItemsByTokenType($tokenType));
 
         return $items;
     }

@@ -25,9 +25,9 @@ class IncludeTermTest extends \PHPUnit_Framework_TestCase
         $this->includeTerm = null;
     }
 
-    public function testGetSubexpression()
+    public function testtestGetExpression()
     {
-        $this->assertSame($this->word, $this->includeTerm->getSubexpression());
+        $this->assertSame($this->word, $this->includeTerm->getExpression());
     }
 
     public function testToArray()
