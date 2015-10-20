@@ -84,7 +84,7 @@ class QueryScanner
      *
      * @var array
      */
-    private $typeStrings = array (
+    public static $typeStrings = array (
         self::T_EOI               => 'EOI',
         self::T_WORD              => 'WORD',
         self::T_OPEN_PARENTHESIS  => 'OPEN_PARENTHESIS',
