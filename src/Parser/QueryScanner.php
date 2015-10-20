@@ -227,6 +227,9 @@ class QueryScanner
                         }
                     }
                 }
+                if (in_array($value, ['#', '@'])) {
+                    $value = sprintf('"%s"', $value);
+                }
 
                 // add quotes to emoticons
                 foreach ([self::REGEX_EMOTICONS_BASIC, self::REGEX_EMOTICONS_UTF8] as $regEx) {
@@ -235,6 +238,10 @@ class QueryScanner
                             ? sprintf('"%s")', substr($value, 0, -1))
                             : sprintf('"%s"', $value);
                     }
+                }
+
+                if (empty($value)) {
+                    continue;
                 }
 
                 $input .= $value;
