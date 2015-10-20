@@ -91,6 +91,54 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($output, $this->getPrintContent($result));
     }
 
+    public function testParseDuplicateHashtags()
+    {
+        $this->parser->readString('##phrase');
+        $result = $this->parser->parse();
+
+        $output = " Or
+> Hashtag
+>> Word: phrase
+";
+
+        $this->assertEquals($output, $this->getPrintContent($result));
+    }
+
+    public function testParseCompareWithBoost()
+    {
+        $this->parser->readString('table.fieldName:value^boost');
+        $result = $this->parser->parse();
+
+        $output = " Or
+> Term: ^ boost
+>> Term: table.fieldName : value
+";
+
+        $this->assertEquals($output, $this->getPrintContent($result));
+    }
+
+    public function testParseExpressionListWithBoost()
+    {
+        $this->parser->readString('(("phrase" OR #phrase) AND table.fieldName:value)^boost');
+        $result = $this->parser->parse();
+
+        $output = " Or
+> Subexpression
+>> Or
+>>> Term: ^ boost
+>>>> Subexpression
+>>>>> And
+>>>>>> Or
+>>>>>>> Text: phrase
+>>>>>>> Hashtag
+>>>>>>>> Word: phrase
+>>>>>> Or
+>>>>>>> Term: table.fieldName : value
+";
+
+        $this->assertEquals($output, $this->getPrintContent($result));
+    }
+
     /**
      * @return string
      */
