@@ -148,7 +148,15 @@ class QueryScanner
         // points (think eg. To dibe_relict.101) Can not match up
         // truncation characters and accents, which should be
         // encapsulated in quotes.
-        self::T_WORD => '/^([\w\d_][\w\d\/_\-.]*)(.*)/',
+        self::T_WORD => [
+
+            // numbers
+            '/^([-+]?\d*\.?\d+)(.*)/',
+
+            // letters, numbers, "_", "-", ".", and "+"
+            '/^([\d_.\p{L}][\d_.\-\+\p{L}]*)(.*)/',
+
+        ],
 
         // parentheses
         self::T_OPEN_PARENTHESIS => '/^(\()(.*)/',
@@ -161,7 +169,10 @@ class QueryScanner
         self::T_MENTION => '/^(\@)(.*)/',
         self::T_FILTER  => '/^(\:[\>|\<|\!]?)(.*)/',
         self::T_BOOST   => '/^(\^)(.*)/',
-        self::T_QUOTE   => '/^(\")([^"]*)$/',
+        self::T_QUOTE   => [
+            '/^(\")([^\"]*)$/',
+            '/^(\')([^\']*)$/'
+        ],
 
         // this should match with each character that is left over.
         self::T_ILLEGAL => '/^(.)(.*)/'
@@ -208,7 +219,33 @@ class QueryScanner
         $openParenthesis = 0;
 
         // find all strings and rebuild input string with "OR"
-        if (preg_match_all('/[^\s\-\+\#\@\"\']+|(\-[^\-\s\)]*)|(\+[^\+\s\)]*)|(\#[^\#\s\)]*)|(\@[^\@\s\)]*)|\"([^\"]*)\"|\'([^\']*)\'/', $input, $matches)) {
+        if (preg_match_all('/[^\s\^\-\+\#\@\"\']+'.
+
+                // boost
+                '|'.'(\^[-+]?\d*\.?\d+)'.
+
+                // exclude
+                '|'.'(\s\-[^\-\^\s\)]*)'.
+                '|'.'(^\-[^\-\^\s\)]*)'.
+
+                // include
+                '|'.'(\s\+[^\+\^\s\)]*)'.
+                '|'.'(^\+[^\+\^\s\)]*)'.
+
+                // hashtag
+                '|'.'(\#[0-9_\p{L}]*[_\p{L}][0-9_\p{L}]*)'.
+
+                // mention
+                '|'.'(\@[0-9_\-\p{L}]*[_\-\p{L}][0-9_\-\p{L}]*)'.
+
+                // double quote
+                '|'.'\"([^\"]*)\"'.
+
+                // single quote
+                '|'.'\'([^\']*)\''.
+
+            '/', $input, $matches)
+        ) {
             $input = '';
             foreach ($matches[0] as $key => $value) {
                 if ($ignoreOperator) {
@@ -218,6 +255,22 @@ class QueryScanner
 
                     $value = str_replace('(', '', $value);
                     $value = str_replace(')', '', $value);
+                }
+
+                // remove duplicate special characters
+                $found = false;
+                foreach (['/\"([^\"]*)\"/', '/\'([^\']*)\'/'] as $re) {
+                    if (preg_match($re, $value)) {
+                        $found = true;
+                    }
+                }
+                if (!$found) {
+                    $value = preg_replace('/(?>\-)\K\-*/', '', $value);
+                    $value = preg_replace('/(?>\+)\K\+*/', '', $value);
+                    $value = preg_replace('/(?>\#)\K\#*/', '', $value);
+                    $value = preg_replace('/(?>\@)\K\@*/', '', $value);
+                    $value = preg_replace('/(?>\^)\K\^*/', '', $value);
+                    $value = preg_replace('/(?>\:)\K\:*/', '', $value);
                 }
 
                 // wrap special characters with double quote
@@ -305,13 +358,8 @@ class QueryScanner
             $input .= ')';
         }
 
-        // removed duplicate charactors and spces
+        // remove duplicate charactors and spces
         $input = preg_replace('/\s+/', ' ', $input);
-        $input = preg_replace('/(?>\-)\K\-*/', '', $input);
-        $input = preg_replace('/(?>\+)\K\+*/', '', $input);
-        $input = preg_replace('/(?>\#)\K\#*/', '', $input);
-        $input = preg_replace('/(?>\@)\K\@*/', '', $input);
-        $input = preg_replace('/(?>\^)\K\^*/', '', $input);
         $input = preg_replace('/(\()(\s?)(OR|AND)(\s?)/', '$1', $input);
         $input = preg_replace('/(\(\))(\s?)(OR|AND)(\s?)/', '', $input);
         $input = preg_replace('/(\()(\s)/', '$1', $input);
@@ -400,14 +448,24 @@ class QueryScanner
      */
     private function testToken($regEx, $tokenType)
     {
-        if ($this->input && preg_match($regEx, $this->input, $matches)) {
-            $this->token = $matches[1];
-            $this->processed .= $matches[1];
-            $this->input = $matches[2];
-            $this->tokenType = $tokenType;
-            $this->position = $this->position + strlen($this->token);
+        if (empty($this->input)) {
+            return  false;
+        }
 
-            return true;
+        if (!is_array($regEx)) {
+            $regEx = [$regEx];
+        }
+
+        foreach ($regEx as $re) {
+            if (preg_match($re, $this->input, $matches)) {
+                $this->token = $matches[1];
+                $this->processed .= $matches[1];
+                $this->input = $matches[2];
+                $this->tokenType = $tokenType;
+                $this->position = $this->position + strlen($this->token);
+
+                return true;
+            }
         }
 
         return false;
