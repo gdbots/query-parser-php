@@ -371,7 +371,7 @@ class QueryScanner
         // if no token matches, we are probably at the end. The control is
         // still entered, the "preg_match" expression failure for illegal
         // characters.
-        if ($this->input != '') {
+        if (!empty($this->input)) {
             $this->tokenType = self::T_ILLEGAL;
             $this->token = $this->input;
             $this->input = '';
@@ -394,7 +394,7 @@ class QueryScanner
      */
     private function testToken($regEx, $tokenType)
     {
-        if (preg_match($regEx, $this->input, $matches)) {
+        if ($this->input && preg_match($regEx, $this->input, $matches)) {
             $this->token = $matches[1];
             $this->processed .= $matches[1];
             $this->input = $matches[2];
