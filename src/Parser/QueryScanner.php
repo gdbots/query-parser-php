@@ -222,7 +222,13 @@ class QueryScanner
 
                 // wrap special characters with double quote
                 if (preg_match(self::REGEX_TOKENS, $value, $m) && $m[0] == $value) {
-                    $value = sprintf('"%s"', $value);
+
+                    // remove duplicate
+                    if (isset($matches[0][$key+1]) && substr($matches[0][$key+1], 0, strlen($value)) == $value) {
+                        $value = null;
+                    } else {
+                        $value = sprintf('"%s"', $value);
+                    }
                 }
 
                 // remove entities chat if invalid
