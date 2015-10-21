@@ -280,7 +280,7 @@ class QueryParser
             $lastExpression = $this->readExpression($this->scanner->getTokenType());
 
             if ($this->scanner->getTokenType() == QueryScanner::T_BOOST) {
-                $expression = $this->readExpression($this->scanner->next());;
+                $expression = $this->readExpression($this->scanner->next());
                 $lastExpression = new Node\ExplicitTerm($lastExpression, QueryScanner::T_BOOST, '^', $expression);
             }
 
