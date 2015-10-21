@@ -47,7 +47,7 @@ class QueryScannerTest extends \PHPUnit_Framework_TestCase
             ['+phrase', QueryScanner::T_INCLUDE],
             ['#phrase', QueryScanner::T_HASHTAG],
             ['@phrase', QueryScanner::T_MENTION],
-            ['^phrase', QueryScanner::T_BOOST],
+            ['^123', QueryScanner::T_BOOST],
             [':phrase', QueryScanner::T_FILTER],
             [':>phrase', QueryScanner::T_FILTER],
             [':<phrase', QueryScanner::T_FILTER],

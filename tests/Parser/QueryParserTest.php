@@ -44,7 +44,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
             ['phrase', 'Gdbots\QueryParser\Node\Word'],
             ['"phrase"', 'Gdbots\QueryParser\Node\Phrase'],
             ['country:"United State"', 'Gdbots\QueryParser\Node\ExplicitTerm'],
-            ['phrase^boost', 'Gdbots\QueryParser\Node\ExplicitTerm'],
+            ['phrase^123', 'Gdbots\QueryParser\Node\ExplicitTerm'],
             ['-phrase', 'Gdbots\QueryParser\Node\ExcludeTerm'],
             ['+phrase', 'Gdbots\QueryParser\Node\IncludeTerm'],
             ['#phrase', 'Gdbots\QueryParser\Node\Hashtag'],
@@ -116,10 +116,10 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
 
     public function testParseFilterWithBoost()
     {
-        $this->parser->readString('table.fieldName:value^boost');
+        $this->parser->readString('table.fieldName:value^123');
         $query = $this->parser->parse();
 
-        $output = " Term: ^ boost
+        $output = " Term: ^ 123
 > Term: table.fieldName : value
 ";
 
@@ -128,10 +128,10 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
 
     public function testParseComplexQuery()
     {
-        $this->parser->readString('(("phrase" #phrase) table.fieldName:value)^boost');
+        $this->parser->readString('(("phrase" #phrase) table.fieldName:value)^123');
         $query = $this->parser->parse();
 
-        $output = " Term: ^ boost
+        $output = " Term: ^ 123
 > Subexpression
 >> Or
 >>> Subexpression
@@ -147,10 +147,10 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
 
     public function testParseComplexQueryUsingOperator()
     {
-        $this->parser->readString('(("phrase" OR #phrase) AND table.fieldName:value)^boost');
+        $this->parser->readString('(("phrase" OR #phrase) AND table.fieldName:value)^123');
         $query = $this->parser->parse();
 
-        $output = " Term: ^ boost
+        $output = " Term: ^ 123
 > Subexpression
 >> And
 >>> Subexpression
@@ -166,14 +166,14 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
 
     public function testParseComplexQueryWithIgnoreOperator()
     {
-        $this->parser->readString('(("phrase" OR #phrase) AND table.fieldName:value)^boost', true);
+        $this->parser->readString('(("phrase" OR #phrase) AND table.fieldName:value)^123', true);
         $query = $this->parser->parse();
 
         $output = " Or
 > Phrase: phrase
 > Hashtag
 >> Word: phrase
-> Term: ^ boost
+> Term: ^ 123
 >> Term: table.fieldName : value
 ";
 
