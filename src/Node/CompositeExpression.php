@@ -28,6 +28,20 @@ abstract class CompositeExpression extends QueryItem
     }
 
     /**
+     * @return int
+     */
+    public function getTokenType()
+    {
+        if ($this instanceof Mention)     return QueryScanner::T_MENTION;
+        if ($this instanceof Hashtag)     return QueryScanner::T_HASHTAG;
+        if ($this instanceof ExcludeTerm) return QueryScanner::T_EXCLUDE;
+        if ($this instanceof IncludeTerm) return QueryScanner::T_INCLUDE;
+        if ($this instanceof IncludeTerm) return QueryScanner::T_INCLUDE;
+
+        return null;
+    }
+
+    /**
      * {@inheritDoc}
      */
     public function getQueryItemsByTokenType($tokenType = null)
@@ -35,12 +49,7 @@ abstract class CompositeExpression extends QueryItem
         $items = [];
 
         if ($tokenType) {
-            if (
-                ($this instanceof Mention && $tokenType == QueryScanner::T_MENTION) ||
-                ($this instanceof Hashtag && $tokenType == QueryScanner::T_HASHTAG) ||
-                ($this instanceof ExcludeTerm && $tokenType == QueryScanner::T_EXCLUDE) ||
-                ($this instanceof IncludeTerm && $tokenType == QueryScanner::T_INCLUDE)
-            ) {
+            if ($tokenType == $this->getTokenType()) {
                 $items[] = $this;
             }
         } else {
