@@ -205,7 +205,7 @@ class QueryScanner
         $openParenthesis = 0;
 
         // find all strings and rebuild input string with "OR"
-        if (preg_match_all('/[^\s\"\'\#\@]+|(\#[^\#\s\)]*)|(\@[^\@\s\)]*)|\"([^\"]*)\"|\'([^\']*)\'/', $input, $matches)) {
+        if (preg_match_all('/[^\s\-\+\#\@\"\']+|(\-[^\-\s\)]*)|(\+[^\+\s\)]*)|(\#[\#\s\]*)|(\@[\@\s\]*)|\"([^\"]*)\"|\'([^\']*)\'/', $input, $matches)) {
             $input = '';
             foreach ($matches[0] as $key => $value) {
                 if ($ignoreOperator) {
@@ -227,7 +227,9 @@ class QueryScanner
                         }
                     }
                 }
-                if (in_array($value, ['#', '@'])) {
+
+                // wrap special characters with double quote
+                if (in_array($value, ['+', '-', '#', '@', ':', '^'])) {
                     $value = sprintf('"%s"', $value);
                 }
 
