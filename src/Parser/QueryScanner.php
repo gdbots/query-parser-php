@@ -385,14 +385,23 @@ class QueryScanner
      */
     private function testToken($regEx, $tokenType)
     {
-        if (preg_match($regEx, $this->input, $matches)) {
-            $this->token = $matches[1];
-            $this->processed .= $matches[1];
-            $this->input = $matches[2];
-            $this->tokenType = $tokenType;
-            $this->position = $this->position + strlen($this->token);
+        if (!is_array($regEx)) {
+            $regEx = [$regEx];
+        }
 
-            return true;
+        foreach ($regEx as $reg) {
+            if ($this->input && preg_match($reg, $this->input, $matches)) {
+                $this->token = $matches[1];
+                $this->processed .= $matches[1];
+                $this->input = $matches[2];
+                if (isset($matches[3])) {
+                    $this->input .= $matches[3];
+                }
+                $this->tokenType = $tokenType;
+                $this->position = $this->position + strlen($this->token);
+
+                return true;
+            }
         }
 
         return false;
