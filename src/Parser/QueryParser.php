@@ -35,6 +35,16 @@ class QueryParser
     }
 
     /**
+     * Returns scanner instance.
+     *
+     * @return QueryScanner
+     */
+    public function getScanner()
+    {
+        return $this->scanner;
+    }
+
+    /**
      * Resets the input string and errors.
      *
      * @param string $input
