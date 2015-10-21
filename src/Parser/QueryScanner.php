@@ -29,12 +29,12 @@ class QueryScanner
     const T_INCLUDE             = 5; // "+"
     const T_HASHTAG             = 6; // "#"
     const T_MENTION             = 7; // "@"
-    const T_COMPARE             = 8; // ":", ":>", ":<" or ":!"
+    const T_FILTER              = 8; // ":", ":>", ":<" or ":!"
     const T_BOOST               = 9; // "^"
     const T_OR_OPERATOR         = 10; // "OR"
     const T_AND_OPERATOR        = 11; // "AND"
     const T_WSPC                = 12; // white-space
-    const T_TEXT                = 13; // text between two quotes (parentheses)
+    const T_PHRASE              = 13; // text between two quotes (parentheses)
     const T_QUOTE               = 14; // double parentheses
     const T_ILLEGAL             = 15; // illegal character
 
@@ -43,6 +43,9 @@ class QueryScanner
 
     // Match UTF-8 emoticons
     const REGEX_EMOTICONS_UTF8 = '/([\x{2712}\x{2714}\x{2716}\x{271d}\x{2721}\x{2728}\x{2733}\x{2734}\x{2744}\x{2747}\x{274c}\x{274e}\x{2753}-\x{2755}\x{2757}\x{2763}\x{2764}\x{2795}-\x{2797}\x{27a1}\x{27b0}\x{27bf}\x{2934}\x{2935}\x{2b05}-\x{2b07}\x{2b1b}\x{2b1c}\x{2b50}\x{2b55}\x{3030}\x{303d}\x{1f004}\x{1f0cf}\x{1f170}\x{1f171}\x{1f17e}\x{1f17f}\x{1f18e}\x{1f191}-\x{1f19a}\x{1f201}\x{1f202}\x{1f21a}\x{1f22f}\x{1f232}-\x{1f23a}\x{1f250}\x{1f251}\x{1f300}-\x{1f321}\x{1f324}-\x{1f393}\x{1f396}\x{1f397}\x{1f399}-\x{1f39b}\x{1f39e}-\x{1f3f0}\x{1f3f3}-\x{1f3f5}\x{1f3f7}-\x{1f4fd}\x{1f4ff}-\x{1f53d}\x{1f549}-\x{1f54e}\x{1f550}-\x{1f567}\x{1f56f}\x{1f570}\x{1f573}-\x{1f579}\x{1f587}\x{1f58a}-\x{1f58d}\x{1f590}\x{1f595}\x{1f596}\x{1f5a5}\x{1f5a8}\x{1f5b1}\x{1f5b2}\x{1f5bc}\x{1f5c2}-\x{1f5c4}\x{1f5d1}-\x{1f5d3}\x{1f5dc}-\x{1f5de}\x{1f5e1}\x{1f5e3}\x{1f5ef}\x{1f5f3}\x{1f5fa}-\x{1f64f}\x{1f680}-\x{1f6c5}\x{1f6cb}-\x{1f6d0}\x{1f6e0}-\x{1f6e5}\x{1f6e9}\x{1f6eb}\x{1f6ec}\x{1f6f0}\x{1f6f3}\x{1f910}-\x{1f918}\x{1f980}-\x{1f984}\x{1f9c0}\x{3297}\x{3299}\x{a9}\x{ae}\x{203c}\x{2049}\x{2122}\x{2139}\x{2194}-\x{2199}\x{21a9}\x{21aa}\x{231a}\x{231b}\x{2328}\x{2388}\x{23cf}\x{23e9}-\x{23f3}\x{23f8}-\x{23fa}\x{24c2}\x{25aa}\x{25ab}\x{25b6}\x{25c0}\x{25fb}-\x{25fe}\x{2600}-\x{2604}\x{260e}\x{2611}\x{2614}\x{2615}\x{2618}\x{261d}\x{2620}\x{2622}\x{2623}\x{2626}\x{262a}\x{262e}\x{262f}\x{2638}-\x{263a}\x{2648}-\x{2653}\x{2660}\x{2663}\x{2665}\x{2666}\x{2668}\x{267b}\x{267f}\x{2692}-\x{2694}\x{2696}\x{2697}\x{2699}\x{269b}\x{269c}\x{26a0}\x{26a1}\x{26aa}\x{26ab}\x{26b0}\x{26b1}\x{26bd}\x{26be}\x{26c4}\x{26c5}\x{26c8}\x{26ce}\x{26cf}\x{26d1}\x{26d3}\x{26d4}\x{26e9}\x{26ea}\x{26f0}-\x{26f5}\x{26f7}-\x{26fa}\x{26fd}\x{2702}\x{2705}\x{2708}-\x{270d}\x{270f}]|\x{23}\x{20e3}|\x{2a}\x{20e3}|\x{30}\x{20e3}|\x{31}\x{20e3}|\x{32}\x{20e3}|\x{33}\x{20e3}|\x{34}\x{20e3}|\x{35}\x{20e3}|\x{36}\x{20e3}|\x{37}\x{20e3}|\x{38}\x{20e3}|\x{39}\x{20e3}|\x{1f1e6}[\x{1f1e8}-\x{1f1ec}\x{1f1ee}\x{1f1f1}\x{1f1f2}\x{1f1f4}\x{1f1f6}-\x{1f1fa}\x{1f1fc}\x{1f1fd}\x{1f1ff}]|\x{1f1e7}[\x{1f1e6}\x{1f1e7}\x{1f1e9}-\x{1f1ef}\x{1f1f1}-\x{1f1f4}\x{1f1f6}-\x{1f1f9}\x{1f1fb}\x{1f1fc}\x{1f1fe}\x{1f1ff}]|\x{1f1e8}[\x{1f1e6}\x{1f1e8}\x{1f1e9}\x{1f1eb}-\x{1f1ee}\x{1f1f0}-\x{1f1f5}\x{1f1f7}\x{1f1fa}-\x{1f1ff}]|\x{1f1e9}[\x{1f1ea}\x{1f1ec}\x{1f1ef}\x{1f1f0}\x{1f1f2}\x{1f1f4}\x{1f1ff}]|\x{1f1ea}[\x{1f1e6}\x{1f1e8}\x{1f1ea}\x{1f1ec}\x{1f1ed}\x{1f1f7}-\x{1f1fa}]|\x{1f1eb}[\x{1f1ee}-\x{1f1f0}\x{1f1f2}\x{1f1f4}\x{1f1f7}]|\x{1f1ec}[\x{1f1e6}\x{1f1e7}\x{1f1e9}-\x{1f1ee}\x{1f1f1}-\x{1f1f3}\x{1f1f5}-\x{1f1fa}\x{1f1fc}\x{1f1fe}]|\x{1f1ed}[\x{1f1f0}\x{1f1f2}\x{1f1f3}\x{1f1f7}\x{1f1f9}\x{1f1fa}]|\x{1f1ee}[\x{1f1e8}-\x{1f1ea}\x{1f1f1}-\x{1f1f4}\x{1f1f6}-\x{1f1f9}]|\x{1f1ef}[\x{1f1ea}\x{1f1f2}\x{1f1f4}\x{1f1f5}]|\x{1f1f0}[\x{1f1ea}\x{1f1ec}-\x{1f1ee}\x{1f1f2}\x{1f1f3}\x{1f1f5}\x{1f1f7}\x{1f1fc}\x{1f1fe}\x{1f1ff}]|\x{1f1f1}[\x{1f1e6}-\x{1f1e8}\x{1f1ee}\x{1f1f0}\x{1f1f7}-\x{1f1fb}\x{1f1fe}]|\x{1f1f2}[\x{1f1e6}\x{1f1e8}-\x{1f1ed}\x{1f1f0}-\x{1f1ff}]|\x{1f1f3}[\x{1f1e6}\x{1f1e8}\x{1f1ea}-\x{1f1ec}\x{1f1ee}\x{1f1f1}\x{1f1f4}\x{1f1f5}\x{1f1f7}\x{1f1fa}\x{1f1ff}]|\x{1f1f4}\x{1f1f2}|\x{1f1f5}[\x{1f1e6}\x{1f1ea}-\x{1f1ed}\x{1f1f0}-\x{1f1f3}\x{1f1f7}-\x{1f1f9}\x{1f1fc}\x{1f1fe}]|\x{1f1f6}\x{1f1e6}|\x{1f1f7}[\x{1f1ea}\x{1f1f4}\x{1f1f8}\x{1f1fa}\x{1f1fc}]|\x{1f1f8}[\x{1f1e6}-\x{1f1ea}\x{1f1ec}-\x{1f1f4}\x{1f1f7}-\x{1f1f9}\x{1f1fb}\x{1f1fd}-\x{1f1ff}]|\x{1f1f9}[\x{1f1e6}\x{1f1e8}\x{1f1e9}\x{1f1eb}-\x{1f1ed}\x{1f1ef}-\x{1f1f4}\x{1f1f7}\x{1f1f9}\x{1f1fb}\x{1f1fc}\x{1f1ff}]|\x{1f1fa}[\x{1f1e6}\x{1f1ec}\x{1f1f2}\x{1f1f8}\x{1f1fe}\x{1f1ff}]|\x{1f1fb}[\x{1f1e6}\x{1f1e8}\x{1f1ea}\x{1f1ec}\x{1f1ee}\x{1f1f3}\x{1f1fa}]|\x{1f1fc}[\x{1f1eb}\x{1f1f8}]|\x{1f1fd}\x{1f1f0}|\x{1f1fe}[\x{1f1ea}\x{1f1f9}]|\x{1f1ff}[\x{1f1e6}\x{1f1f2}\x{1f1fc}])/u';
+
+    // Match tokens
+    const REGEX_TOKENS = '/(\:[\>|\<|\!]?|\-|\+|\#|\@|\^)/';
 
     /**
      * The input string which has already been processed and data back into tokens.
@@ -84,7 +87,7 @@ class QueryScanner
      *
      * @var array
      */
-    private $typeStrings = array (
+    public static $typeStrings = array (
         self::T_EOI               => 'EOI',
         self::T_WORD              => 'WORD',
         self::T_OPEN_PARENTHESIS  => 'OPEN_PARENTHESIS',
@@ -93,12 +96,12 @@ class QueryScanner
         self::T_INCLUDE           => 'INCLUDE',
         self::T_HASHTAG           => 'HASHTAG',
         self::T_MENTION           => 'MENTION',
-        self::T_COMPARE           => 'COMPARE',
+        self::T_FILTER            => 'FILTER',
         self::T_BOOST             => 'BOOST',
         self::T_OR_OPERATOR       => 'OR_OPERATOR',
         self::T_AND_OPERATOR      => 'AND_OPERATOR',
         self::T_WSPC              => 'WHITESPACE',
-        self::T_TEXT              => 'TEXT',
+        self::T_PHRASE            => 'PHRASE',
         self::T_QUOTE             => 'QUOTE',
         self::T_ILLEGAL           => 'ILLEGAL'
     );
@@ -129,9 +132,9 @@ class QueryScanner
         // WSPC matches in (frequent) spaces, tabs and newlines.
         self::T_WSPC => '/^([ \t\n]+)(.*)/',
 
-        // TEXT matches every possible input between double brackets.
+        // PHRASE matches every possible input between double brackets.
         // Double parentheses are part of the match.
-        self::T_TEXT => '/^(\"[^"]*\")(.*)/',
+        self::T_PHRASE => '/^(\"[^"]*\")(.*)/',
 
         // OR matches by keyword "OR" (case sensitive)
         // when no text follows after "OR".
@@ -156,7 +159,7 @@ class QueryScanner
         self::T_INCLUDE => '/^(\+)(.*)/',
         self::T_HASHTAG => '/^(\#)(.*)/',
         self::T_MENTION => '/^(\@)(.*)/',
-        self::T_COMPARE => '/^(\:[\>|\<|\!]?)(.*)/',
+        self::T_FILTER  => '/^(\:[\>|\<|\!]?)(.*)/',
         self::T_BOOST   => '/^(\^)(.*)/',
         self::T_QUOTE   => '/^(\")([^"]*)$/',
 
@@ -205,7 +208,7 @@ class QueryScanner
         $openParenthesis = 0;
 
         // find all strings and rebuild input string with "OR"
-        if (preg_match_all('/[^\s\"\'\#\@]+|(\#[^\#\s\)]*)|(\@[^\@\s\)]*)|\"([^\"]*)\"|\'([^\']*)\'/', $input, $matches)) {
+        if (preg_match_all('/[^\s\-\+\#\@\"\']+|(\-[^\-\s\)]*)|(\+[^\+\s\)]*)|(\#[^\#\s\)]*)|(\@[^\@\s\)]*)|\"([^\"]*)\"|\'([^\']*)\'/', $input, $matches)) {
             $input = '';
 
             foreach ($matches[0] as $key => $value) {
@@ -218,6 +221,17 @@ class QueryScanner
                     $value = str_replace(')', '', $value);
                 }
 
+                // wrap special characters with double quote
+                if (preg_match(self::REGEX_TOKENS, $value, $m) && $m[0] == $value) {
+
+                    // remove duplicate
+                    if (isset($matches[0][$key+1]) && substr($matches[0][$key+1], 0, strlen($value)) == $value) {
+                        $value = null;
+                    } else {
+                        $value = sprintf('"%s"', $value);
+                    }
+                }
+
                 // remove entities chat if invalid
                 foreach ([self::T_HASHTAG, self::T_MENTION] as $regEx) {
                     if (preg_match($this->regEx[$regEx], $value, $m)) {
@@ -228,16 +242,13 @@ class QueryScanner
                         }
                     }
                 }
-                if (in_array($value, ['#', '@'])) {
-                    $value = sprintf('"%s"', $value);
-                }
 
                 echo $value;
 
 
                 // add quotes to emoticons
                 foreach ([self::REGEX_EMOTICONS_BASIC, self::REGEX_EMOTICONS_UTF8] as $regEx) {
-                    if (preg_match($regEx, $value, $m)) {
+                    if (preg_match($regEx, $value, $m) && $m[0] == $value) {
                         $value = str_replace($m[0], sprintf('"%s"', $m[0]), $value);
                     }
                 }
@@ -254,7 +265,7 @@ class QueryScanner
                     $openParenthesis += count($m[0]);
                 }
                 if (preg_match_all('/(\))/', $value, $m)) {
-                    if (preg_match($this->regEx[self::T_TEXT], $value, $m1)) {
+                    if (preg_match($this->regEx[self::T_PHRASE], $value, $m1)) {
                         if (preg_match_all('/(\))/', str_replace($m1[1], '', $value), $m2)) {
                             $openParenthesis -= count($m2[0]);
                         }
@@ -267,7 +278,11 @@ class QueryScanner
                     isset($matches[0][$key+1]) &&
                     (
                         !in_array(substr($matches[0][$key+1], 0, 1), [':', '^', ')']) ||
-                        preg_match(self::REGEX_EMOTICONS_BASIC, $matches[0][$key+1])
+                        preg_match(self::REGEX_EMOTICONS_BASIC, $matches[0][$key+1]) ||
+                        (
+                            preg_match(self::REGEX_TOKENS, $matches[0][$key+1], $m) &&
+                            $m[0] == $matches[0][$key+1]
+                        )
                     ) &&
                     (
                         !in_array(substr($value, -1), [':', '^']) ||
@@ -337,7 +352,7 @@ class QueryScanner
             $tokenType = $this->tokenType;
         }
 
-        return $this->typeStrings[$tokenType];
+        return self::$typeStrings[$tokenType];
     }
 
     /**
@@ -367,7 +382,7 @@ class QueryScanner
         // if no token matches, we are probably at the end. The control is
         // still entered, the "preg_match" expression failure for illegal
         // characters.
-        if ($this->input != '') {
+        if (!empty($this->input)) {
             $this->tokenType = self::T_ILLEGAL;
             $this->token = $this->input;
             $this->input = '';
@@ -390,7 +405,7 @@ class QueryScanner
      */
     private function testToken($regEx, $tokenType)
     {
-        if (preg_match($regEx, $this->input, $matches)) {
+        if ($this->input && preg_match($regEx, $this->input, $matches)) {
             $this->token = $matches[1];
             $this->processed .= $matches[1];
             $this->input = $matches[2];

@@ -35,6 +35,16 @@ class QueryParser
     }
 
     /**
+     * Returns scanner instance.
+     *
+     * @return QueryScanner
+     */
+    public function getScanner()
+    {
+        return $this->scanner;
+    }
+
+    /**
      * Resets the input string and errors.
      *
      * @param string $input
@@ -86,12 +96,12 @@ class QueryParser
      */
     protected function readTerm($tokenType, $term)
     {
-        if (!in_array($tokenType, [QueryScanner::T_COMPARE, QueryScanner::T_BOOST])) {
+        if (!in_array($tokenType, [QueryScanner::T_FILTER, QueryScanner::T_BOOST])) {
             return $term;
         }
 
-        if ($tokenType == QueryScanner::T_COMPARE && $term->getTokenType() == QueryScanner::T_TEXT) {
-            $this->addError(sprintf('Error: COMPARE only support Word. Found: "%s"', $this->scanner->getTokenTypeText()));
+        if ($tokenType == QueryScanner::T_FILTER && $term->getTokenType() == QueryScanner::T_PHRASE) {
+            $this->addError(sprintf('Error: FILTER only support Word. Found: "%s"', $this->scanner->getTokenTypeText()));
 
             return $term;
         }
@@ -100,8 +110,8 @@ class QueryParser
         $tokenTypeText = $this->scanner->getToken();
 
         switch ($this->scanner->next()) {
-            case QueryScanner::T_TEXT:
-                $value = new Node\Text($this->scanner->getToken());
+            case QueryScanner::T_PHRASE:
+                $value = new Node\Phrase($this->scanner->getToken());
 
                 break;
 
@@ -111,7 +121,7 @@ class QueryParser
                 break;
 
             default:
-                $this->addError(sprintf('Error: Expected Word or Text. Found: "%s"', $this->scanner->getTokenTypeText()));
+                $this->addError(sprintf('Error: Expected Word or Phrase. Found: "%s"', $this->scanner->getTokenTypeText()));
 
                 return null;
         }
@@ -126,7 +136,7 @@ class QueryParser
      * - '(' Subexpression ')'
      * - '"' text '"'
      * - Word
-     * - Word:Text
+     * - Word:Phrase
      * - Word:Word
      * - '-' Expression
      * - '+' Expression
@@ -143,8 +153,8 @@ class QueryParser
             case QueryScanner::T_OPEN_PARENTHESIS:
                 return $this->readSubQuery($tokenType);
 
-            case QueryScanner::T_TEXT:
-                $text = new Node\Text($this->scanner->getToken());
+            case QueryScanner::T_PHRASE:
+                $text = new Node\Phrase($this->scanner->getToken());
                 return $this->readTerm($this->scanner->next(), $text);
 
             case QueryScanner::T_WORD:

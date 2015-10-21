@@ -33,17 +33,12 @@ abstract class ExpressionList extends QueryItem implements \Countable
     /**
      * {@inheritDoc}
      */
-    public function getQueryItemsByTokenType($tokenType)
+    public function getQueryItemsByTokenType($tokenType = null)
     {
         $items = [];
 
         foreach ($this->getExpressions() as $expr) {
-            if (method_exists($expr, 'getTokenType') && $expr->getTokenType() == $tokenType) {
-                $items[] = $expr;
-
-            } else {
-                $items = array_merge($items, $expr->getQueryItemsByTokenType($tokenType));
-            }
+            $items = array_merge_recursive($items, $expr->getQueryItemsByTokenType($tokenType));
         }
 
         return $items;
