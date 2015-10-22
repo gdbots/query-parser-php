@@ -47,6 +47,9 @@ class QueryScanner
     // Match tokens
     const REGEX_TOKENS = '/(\:[\>|\<|\!]?|\-|\+|\#|\@|\^)/';
 
+    // Match filter value
+    const REGEX_FILTER_VALUE = '/^([\"\'\d_.\-\p{L}]*)/';
+
     /**
      * The input string which has already been processed and data back into tokens.
      *
@@ -475,11 +478,21 @@ class QueryScanner
 
         foreach ($regEx as $re) {
             if (preg_match($re, $this->input, $matches)) {
+                if ($tokenType == self::T_WORD) {
+                    // word+filter with no value (ex: "a:")
+                    if (preg_match(self::REGEX_TOKENS, $matches[2], $m) && $m[0] == $matches[2]) {
+                        $matches[1] = $matches[0];
+                        $matches[2] = '';
+                    }
 
-                // handle word + filter with no value (ex: "a:")
-                if ($tokenType == self::T_WORD && preg_match(self::REGEX_TOKENS, $matches[2], $m) && $m[0] == $matches[2]) {
-                    $matches[1] = $matches[0];
-                    $matches[2] = '';
+                    // ignore non-filters (ex: "http://")
+                    if (preg_match($this->regEx[self::T_FILTER], $matches[2], $m)) {
+                        if (preg_match(self::REGEX_FILTER_VALUE, $m[2], $t) && !$t[0]) {
+                            $tmp = explode(' ', $m[2], 2);
+                            $matches[1] = $matches[1].$m[1].$tmp[0];
+                            $matches[2] = isset($tmp[1]) ? $tmp[1] : '';
+                        }
+                    }
                 }
 
                 $this->token = $matches[1];

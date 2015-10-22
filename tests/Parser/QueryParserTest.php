@@ -95,7 +95,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
             ['(a b)^2', 'Or>Word:a>Term:b^2'],
             ['+(a b c)-(d e f)^2', 'Or>IncludeTerm>>Word:a>Word:b>Word:c>Word:d>Word:e>Term:f^2'],
             ['a b:', 'Or>Word:a>Word:b:'],
-            ['http://a.com a:>500', 'Or>Term:http://a.com>Term:a:>500'],
+            ['http://a.com a:>500', 'Or>Word:http://a.com>Term:a:>500'],
             ['a (b/c d)^2 Father and Daughter', 'Or>Word:a>Word:b/c>Term:d^2>Word:Father>Word:and>Word:Daughter'],
             ['a:>b^2abc', 'Or>Term:^2>>Term:a:>b>Word:abc'],
             ['a + b', 'Or>Word:a>Phrase:+>Word:b'],
