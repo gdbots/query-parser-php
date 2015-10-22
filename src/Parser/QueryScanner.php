@@ -47,8 +47,10 @@ class QueryScanner
     // Match tokens
     const REGEX_TOKENS = '/(\:[\>|\<|\!]?|\-|\+|\#|\@|\^)/';
 
-    // Match filter value
+    // Match filter
+    const REGEX_FILTER_KEY = '/^([_\p{L}][\d_.\p{L}]*)/';
     const REGEX_FILTER_VALUE = '/^([\"\'\d_.\-\p{L}]*)/';
+    const REGEX_FILTER_OPERATOR = '/(\:[\>|\<|\!]?)/';
 
     /**
      * The input string which has already been processed and data back into tokens.
@@ -243,7 +245,6 @@ class QueryScanner
         ) {
             $input = '';
             $matches = $matches[0];
-
             // phase 1: cleanup characters
             foreach ($matches as $key => $value) {
                 $value = trim($value);
@@ -306,15 +307,31 @@ class QueryScanner
                     }
                 }
 
-                // use last boost value when boost-on-a-boost is used (ex: a^1^2 -> a^2)
                 if (
-                    isset($matches[$key+1]) &&
-                    preg_match($this->regEx[self::T_BOOST], $value, $m1) &&
-                    preg_match($this->regEx[self::T_BOOST], $matches[$key+1], $m2)
+                    // use last boost value when boost-on-a-boost is used (ex: a^1^2 -> a^2)
+                    (
+                        isset($matches[$key+1]) &&
+                        preg_match($this->regEx[self::T_BOOST], $value) &&
+                        preg_match($this->regEx[self::T_BOOST], $matches[$key+1])
+                    ) ||
+
+                    // ignore bad filters
+                    (
+                        isset($matches[$key-1]) &&
+                        preg_match($this->regEx[self::T_FILTER], $value, $m) &&
+                        preg_match(self::REGEX_FILTER_VALUE, $m[2]) &&
+                        !preg_match(self::REGEX_FILTER_KEY, $matches[$key-1])
+                    )
                 ) {
                     unset($matches[$key]);
 
                     continue;
+                }
+
+                // use last filter value when filter-on-a-filter is used (ex: a:1:2 -> a:2)
+                if (preg_match(self::REGEX_FILTER_OPERATOR, $value, $m)) {
+                    $tmp = explode(':', $value);
+                    $value = $tmp[0].end($m).end($tmp);
                 }
 
                 // add quotes to emoticons
@@ -395,6 +412,8 @@ class QueryScanner
         $input = preg_replace('/(\s)(\))/', '$1', $input);
         $input = preg_replace('/(\()/', '$1 ', $input);
         $input = preg_replace('/(\))/', ' $1', $input);
+
+var_dump($input);
 
         $this->input = $input;
         $this->processed = '';
