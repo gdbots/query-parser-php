@@ -164,7 +164,7 @@ class QueryScanner
         // points (think eg. To dibe_relict.101) Can not match up
         // truncation characters and accents, which should be
         // encapsulated in quotes.
-        self::T_WORD => '/^([\S][^\s\:]*)(.*)/',
+        self::T_WORD => '/^([\S][^\s\:\^]*)(.*)/',
 
         // this should match with each character that is left over.
         self::T_ILLEGAL => '/^(.)(.*)/'
