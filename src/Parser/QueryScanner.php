@@ -164,7 +164,7 @@ class QueryScanner
         // points (think eg. To dibe_relict.101) Can not match up
         // truncation characters and accents, which should be
         // encapsulated in quotes.
-        self::T_WORD => '/^([\S][^\s\^\-\+\#\@\"\']*)(.*)/',
+        self::T_WORD => '/^([\S][^\s\-\+\#\@\:\^\"\']*)(.*)/',
 
         // this should match with each character that is left over.
         self::T_ILLEGAL => '/^(.)(.*)/'
@@ -318,6 +318,10 @@ class QueryScanner
 
             // phase 3: handle parentheses and add OR/AND expression
             foreach ($matches as $key => $value) {
+                if (empty($value)) {
+                    continue;
+                }
+
                 $input .= $value;
 
                 if (preg_match_all('/(\()/', $value, $m)) {
@@ -370,6 +374,7 @@ class QueryScanner
 
         // remove duplicate charactors and spaces
         $input = preg_replace('/\s+/', ' ', $input);
+        $input = preg_replace('/(OR|AND)(\s)(OR|AND)/', '$1', $input);
         $input = preg_replace('/(\()(\s?)(OR|AND)(\s?)/', '$1', $input);
         $input = preg_replace('/(\(\))(\s?)(OR|AND)(\s?)/', '', $input);
         $input = preg_replace('/(\()(\s)/', '$1', $input);
