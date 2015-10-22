@@ -77,7 +77,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
             ['##one', 'Hashtag>Word:one'],
             ['#one #two #three', 'Or>Hashtag>>Word:one>Hashtag>>Word:two>Hashtag>>Word:three'],
             ['#one#two##three', 'Or>Hashtag>>Word:one>Hashtag>>Word:two>Hashtag>>Word:three'],
-            ['#one!', 'Hashtag>Word:one'],
+            ['#one!', 'Or>Hashtag>>Word:one>Word:!'],
             ['"#one^7 #two#three ##four!"', 'Phrase:#one^7#two#three##four!'],
             ['a^b', 'Or>Word:a>Word:b'],
             ['a^^2', 'Term:a^2'],
@@ -86,8 +86,6 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
             ['abc^2def', 'Or>Term:abc^2>Word:def'],
             ['#a^2', 'Term:^2>Hashtag>>Word:a'],
             ['a#b', 'Or>Word:a>Hashtag>>Word:b'],
-            ['+a-b-c -d-e+f', 'Or>IncludeTerm>>Word:a-b-c>ExcludeTerm>>Word:d>Word:e>Word:f'],
-            ['+a-b - c -d - e+f', 'Or>IncludeTerm>>Word:a-b>Phrase:->Word:c>ExcludeTerm>>Word:d>Phrase:->Word:e>Word:f'],
             ['"abc""def""ghi', 'Or>Phrase:abc>Phrase:def>Word:ghi'],
             ['"abc"def', 'Or>Phrase:abc>Word:def'],
             ['"abc"def"', 'Or>Phrase:abc>Word:def'],
@@ -96,14 +94,12 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
             ['#a#b@c @d#e', 'Or>Hashtag>>Word:a>Hashtag>>Word:b>Mention>>Word:c>Mention>>Word:d>Hashtag>>Word:e'],
             ['(a b)^2', 'Or>Word:a>Term:b^2'],
             ['+(a b c)-(d e f)^2', 'Or>IncludeTerm>>Word:a>Word:b>Word:c>Word:d>Word:e>Term:f^2'],
-            ['a b:', 'Or>Word:a>Word:b'],
-            ['http://a.com a:>500', 'Or>Word:http://a.com>Term:a:>500'],
-            ['a (b/c d)^2 Father and Daughter', 'Or>Word:a>Word:b>Word:c>Term:d^2>Word:Father>Word:and>Word:Daughter'],
+            ['a b:', 'Or>Word:a>Word:b:'],
+            ['http://a.com a:>500', 'Or>Term:http://a.com>Term:a:>500'],
+            ['a (b/c d)^2 Father and Daughter', 'Or>Word:a>Word:b/c>Term:d^2>Word:Father>Word:and>Word:Daughter'],
             ['a:>b^2abc', 'Or>Term:^2>>Term:a:>b>Word:abc'],
-            ['a + b', 'Or>Word:a>Phrase:+>Word:b',],
+            ['a + b', 'Or>Word:a>Phrase:+>Word:b'],
             ['+(a:>b)-c:>d -e:<f', 'Or>IncludeTerm>>Term:a:>b>Term:c:>d>ExcludeTerm>>Term:e:<f'],
-            ['a:(a b)^2', 'Or>Term:a:a>Term:b^2'],
-            [' #+a #-b', 'Or>Word:a>Word:b']
         ];
     }
 
@@ -113,19 +109,6 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
         $query = $this->parser->parse();
 
         $this->assertInstanceOf('Gdbots\QueryParser\Node\Word', $query);
-    }
-
-    public function testParseIllegalCharacterError()
-    {
-        $this->parser->readString('$phrase');
-        $query = $this->parser->parse();
-        $this->assertNull($query);
-        $this->assertTrue($this->parser->hasErrors());
-
-        $this->parser->readString('phrase && word || "text"');
-        $query = $this->parser->parse();
-        $this->assertNull($query);
-        $this->assertTrue($this->parser->hasErrors());
     }
 
     public function testParseInvalidExcludeTermError()
