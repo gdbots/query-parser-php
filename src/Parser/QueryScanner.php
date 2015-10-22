@@ -164,7 +164,7 @@ class QueryScanner
         // points (think eg. To dibe_relict.101) Can not match up
         // truncation characters and accents, which should be
         // encapsulated in quotes.
-        self::T_WORD => '/^([\S][^\s\-\+\#\@\:\^\"\']*)(.*)/',
+        self::T_WORD => '/^([\S][^\s\:]*)(.*)/',
 
         // this should match with each character that is left over.
         self::T_ILLEGAL => '/^(.)(.*)/'
@@ -475,6 +475,13 @@ class QueryScanner
 
         foreach ($regEx as $re) {
             if (preg_match($re, $this->input, $matches)) {
+
+                // handle word + filter with no value (ex: "a:")
+                if ($tokenType == self::T_WORD && preg_match(self::REGEX_TOKENS, $matches[2], $m) && $m[0] == $matches[2]) {
+                    $matches[1] = $matches[0];
+                    $matches[2] = '';
+                }
+
                 $this->token = $matches[1];
                 $this->processed .= $matches[1];
                 $this->input = $matches[2];
