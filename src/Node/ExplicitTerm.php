@@ -39,6 +39,12 @@ class ExplicitTerm extends QueryItem
         $this->tokenType = $tokenType;
         $this->tokenTypeText = $tokenTypeText;
         $this->term = $term;
+
+        if ($this->nominator instanceof CompositeExpression) {
+            $this->nominator->getExpression()->addParentTokenType($tokenType);
+        }
+        $this->nominator->addParentTokenType($tokenType);
+        $this->term->addParentTokenType($tokenType);
     }
 
     /**

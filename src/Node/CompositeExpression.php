@@ -17,6 +17,7 @@ abstract class CompositeExpression extends QueryItem
     public function __construct(QueryItem $expression)
     {
         $this->expression = $expression;
+        $this->expression->addParentTokenType($this->getTokenType());
     }
 
     /**
