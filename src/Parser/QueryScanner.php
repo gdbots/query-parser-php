@@ -295,7 +295,7 @@ class QueryScanner
                     }
                 }
 
-                // remove entities chat if invalid
+                // strip non-allowed characters
                 foreach ([self::T_HASHTAG, self::T_MENTION] as $regEx) {
                     if (preg_match($this->regEx[$regEx], $value, $m)) {
                         if (!preg_match('/^([\w\d\-\^_.])/', $m[2], $m1)) {
@@ -304,6 +304,17 @@ class QueryScanner
                             $value = substr($value, 0, 1).preg_replace('/[^\w\d\-\^_.]/', '', $value);
                         }
                     }
+                }
+
+                // use last boost value when boost-on-a-boost is used (ex: a^1^2 -> a^2)
+                if (
+                    isset($matches[$key+1]) &&
+                    preg_match($this->regEx[self::T_BOOST], $value, $m1) &&
+                    preg_match($this->regEx[self::T_BOOST], $matches[$key+1], $m2)
+                ) {
+                    unset($matches[$key]);
+
+                    continue;
                 }
 
                 // add quotes to emoticons
