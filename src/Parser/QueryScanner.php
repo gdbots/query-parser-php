@@ -144,20 +144,6 @@ class QueryScanner
         // when no text follows after "AND".
         self::T_AND_OPERATOR => '/^(AND)(\b.*)/',
 
-        // WORD matches letters, numbers, underscores, hyphens and
-        // points (think eg. To dibe_relict.101) Can not match up
-        // truncation characters and accents, which should be
-        // encapsulated in quotes.
-        self::T_WORD => [
-
-            // numbers
-            '/^([-+]?\d*\.?\d+)(.*)/',
-
-            // letters, numbers, "_", "-", ".", and "+"
-            '/^([\d_.\p{L}][\d_.\-\+\p{L}]*)(.*)/',
-
-        ],
-
         // parentheses
         self::T_OPEN_PARENTHESIS => '/^(\()(.*)/',
         self::T_CLOSE_PARENTHESIS => '/^(\))(.*)/',
@@ -173,6 +159,12 @@ class QueryScanner
             '/^(\")([^\"]*)$/',
             '/^(\')([^\']*)$/'
         ],
+
+        // WORD matches letters, numbers, underscores, hyphens and
+        // points (think eg. To dibe_relict.101) Can not match up
+        // truncation characters and accents, which should be
+        // encapsulated in quotes.
+        self::T_WORD => '/^([\S][^\s\^\-\+\#\@\"\']*)(.*)/',
 
         // this should match with each character that is left over.
         self::T_ILLEGAL => '/^(.)(.*)/'
@@ -233,10 +225,10 @@ class QueryScanner
                 '|'.'(^\+[^\+\^\s\)]*)'.
 
                 // hashtag
-                '|'.'(\#[0-9_\p{L}]*[_\p{L}][0-9_\p{L}]*)'.
+                '|'.'(\#[\d_\p{L}]*[_\p{L}][\d_\p{L}]*)'.
 
                 // mention
-                '|'.'(\@[0-9_\-\p{L}]*[_\-\p{L}][0-9_\-\p{L}]*)'.
+                '|'.'(\@[\d_\-\p{L}]*[_\-\p{L}][\d_\-\p{L}]*)'.
 
                 // double quote
                 '|'.'\"([^\"]*)\"'.
@@ -247,7 +239,10 @@ class QueryScanner
             '/', $input, $matches)
         ) {
             $input = '';
-            foreach ($matches[0] as $key => $value) {
+            $matches = $matches[0];
+
+            // phase 1: cleanup characters
+            foreach ($matches as $key => $value) {
                 $value = trim($value);
 
                 if ($ignoreOperator) {
@@ -273,14 +268,25 @@ class QueryScanner
                     $value = preg_replace('/(?>\@)\K\@*/', '', $value);
                     $value = preg_replace('/(?>\^)\K\^*/', '', $value);
                     $value = preg_replace('/(?>\:)\K\:*/', '', $value);
+                    $value = preg_replace('/\:(?>\>)\K\>*/', '', $value);
+                    $value = preg_replace('/\:(?>\<)\K\<*/', '', $value);
+                    $value = preg_replace('/\:(?>\!)\K\!*/', '', $value);
                 }
+
+                $matches[$key] = $value;
+            }
+
+            // phase 2: modify special characters
+            foreach ($matches as $key => $value) {
 
                 // wrap special characters with double quote
                 if (preg_match(self::REGEX_TOKENS, $value, $m) && $m[0] == $value) {
 
                     // remove duplicate
-                    if (isset($matches[0][$key+1]) && substr($matches[0][$key+1], 0, strlen($value)) == $value) {
-                        $value = null;
+                    if (isset($matches[$key+1]) && substr($matches[$key+1], 0, strlen($value)) == $value) {
+                        unset($matches[$key]);
+
+                        continue;
                     } else {
                         $value = sprintf('"%s"', $value);
                     }
@@ -304,12 +310,14 @@ class QueryScanner
                     }
                 }
 
-                if (empty($value)) {
-                    $input .= ' ';
+                $matches[$key] = $value;
+            }
 
-                    continue;
-                }
+            // reindex array
+            $matches = array_values($matches);
 
+            // phase 3: handle parentheses and add OR/AND expression
+            foreach ($matches as $key => $value) {
                 $input .= $value;
 
                 if (preg_match_all('/(\()/', $value, $m)) {
@@ -326,13 +334,13 @@ class QueryScanner
                 }
 
                 if (
-                    isset($matches[0][$key+1]) &&
+                    isset($matches[$key+1]) &&
                     (
-                        !in_array(substr($matches[0][$key+1], 0, 1), [':', '^', ')']) ||
-                        preg_match(self::REGEX_EMOTICONS_BASIC, $matches[0][$key+1]) ||
+                        !in_array(substr($matches[$key+1], 0, 1), [':', '^', ')']) ||
+                        preg_match(self::REGEX_EMOTICONS_BASIC, $matches[$key+1]) ||
                         (
-                            preg_match(self::REGEX_TOKENS, $matches[0][$key+1], $m) &&
-                            $m[0] == $matches[0][$key+1]
+                            preg_match(self::REGEX_TOKENS, $matches[$key+1], $m) &&
+                            $m[0] == $matches[$key+1]
                         )
                     ) &&
                     (
@@ -341,7 +349,7 @@ class QueryScanner
                     )
                 ) {
                     if (
-                        !in_array($matches[0][$key+1], ['AND', 'OR']) &&
+                        !in_array($matches[$key+1], ['AND', 'OR']) &&
                         !in_array($value, ['AND', 'OR', '('])
                     ) {
                         $input .= ' OR ';
@@ -360,12 +368,14 @@ class QueryScanner
             $input .= ')';
         }
 
-        // remove duplicate charactors and spces
+        // remove duplicate charactors and spaces
         $input = preg_replace('/\s+/', ' ', $input);
         $input = preg_replace('/(\()(\s?)(OR|AND)(\s?)/', '$1', $input);
         $input = preg_replace('/(\(\))(\s?)(OR|AND)(\s?)/', '', $input);
         $input = preg_replace('/(\()(\s)/', '$1', $input);
         $input = preg_replace('/(\s)(\))/', '$1', $input);
+        $input = preg_replace('/(\()/', '$1 ', $input);
+        $input = preg_replace('/(\))/', ' $1', $input);
 
         $this->input = $input;
         $this->processed = '';
