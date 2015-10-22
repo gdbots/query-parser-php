@@ -97,7 +97,7 @@ class ExplicitTerm extends QueryItem
         if ($tokenType === null) {
             $items[QueryScanner::$typeStrings[$this->getTokenType()]][] = $this;
         } elseif ($this->getTokenType() == $tokenType) {
-            $item[] = $this;
+            $items[] = $this;
         }
 
         if (!($this->getNominator() instanceof SimpleTerm)) {
