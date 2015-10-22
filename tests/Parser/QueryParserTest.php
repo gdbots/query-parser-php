@@ -48,62 +48,59 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
         ];
     }
 
-
     public function queryDataprovider()
     {
         return [
-            ['#a#b#c #d^2', array('hashtags'=>array(array('token'=>'a','attribute'=>array('boosted'=>false,'negated'=>false,'required'=>false)),array('token'=>'b'),array('token'=>'c')),
-                            'phrases'=>array(),
-                            'words'=>array(),
-                            'filters'=>array(),
-                            'mentions'=>array()
-                              )]
+            ['##one', 'Hashtag>Word:one'],
+            ['#one #two #three', 'Or>Hashtag>>Word:one>Hashtag>>Word:two>Hashtag>>Word:three'],
+            ['#one#two##three', 'Or>Hashtag>>Word:one>Hashtag>>Word:two>Hashtag>>Word:three'],
+            ['#one!', 'Hashtag>Word:one'],
+            ['"#one^7 #two#three ##four!"', 'Phrase:#one^7#two#three##four!'],
+            ['a^b', 'Or>Word:a>Word:b'],
+            ['a^^2', 'Term:a^2'],
+            ['"abc"^def', 'Or>Phrase:abc>Word:def'],
+            ['"abc"^2"def ^ghi"jkl^mno^8', 'Or>Term:abc^2>Phrase:def^ghi>Word:jkl>Term:mno^8'],
+            ['abc^2def', 'Or>Term:abc^2>Word:def'],
+            ['#a^2', 'Term:^2>Hashtag>>Word:a'],
+            ['a#b', 'Or>Word:a>Hashtag>>Word:b'],
+            ['+a-b-c -d-e+f', 'Or>IncludeTerm>>Word:a-b-c>ExcludeTerm>>Word:d-e+f'],
+            ['+a-b - c -d - e+f', 'Or>IncludeTerm>>Word:a-b>Word:c>ExcludeTerm>>Word:d>Word:e+f'],
+            ['"abc""def""ghi', 'Or>Phrase:abc>Phrase:def>Phrase:ghi'],
+            ['"abc"def', 'Or>Phrase:abc>Word:def'],
+            ['"abc"def"', 'Or>Phrase:abc>Word:def'],
+            ['abc"def', 'Or>Word:abc>Phrase:def'],
+            ['abc"def ghi"@j"@k l', 'Or>Word:abc>Phrase:defghi>Mention>>Word:j>Phrase:@kl'],
+            ['#a#b@c @d#e', 'Or>Hashtag>>Word:a>Hashtag>>Word:b>Mention>>Word:c>Mention>>Word:d>Hashtag>>Word:e'],
+            ['(a b)^2', 'Or>Word:a>Term:b^2'],
+            ['+(a b c)-(d e f)^2', 'Or>IncludeTerm>>Word:a>Word:b>Word:c>Word:d>Word:e>Term:f^2'],
+            ['a b:', 'Or>Word:a>Word:b'],
+            ['http://a.com a:>500', 'Or>Word:http://a.com>Term:a:>500'],
+            ['a (b/c d)^2 Father and Daughter', 'Or>Word:a>Word:b>Word:c>Term:d^2>Word:Father>Word:and>Word:Daughter'],
+            ['a:>b^2abc', 'Or>Term:^2>>Term:a:>b>Word:abc'],
+            ['a + b', 'Or>Word:a>Word:b',],
+            ['+(a:>b)-c:>d -e:<f', 'Or>IncludeTerm>>Term:a:>b>ExcludeTerm>>Term:c:>d>ExcludeTerm>>Term:e:<f'],
+            ['a:(a b)^2', 'Or>Term:a:a>Term:b^2'],
+            [' #+a #-b', 'Or>Hashtag>>Word:a>Hashtag>>Word:b']
+
         ];
     }
 
     /**
      * @dataProvider queryDataprovider
      */
-    public function testQueryParser($query, $expected){
+    public function testParseQuery($query, $expected)
+    {
+        $this->parser->readString($query, true);
 
-        $this->parser->readString($query);
         $query = $this->parser->parse();
-        //print_r($query);
-        //exit;
 
-        //$hashtags = $query->getQueryItemsByTokenType(\Gdbots\QueryParser\Parser\QueryScanner::T_HASHTAG);
-        $boost = $query->getQueryItemsByTokenType();
-        $include = $query->getQueryItemsByTokenType(\Gdbots\QueryParser\Parser\QueryScanner::T_EXCLUDE);
-        $exclude = $query->getQueryItemsByTokenType(\Gdbots\QueryParser\Parser\QueryScanner::T_INCLUDE);
-        //print_r($hashtags);
-        print_r($boost);
+        $output =  $this->getPrintContent($query);
+        $output = preg_replace("/[\r\n]+/", "", $output);
+        $output = preg_replace("/\s+/", '', $output);
 
-        exit;
-
-
-
-        $phrases = $query->getQueryItemsByTokenType(\Gdbots\QueryParser\Parser\QueryScanner::T_PHRASE);
-        $words = $query->getQueryItemsByTokenType(\Gdbots\QueryParser\Parser\QueryScanner::T_WORD);
-        $filters = $query->getQueryItemsByTokenType(\Gdbots\QueryParser\Parser\QueryScanner::T_FILTER);
-        $mention = $query->getQueryItemsByTokenType(\Gdbots\QueryParser\Parser\QueryScanner::T_MENTION);
-        $hashtagArray=array();
-        $phraseArray=array();
-        $wordArray=array();
-        $filterArray=array();
-        $mentionArray=array();
-
-
-        foreach($hashtags as $hashtag){
-            $hashtagArray[]=array('token'=>$hashtag->getExpression()->getToken(),'attribute'=>array('boosted'=>$hashtag->getExpression()->isBoosted(),));
-
-
-        }
-
-
-        $this->assertEquals(2, count($hasttags));
-        $this->assertEquals('phrase', $hasttags[0]->getExpression()->getToken());
-        $this->assertEquals('boost', $hasttags[1]->getExpression()->getToken());
+        $this->assertEquals($expected, $output);
     }
+
 
     public function testParseTextWithUnclosedQuotes()
     {
@@ -185,7 +182,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
     {
         $this->parser->readString('(("phrase" OR #phrase) AND table.fieldName:value)^123');
         $query = $this->parser->parse();
-        
+
         $output = " Term: ^ 123
 >>>>>>> excel/master
 > Subexpression

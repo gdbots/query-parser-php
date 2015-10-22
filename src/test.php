@@ -15,7 +15,7 @@ use Gdbots\QueryParser\Node\Hashtag;
 
 //$str= 'brian"what the"@mention #hashtag"#hash me" brian^100 +include -exclude';
 
-$str= '"exact^hello';
+$str= '+a:>b';
 
 
 

@@ -296,9 +296,6 @@ class QueryScanner
                     }
                 }
 
-                echo $value;
-
-
                 // add quotes to emoticons
                 foreach ([self::REGEX_EMOTICONS_BASIC, self::REGEX_EMOTICONS_UTF8] as $regEx) {
                     if (preg_match($regEx, $value, $m) && $m[0] == $value) {
