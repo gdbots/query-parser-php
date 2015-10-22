@@ -248,6 +248,8 @@ class QueryScanner
         ) {
             $input = '';
             foreach ($matches[0] as $key => $value) {
+                $value = trim($value);
+
                 if ($ignoreOperator) {
                     if ($value == 'AND') {
                         $value = 'OR';
