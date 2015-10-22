@@ -413,8 +413,6 @@ class QueryScanner
         $input = preg_replace('/(\()/', '$1 ', $input);
         $input = preg_replace('/(\))/', ' $1', $input);
 
-var_dump($input);
-
         $this->input = $input;
         $this->processed = '';
         $this->position = 0;
