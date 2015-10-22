@@ -2,7 +2,6 @@
 
 namespace Gdbots\QueryParser\Node;
 
-use Doctrine\Common\Collections\ArrayCollection;
 use Gdbots\QueryParser\Visitor\QueryItemVisitorinterface;
 
 abstract class QueryItem
@@ -19,7 +18,7 @@ abstract class QueryItem
      */
     public function hasParentTokenType($parentTokenType)
     {
-        return $this->getParentTokenTypes()->contains($parentTokenType);
+        return in_array($parentTokenType, $this->parentTokenTypes);
     }
 
     /**
@@ -29,7 +28,7 @@ abstract class QueryItem
      */
     public function setParentTokenTypes(array $parentTokenTypes)
     {
-        $this->parentTokenTypes = new ArrayCollection();
+        $this->parentTokenTypes = [];
 
         foreach ($parentTokenTypes as $parentTokenType) {
             $this->addParentTokenType($parentTokenType);
@@ -43,7 +42,7 @@ abstract class QueryItem
      */
     public function getParentTokenTypes()
     {
-        return $this->parentTokenTypes ?: $this->parentTokenTypes = new ArrayCollection();
+        return $this->parentTokenTypes ?: $this->parentTokenTypes = [];
     }
 
     /**
@@ -53,8 +52,8 @@ abstract class QueryItem
      */
     public function addParentTokenType($parentTokenType)
     {
-        if (!$this->getParentTokenTypes()->contains($parentTokenType)) {
-            $this->getParentTokenTypes()->add($parentTokenType);
+        if (!$this->hasParentTokenType($parentTokenType)) {
+            $this->getParentTokenTypes[] = $parentTokenType;
         }
 
         return $this;
@@ -67,8 +66,8 @@ abstract class QueryItem
      */
     public function removeParentTokenType($parentTokenType)
     {
-        if ($this->getParentTokenTypes()->contains($parentTokenType)) {
-            $this->getParentTokenTypes()->removeElement($parentTokenType);
+        if ($this->hasParentTokenType($parentTokenType)) {
+            unset($this->getParentTokenTypes[array_search($parentTokenType, $this->getParentTokenTypes)]);
         }
 
         return $this;
