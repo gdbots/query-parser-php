@@ -47,8 +47,10 @@ class QueryScanner
     // Match tokens
     const REGEX_TOKENS = '/(\:[\>|\<|\!]?|\-|\+|\#|\@|\^)/';
 
-    // Match filter value
+    // Match filter
+    const REGEX_FILTER_KEY = '/^([_\p{L}][\d_.\p{L}]*)/';
     const REGEX_FILTER_VALUE = '/^([\"\'\d_.\-\p{L}]*)/';
+    const REGEX_FILTER_OPERATOR = '/(\:[\>|\<|\!]?)/';
 
     /**
      * The input string which has already been processed and data back into tokens.
@@ -244,7 +246,6 @@ class QueryScanner
             $input = '';
 
             $matches = $matches[0];
-
             // phase 1: cleanup characters
             foreach ($matches as $key => $value) {
                 $value = trim($value);
@@ -297,7 +298,7 @@ class QueryScanner
                     }
                 }
 
-                // remove entities chat if invalid
+                // strip non-allowed characters
                 foreach ([self::T_HASHTAG, self::T_MENTION] as $regEx) {
                     if (preg_match($this->regEx[$regEx], $value, $m)) {
                         if (!preg_match('/^([\w\d\-\^_.])/', $m[2], $m1)) {
@@ -306,6 +307,33 @@ class QueryScanner
                             $value = substr($value, 0, 1).preg_replace('/[^\w\d\-\^_.]/', '', $value);
                         }
                     }
+                }
+
+                if (
+                    // use last boost value when boost-on-a-boost is used (ex: a^1^2 -> a^2)
+                    (
+                        isset($matches[$key+1]) &&
+                        preg_match($this->regEx[self::T_BOOST], $value) &&
+                        preg_match($this->regEx[self::T_BOOST], $matches[$key+1])
+                    ) ||
+
+                    // ignore bad filters
+                    (
+                        isset($matches[$key-1]) &&
+                        preg_match($this->regEx[self::T_FILTER], $value, $m) &&
+                        preg_match(self::REGEX_FILTER_VALUE, $m[2]) &&
+                        !preg_match(self::REGEX_FILTER_KEY, $matches[$key-1])
+                    )
+                ) {
+                    unset($matches[$key]);
+
+                    continue;
+                }
+
+                // use last filter value when filter-on-a-filter is used (ex: a:1:2 -> a:2)
+                if (preg_match(self::REGEX_FILTER_OPERATOR, $value)) {
+                    $tmp = explode(':', $value);
+                    $value = $tmp[0].':'.end($tmp);
                 }
 
                 // add quotes to emoticons

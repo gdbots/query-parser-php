@@ -2,7 +2,7 @@
 
 namespace Gdbots\Tests\QueryParser\Parser;
 
-use Gdbots\QueryParser\Node\QueryItem;
+use Gdbots\QueryParser\Node;
 use Gdbots\QueryParser\Parser\QueryParser;
 use Gdbots\QueryParser\Parser\QueryScanner;
 use Gdbots\QueryParser\Visitor\QueryItemPrinter;
@@ -59,22 +59,26 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
     /**
      * @dataProvider getTestParseWithPrintoutDataprovider
      */
-    public function testParseQuery($query, $expected)
+    public function testParseQuery($string, $print, $item = null)
     {
-        $this->parser->readString($query, true);
+        $this->parser->readString($string, true);
         $query = $this->parser->parse();
 
         $output =  $this->getPrintContent($query);
         $output = preg_replace("/[\r\n]+/", '', $output);
         $output = preg_replace('/\s+/', '', $output);
 
-        $this->assertEquals($expected, $output);
+        $this->assertEquals($print, $output);
+
+        if ($item) {
+            $this->assertEquals($item, $query);
+        }
     }
 
     public function getTestParseWithPrintoutDataprovider()
     {
         return [
-            ['##one', 'Hashtag>Word:one'],
+            ['##one', 'Hashtag>Word:one', new Node\Hashtag(new Node\Word('one'))],
             ['#one #two #three', 'Or>Hashtag>>Word:one>Hashtag>>Word:two>Hashtag>>Word:three'],
             ['#one#two##three', 'Or>Hashtag>>Word:one>Hashtag>>Word:two>Hashtag>>Word:three'],
             ['#one!', 'Or>Hashtag>>Word:one>Word:!'],
@@ -247,7 +251,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
     /**
      * @return string
      */
-    private function getPrintContent(QueryItem $query)
+    private function getPrintContent(Node\QueryItem $query)
     {
         ob_start();
 
