@@ -306,6 +306,7 @@ class QueryScanner
             }
 
             // phase 2: modify special characters
+            $prevKey = -1;
             foreach ($matches as $key => $value) {
 
                 // delete value that is a special characters
@@ -323,17 +324,17 @@ class QueryScanner
                         preg_match($this->regEx[self::T_BOOST], $matches[$key+1])
                     ) ||
 
-                    // ignore bad filters
+                    // ignore bad filters (ex: #abc:1 -> #abc)
                     (
-                        isset($matches[$key-1]) &&
+                        isset($matches[$prevKey]) &&
                         preg_match($this->regEx[self::T_FILTER], $value, $m) &&
                         preg_match(self::REGEX_FILTER_VALUE, $m[2]) &&
-                        !preg_match(self::REGEX_FILTER_KEY, $matches[$key-1])
+                        !preg_match(self::REGEX_FILTER_KEY, $matches[$prevKey])
                     ) ||
 
-                    // parentheses
+                    // boost a parentheses (ex: (a b)^2 -> (a b))
                     (
-                        isset($matches[$key-1]) && $matches[$key-1] == ')' &&
+                        isset($matches[$prevKey]) && $matches[$prevKey] == ')' &&
                         preg_match($this->regEx[self::T_BOOST], $value)
                     )
                 ) {
@@ -356,6 +357,8 @@ class QueryScanner
                 }
 
                 $matches[$key] = $value;
+
+                $prevKey = $key;
             }
 
             // reindex array
