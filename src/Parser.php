@@ -22,7 +22,8 @@ class Parser
      * Create a new token
      * @param string $queryString
      */
-    public function __construct($queryString) {
+    public function __construct($queryString)
+    {
         $this->queryString = $queryString;
         $this->setNormalizedQuery();
     }
@@ -33,12 +34,14 @@ class Parser
      * @return array
      */
 
-    public function parse(){
+    public function parse()
+    {
         $tokenArray = Lexer::tokenize($this->normalizedQueryString);
         return $tokenArray;
     }
 
-    private function setnormalizedQuery(){
+    private function setnormalizedQuery()
+    {
         $this->normalizedQueryString = preg_replace('/[\/\[\]\(\)\{\}\?\\\]/', ' ', $this->queryString);
         $this->normalizedQueryString = preg_replace('/(\s+:\s+)/', ':', $this->normalizedQueryString);
         $this->normalizedQueryString = preg_replace('/\s+/', ' ', $this->normalizedQueryString);

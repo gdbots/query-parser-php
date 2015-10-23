@@ -2,7 +2,6 @@
 
 namespace Gdbots\QueryParser;
 
-
 class Token
 {
 
@@ -53,7 +52,7 @@ class Token
      * @param int $type The token type
      * @param int $startPos The token start position
      */
-    public function __construct($type, $startPos=null)
+    public function __construct($type, $startPos = null)
     {
         $this->type = $type;
         $this->startPos = null;
@@ -83,8 +82,9 @@ class Token
      */
     public function setTypeIfNone($type)
     {
-        if ($this->type == self::T_NONE)
+        if ($this->type == self::T_NONE) {
             $this->type = $type;
+        }
     }
 
     /**
@@ -184,8 +184,9 @@ class Token
         $refl = new \ReflectionClass(__CLASS__);
         $constants = $refl->getConstants();
         $name = array_search($token, $constants);
-        if ($name)
+        if ($name) {
             return $name;
+        }
         return 'UNKNOWN_TOKEN';
     }
 

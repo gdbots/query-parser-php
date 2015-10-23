@@ -25,18 +25,18 @@ class LexerTest extends \PHPUnit_Framework_TestCase
     public function queryDataprovider()
     {
         return [
-            ['"dude"^8"dude2 ^hehe"brian^arse^8hsiao^^99 #hashtag^2@mention^2', array(  array('type'=>Token::T_PHRASE,'data'=>'dude','boost'=>8),
-                                                                                        array('type'=>Token::T_PHRASE,'data'=>'dude2 ^hehe'),
-                                                                                        array('type'=>Token::T_KEYWORD,'data'=>'brian^arse','boost'=>8),
-                                                                                        array('type'=>Token::T_KEYWORD,'data'=>'hsiao','boost'=>99),
-                                                                                        array('type'=>Token::T_HASHTAG,'data'=>'hashtag','boost'=>2),
-                                                                                        array('type'=>Token::T_MENTION,'data'=>'mention','boost'=>2)
-                                                                                )],
-            ['#+hashtag1 #-hashtag2',                                          array(  array('type'=>Token::T_HASHTAG,'data'=>'hashtag1'),
-                                                                                        array('type'=>Token::T_HASHTAG,'data'=>'hashtag2')
-                                                                                )],
-
-
+            ['"dude"^8"dude2 ^hehe"brian^arse^8hsiao^^99 #hashtag^2@mention^2',
+                array(  array('type'=>Token::T_PHRASE,'data'=>'dude','boost'=>8),
+                        array('type'=>Token::T_PHRASE,'data'=>'dude2 ^hehe'),
+                        array('type'=>Token::T_KEYWORD,'data'=>'brian^arse','boost'=>8),
+                        array('type'=>Token::T_KEYWORD,'data'=>'hsiao','boost'=>99),
+                        array('type'=>Token::T_HASHTAG,'data'=>'hashtag','boost'=>2),
+                        array('type'=>Token::T_MENTION,'data'=>'mention','boost'=>2)
+                )],
+            ['#+hashtag1 #-hashtag2',
+                array(  array('type'=>Token::T_HASHTAG,'data'=>'hashtag1'),
+                        array('type'=>Token::T_HASHTAG,'data'=>'hashtag2')
+                )],
         ];
     }
 
@@ -64,8 +64,6 @@ class LexerTest extends \PHPUnit_Framework_TestCase
         $tokenArray = Lexer::tokenize($query);
 
         $this->AssertEquals(json_encode($expectedTokenArray), json_encode($tokenArray));
-
-
     }
 
 
@@ -117,6 +115,4 @@ class LexerTest extends \PHPUnit_Framework_TestCase
         $this->AssertNull($tokenArray[0]->getBoost());
 
     }*/
-
-
 }

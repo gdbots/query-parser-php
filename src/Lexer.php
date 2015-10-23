@@ -16,7 +16,8 @@ final class Lexer
     /**
      * Private constructor. This class is not meant to be instantiated.
      */
-    private function __construct() {
+    private function __construct()
+    {
     }
 
     /**
