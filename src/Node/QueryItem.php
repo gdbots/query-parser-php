@@ -18,7 +18,7 @@ abstract class QueryItem
      */
     public function hasParentTokenType($parentTokenType)
     {
-        return in_array($parentTokenType, $this->parentTokenTypes);
+        return array_key_exists($parentTokenType, $this->parentTokenTypes);
     }
 
     /**
@@ -30,8 +30,8 @@ abstract class QueryItem
     {
         $this->parentTokenTypes = [];
 
-        foreach ($parentTokenTypes as $parentTokenType) {
-            $this->addParentTokenType($parentTokenType);
+        foreach ($parentTokenTypes as $parentTokenType => $value) {
+            $this->addParentTokenType($parentTokenType, $value);
         }
 
         return $this;
@@ -46,14 +46,30 @@ abstract class QueryItem
     }
 
     /**
-     * @param int $parentTokenType
+     * @param int   $parentTokenType
+     * @param mixed $default
+     *
+     * @return mixed
+     */
+    public function getParentTokenType($parentTokenType, $default = null)
+    {
+        if ($this->hasParentTokenType($parentTokenType)) {
+            return $this->parentTokenTypes[$parentTokenType];
+        }
+
+        return $default;
+    }
+
+    /**
+     * @param int   $parentTokenType
+     * @param mixed $value
      *
      * @return QueryItem
      */
-    public function addParentTokenType($parentTokenType)
+    public function addParentTokenType($parentTokenType, $value = null)
     {
         if (!$this->hasParentTokenType($parentTokenType)) {
-            $this->getParentTokenTypes[] = $parentTokenType;
+            $this->parentTokenTypes[$parentTokenType] = $value;
         }
 
         return $this;
@@ -67,7 +83,7 @@ abstract class QueryItem
     public function removeParentTokenType($parentTokenType)
     {
         if ($this->hasParentTokenType($parentTokenType)) {
-            unset($this->getParentTokenTypes[array_search($parentTokenType, $this->getParentTokenTypes)]);
+            unset($this->parentTokenTypes[$parentTokenType]);
         }
 
         return $this;

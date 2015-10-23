@@ -17,7 +17,10 @@ abstract class CompositeExpression extends QueryItem
     public function __construct(QueryItem $expression)
     {
         $this->expression = $expression;
-        $this->expression->addParentTokenType($this->getTokenType());
+
+        if (!($this->expression instanceof SimpleTerm)) {
+            $this->expression->addParentTokenType($this->getTokenType());
+        }
     }
 
     /**
@@ -37,7 +40,6 @@ abstract class CompositeExpression extends QueryItem
         if ($this instanceof Hashtag)     return QueryScanner::T_HASHTAG;
         if ($this instanceof ExcludeTerm) return QueryScanner::T_EXCLUDE;
         if ($this instanceof IncludeTerm) return QueryScanner::T_INCLUDE;
-        if ($this instanceof IncludeTerm) return QueryScanner::T_INCLUDE;
 
         return null;
     }
@@ -47,29 +49,28 @@ abstract class CompositeExpression extends QueryItem
      */
     public function getQueryItemsByTokenType($tokenType = null)
     {
+        if (!$this->getTokenType()) {
+            return [];
+        }
+
         $items = [];
 
         if ($tokenType) {
             if ($tokenType == $this->getTokenType()) {
-                $items[] = $this;
+                if (in_array($this->getTokenType(), [QueryScanner::T_EXCLUDE, QueryScanner::T_INCLUDE])) {
+                    $items = array_merge_recursive($items, $this->getExpression()->getQueryItemsByTokenType($this->getExpression()->getTokenType()));
+                } else {
+                    $items[] = $this;
+                }
+            } else {
+                $items = array_merge_recursive($items, $this->getExpression()->getQueryItemsByTokenType($tokenType));
             }
         } else {
-            if ($this instanceof Mention) {
-                $items[QueryScanner::$typeStrings[QueryScanner::T_MENTION]][] = $this;
+            if (in_array($this->getTokenType(), [QueryScanner::T_EXCLUDE, QueryScanner::T_INCLUDE])) {
+                $items = array_merge_recursive($items, $this->getExpression()->getQueryItemsByTokenType());
+            } else {
+                $items[QueryScanner::$typeStrings[$this->getTokenType()]][] = $this;
             }
-            if ($this instanceof Hashtag) {
-                $items[QueryScanner::$typeStrings[QueryScanner::T_HASHTAG]][] = $this;
-            }
-            if ($this instanceof ExcludeTerm) {
-                $items[QueryScanner::$typeStrings[QueryScanner::T_EXCLUDE]][] = $this;
-            }
-            if ($this instanceof IncludeTerm) {
-                $items[QueryScanner::$typeStrings[QueryScanner::T_INCLUDE]][] = $this;
-            }
-        }
-
-        if (!($this->getExpression() instanceof SimpleTerm)) {
-            $items = array_merge_recursive($items, $this->getExpression()->getQueryItemsByTokenType($tokenType));
         }
 
         return $items;

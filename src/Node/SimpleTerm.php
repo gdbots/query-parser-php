@@ -88,10 +88,12 @@ abstract class SimpleTerm extends QueryItem
      */
     public function getQueryItemsByTokenType($tokenType = null)
     {
-        if ($tokenType === null) {
+        if ($tokenType) {
+            if ($tokenType == $this->getTokenType()) {
+                return [$this];
+            }
+        } else {
             return [QueryScanner::$typeStrings[$this->getTokenType()] => [$this]];
-        } elseif ($this->getTokenType() == $tokenType) {
-            return [$this];
         }
 
         return [];
