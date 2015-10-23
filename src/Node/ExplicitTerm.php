@@ -42,7 +42,7 @@ class ExplicitTerm extends QueryItem
 
         if ($this->nominator instanceof CompositeExpression) {
             $this->nominator->getExpression()->addParentTokenType($tokenType, $this->term->getToken());
-        } elseif (!($this->nominator instanceof SimpleTerm)) {
+        } elseif ($this->nominator instanceof QueryItem) {
             $this->nominator->addParentTokenType($tokenType, $this->term->getToken());
         }
     }
@@ -103,20 +103,20 @@ class ExplicitTerm extends QueryItem
         if ($tokenType) {
             if ($tokenType == $this->getTokenType()) {
                 if (in_array($this->getTokenType(), [QueryScanner::T_BOOST])) {
-                    if ($this->getNominator() && !($this->getNominator() instanceof SimpleTerm)) {
+                    if ($this->getNominator() && $this->getNominator() instanceof QueryItem) {
                         $items = array_merge_recursive($items, $this->getNominator()->getQueryItemsByTokenType($this->getNominator()->getTokenType()));
                     }
                 } else {
                     $items[] = $this;
                 }
             } else {
-                if ($this->getNominator() && !($this->getNominator() instanceof SimpleTerm)) {
+                if ($this->getNominator() && $this->getNominator() instanceof QueryItem) {
                     $items = array_merge_recursive($items, $this->getNominator()->getQueryItemsByTokenType($tokenType));
                 }
             }
         } else {
             if (in_array($this->getTokenType(), [QueryScanner::T_BOOST])) {
-                if ($this->getNominator() && !($this->getNominator() instanceof SimpleTerm)) {
+                if ($this->getNominator() && $this->getNominator() instanceof QueryItem) {
                     $items = array_merge_recursive($items, $this->getNominator()->getQueryItemsByTokenType());
                 }
             } else {
