@@ -47,5 +47,4 @@ class SearchQuery
      * @var array
      */
     public $terms = [];
-
 }

@@ -52,5 +52,4 @@ class Parser
 
         $this->normalizedQueryString = str_ireplace([' and ', ' or '], [' AND ', ' OR '], $this->normalizedQueryString);
     }
-
 }

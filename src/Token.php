@@ -206,6 +206,4 @@ class Token
     {
         $this->value = $value;
     }
-
-
 }

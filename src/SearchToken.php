@@ -47,5 +47,4 @@ class SearchToken
      * @var array
      */
     public $terms = [];
-
 }

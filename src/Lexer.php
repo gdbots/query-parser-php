@@ -16,7 +16,8 @@ final class Lexer
     /**
      * Private constructor. This class is not meant to be instantiated.
      */
-    private function __construct() {}
+    private function __construct() {
+    }
 
     /**
      * Tokenizes search query string and returns search object.
@@ -73,7 +74,7 @@ final class Lexer
      * @return Token
      */
 
-    static private function pushToken($currentToken, $i)
+    private static function pushToken($currentToken, $i)
     {
 
         if ($currentToken->getData() === null) {
@@ -113,11 +114,13 @@ final class Lexer
      * @return Token $currentToken
      * @throws ParseException
      */
-    static private function tokenizeBoost($currentToken, $string, &$i)
+    private static function tokenizeBoost($currentToken, $string, &$i)
     {
         if ($currentToken->getData() != null) {
             //only boost keywords/terms for now
-            if ($currentToken->getType() === Token::T_KEYWORD || $currentToken->getType() === Token::T_NONE || $currentToken->getType() === Token::T_PHRASE || $currentToken->getType() === Token::T_HASHTAG ||  $currentToken->getType() === Token::T_MENTION) {
+            if ($currentToken->getType() === Token::T_KEYWORD || $currentToken->getType() === Token::T_NONE ||
+                $currentToken->getType() === Token::T_PHRASE || $currentToken->getType() === Token::T_HASHTAG ||
+                $currentToken->getType() === Token::T_MENTION) {
                 //grab the boost value
                 $boostValue = self::readInt($string, $i);
                 if (!empty($boostValue)) {
@@ -141,7 +144,7 @@ final class Lexer
      * @param int $i
      * @return Token $currentToken
      */
-    static private function tokenizeHashtag($currentToken, $i)
+    private static function tokenizeHashtag($currentToken, $i)
     {
         if ($currentToken->getData() != null) {
             $currentToken = self::pushToken($currentToken, $i);
@@ -159,7 +162,7 @@ final class Lexer
      * @param int $i
      * @return Token $currentToken
      */
-    static private function tokenizeMention($currentToken, $i)
+    private static function tokenizeMention($currentToken, $i)
     {
         if ($currentToken->getData() != null) {
             $currentToken = self::pushToken($currentToken, $i);
@@ -177,9 +180,9 @@ final class Lexer
      * @param string $string
      * @param int $i
      */
-    static private function tokenizeExclude($currentToken, $string, $i)
+    private static function tokenizeExclude($currentToken, $string, $i)
     {
-        if ($currentToken->getData() != null){
+        if ($currentToken->getData() != null) {
             $currentToken->addData(substr($string, $i, 1));
 
         } else {
@@ -194,9 +197,9 @@ final class Lexer
      * @param string $string
      * @param int $i
      */
-    static private function tokenizeInclude($currentToken, $string, $i)
+    private static function tokenizeInclude($currentToken, $string, $i)
     {
-        if ($currentToken->getData() != null){
+        if ($currentToken->getData() != null) {
             $currentToken->addData(substr($string, $i, 1));
 
         } else {
@@ -215,7 +218,7 @@ final class Lexer
      * @return Token $currentToken
      * @throws ParseException
      */
-    static private function tokenizeQuotedString($currentToken, $string, &$i)
+    private static function tokenizeQuotedString($currentToken, $string, &$i)
     {
         if ($currentToken->getData() != null) {
             //add token you have now and begin the exact phrase
@@ -228,7 +231,7 @@ final class Lexer
         while(++$i < strlen($string)) {
             if (substr($string, $i, 1) == '\\') {
                 $currentToken->addData(substr($string, ++$i, 1));
-            } else if (substr($string, $i, 1) != '"') {
+            } elseif (substr($string, $i, 1) != '"') {
                 $currentToken->addData(substr($string, $i, 1));
             } else {
                 //check to see if this phrase has a boost by looking ahead
@@ -250,7 +253,7 @@ final class Lexer
      * @param int $i The current position in the string being tokenized
      * @return string value
      */
-    static private function readInt($string, &$i)
+    private static function readInt($string, &$i)
     {
         $value= null;
 
@@ -266,6 +269,4 @@ final class Lexer
 
         return $value;
     }
-
-
 }
