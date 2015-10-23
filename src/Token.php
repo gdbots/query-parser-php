@@ -13,12 +13,11 @@ class Token
     const T_PHRASE      = 4;
     const T_INCLUDE     = 5;
     const T_EXCLUDE     = 6;
-    const T_BOOST       = 7;
-    const T_FILTER_GT   = 8;
-    const T_FILTER_GTE  = 9;
-    const T_FILTER_LT   = 10;
-    const T_FILTER_LTE  = 11;
-    const T_FILTER_EQ   = 12;
+    const T_FILTER_GT   = 7;
+    const T_FILTER_GTE  = 8;
+    const T_FILTER_LT   = 9;
+    const T_FILTER_LTE  = 10;
+    const T_FILTER_EQ   = 11;
 
 
     /**
@@ -35,13 +34,19 @@ class Token
      * The token start position
      * @var int
      */
-    protected $startPos;
+    protected $startPos = null;
 
     /**
-     * The value of boost or filter
+     * The value filter
      * @var string
      */
     protected $value = null;
+
+    /**
+     * The boost value
+     * @var int
+     */
+    protected $boost;
 
     /**
      * Create a new token
@@ -51,7 +56,7 @@ class Token
     public function __construct($type, $startPos)
     {
         $this->type = $type;
-        $this->startPos = $startPos;
+        $this->startPos = null;
     }
 
     /**
@@ -102,6 +107,36 @@ class Token
     }
 
     /**
+     * Gets the boost value
+     * @return int
+     */
+    public function getBoost()
+    {
+        return $this->boost;
+    }
+
+    /**
+     * Sets the boost
+     * @param int $boost
+     */
+    public function setBoost($boost)
+    {
+        $this->boost = $boost;
+    }
+
+    /**
+     * Checks to see if boost value is set
+     * @retrun boolean
+     */
+    public function hasBoost()
+    {
+        if(!empty($this->boost)){
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Gets the token data
      * @return string
      */
@@ -136,6 +171,7 @@ class Token
     public function setStartPosition($startPos)
     {
         $this->startPos = $startPos;
+        $this->startPos = null;
     }
 
     /**

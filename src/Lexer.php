@@ -27,20 +27,21 @@ final class Lexer
     public static function tokenize($str)
     {
         $len = strlen($str);
+        self::$tokens = [];
 
         $currentToken = new Token(Token::T_NONE, 0);
         $i = 0;
         while ($i < $len) {
-            $char = $str[$i];
+            $char = substr($str, $i, 1);
             switch ($char) {
                 case ' ':
                     $currentToken = self::pushToken($currentToken, $i);
                     break;
                 case '@':
-                    $currentToken = self::tokenizeMention($currentToken, $str, $i);
+                    $currentToken = self::tokenizeMention($currentToken, $i);
                     break;
                 case '#':
-                    $currentToken = self::tokenizeHashtag($currentToken, $str, $i);
+                    $currentToken = self::tokenizeHashtag($currentToken, $i);
                     break;
                 case '"':
                     $currentToken = self::tokenizeQuotedString($currentToken, $str, $i);
@@ -86,11 +87,13 @@ final class Lexer
         //if adding hashtag then use extract to cleanup hashtag
         if($currentToken->getType() === Token::T_HASHTAG) {
             $hashtagArray = HashtagUtils::extract('#'.$currentToken->getData());
-            foreach($hashtagArray as $hashTag) {
+            $currentToken->setData($hashtagArray[0]);
+            self::$tokens[] = $currentToken;
+            /*foreach($hashtagArray as $hashTag) {
                 $currentToken = new Token(Token::T_HASHTAG, $i);
                 $currentToken->setData($hashTag);
                 self::$tokens[] = $currentToken;
-            }
+            }*/
         } else {
             $currentToken->setTypeIfNone(Token::T_KEYWORD);
             self::$tokens[] = $currentToken;
@@ -114,14 +117,16 @@ final class Lexer
     {
         if ($currentToken->getData() != null) {
             //only boost keywords/terms for now
-            if($currentToken->getType() === Token::T_KEYWORD || $currentToken->getType() === Token::T_NONE) {
+            if($currentToken->getType() === Token::T_KEYWORD || $currentToken->getType() === Token::T_NONE || $currentToken->getType() === Token::T_PHRASE || $currentToken->getType() === Token::T_HASHTAG ||  $currentToken->getType() === Token::T_MENTION) {
                 //grab the boost value
-                $boostValue = self::readInt($currentToken, $string, $i);
+                $boostValue = self::readInt($string, $i);
                 if (!empty($boostValue)) {
                     //change type to boost and set value to current token
-                    $currentToken->setType(Token::T_BOOST);
-                    $currentToken->setvalue($boostValue);
-                    $currentToken = self::pushToken($currentToken, $i);
+                    $currentToken->setBoost($boostValue);
+                    //if boosting a phrase just set the boost value and have quoted string tokenizer add the token
+                    if($currentToken->getType() !== Token::T_PHRASE) {
+                        $currentToken = self::pushToken($currentToken, $i);
+                    }
                 }
             }
 
@@ -136,7 +141,7 @@ final class Lexer
      * @param int $i
      * @return Token $currentToken
      */
-    static private function tokenizeHashtag($currentToken, $string, $i)
+    static private function tokenizeHashtag($currentToken, $i)
     {
         if($currentToken->getData() != null){
             $currentToken = self::pushToken($currentToken, $i);
@@ -154,7 +159,7 @@ final class Lexer
      * @param int $i
      * @return Token $currentToken
      */
-    static private function tokenizeMention($currentToken, $string, $i)
+    static private function tokenizeMention($currentToken, $i)
     {
         if($currentToken->getData() != null){
             $currentToken = self::pushToken($currentToken, $i);
@@ -175,7 +180,7 @@ final class Lexer
     static private function tokenizeExclude($currentToken, $string, $i)
     {
         if($currentToken->getData() != null){
-            $currentToken->addData($string[$i]);
+            $currentToken->addData(substr($string, $i, 1));
 
         } else {
             $currentToken->setStartPosition($i);
@@ -192,7 +197,7 @@ final class Lexer
     static private function tokenizeInclude($currentToken, $string, $i)
     {
         if($currentToken->getData() != null){
-            $currentToken->addData($string[$i]);
+            $currentToken->addData(substr($string, $i, 1));
 
         } else {
             $currentToken->setStartPosition($i);
@@ -221,11 +226,15 @@ final class Lexer
 
         //keep adding character to token until another quote or end of string
         while(++$i < strlen($string)) {
-            if($string[$i] == '\\') {
-                $currentToken->addData($string[++$i]);
-            } else if($string[$i] != '"') {
-                $currentToken->addData($string[$i]);
+            if(substr($string, $i, 1) == '\\') {
+                $currentToken->addData(substr($string, ++$i, 1));
+            } else if(substr($string, $i, 1) != '"') {
+                $currentToken->addData(substr($string, $i, 1));
             } else {
+                //check to see if this phrase has a boost by looking ahead
+                if (substr($string, $i+1, 1) == '^') {
+                    self::tokenizeBoost($currentToken, $string, ++$i);
+                }
                 break;
             }
         }
@@ -241,14 +250,14 @@ final class Lexer
      * @param int $i The current position in the string being tokenized
      * @return string value
      */
-    static private function readInt(Token $currentToken, $string, &$i)
+    static private function readInt($string, &$i)
     {
         $value= null;
 
         while(++$i < strlen($string)) {
-            if(in_array($string[$i], array('0', '1', '2', '3', '4', '5', '6', '7',
+            if(in_array(substr($string, $i, 1), array('0', '1', '2', '3', '4', '5', '6', '7',
                 '8', '9'), true)) {
-                $value .= ($string[$i]);
+                $value .= (substr($string, $i, 1));
             } else {
                 $i--;
                 break;
