@@ -165,10 +165,7 @@ class QueryScanner
         self::T_MENTION => '/^(\@)(.*)/',
         self::T_FILTER  => '/^(\:[\>|\<|\!]?)(.*)/',
         self::T_BOOST   => '/^(\^)(.*)/',
-        self::T_QUOTE   => [
-            '/^(\")([^\"]*)$/',
-            '/^(\')([^\']*)$/'
-        ],
+        self::T_QUOTE   => '/^(\")([^\"]*)$/',
 
         // WORD matches letters, numbers, underscores, hyphens and
         // points (think eg. To dibe_relict.101) Can not match up
@@ -221,7 +218,7 @@ class QueryScanner
         $openParenthesis = 0;
 
         // find all strings and rebuild input string with "OR"
-        if (preg_match_all('/[^\s\(\)\-\+\#\@\^\"\']+'.
+        if (preg_match_all('/[^\s\(\)\-\+\#\@\^\"]+'.
 
                 // parentheses
                 '|'.'(\()'.
@@ -248,9 +245,6 @@ class QueryScanner
                 // double quote
                 '|'.'\"([^\"]*)\"'.
 
-                // single quote
-                '|'.'\'([^\']*)\''.
-
             '/', $input, $matches)
         ) {
             $matches = $matches[0];
@@ -271,10 +265,8 @@ class QueryScanner
 
                 // remove duplicate special characters
                 $found = false;
-                foreach (['/\"([^\"]*)\"/', '/\'([^\']*)\'/'] as $re) {
-                    if (preg_match($re, $value)) {
-                        $found = true;
-                    }
+                if (preg_match('/\"([^\"]*)\"/', $value)) {
+                    $found = true;
                 }
                 if (!$found) {
                     $value = preg_replace('/(?>\-)\K\-*/', '', $value);
