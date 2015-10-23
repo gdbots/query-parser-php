@@ -253,11 +253,11 @@ class QueryScanner
 
             '/', $input, $matches)
         ) {
-            $input = '';
             $matches = $matches[0];
 
             // phase 1: cleanup characters
-            foreach ($matches as $key => $value) {
+            for ($key = 0, $m = count($matches); $key < $m; $key++) {
+                $value = $matches[$key];
                 $value = trim($value);
 
                 if ($ignoreOperator) {
@@ -288,7 +288,29 @@ class QueryScanner
                     $value = preg_replace('/\:(?>\!)\K\!*/', '', $value);
                 }
 
-                $matches[$key] = $value;
+                // merge url string
+                if (preg_match($this->regEx[self::T_URL], $value)) {
+                    $orgKey = $key;
+
+                    for ($key++; $key < $m; $key++) {
+                        if (strpos($input, $value.$matches[$key]) !== false) {
+                            $value .= $matches[$key];
+
+                            unset($matches[$key]);
+                        }
+
+                        if (isset($matches[$key+1]) && strpos($input, $value.$matches[$key+1]) === false) {
+                            break;
+                        }
+                    }
+
+                    $matches[$orgKey] = $value;
+                }
+
+                // update value
+                else {
+                    $matches[$key] = $value;
+                }
             }
 
             // phase 2: modify special characters
@@ -346,6 +368,9 @@ class QueryScanner
 
             // reindex array
             $matches = array_values($matches);
+
+            // reset
+            $input = '';
 
             // phase 3: handle parentheses and add OR/AND expression
             foreach ($matches as $key => $value) {
