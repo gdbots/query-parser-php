@@ -28,10 +28,10 @@ class ExplicitTerm extends QueryItem
     protected $term;
 
     /**
-     * @param string     $nominator
-     * @param int        $tokenType
-     * @param string     $tokenTypeText
-     * @param SimpleTerm $term
+     * @param string|QueryItem $nominator
+     * @param int              $tokenType
+     * @param string           $tokenTypeText
+     * @param SimpleTerm       $term
      */
     public function __construct($nominator, $tokenType, $tokenTypeText, SimpleTerm $term)
     {
@@ -43,7 +43,10 @@ class ExplicitTerm extends QueryItem
         if ($this->nominator instanceof CompositeExpression) {
             $this->nominator->getExpression()->addParentTokenType($tokenType);
         }
-        $this->nominator->addParentTokenType($tokenType);
+        if ($this->nominator instanceof QueryItem) {
+            $this->nominator->addParentTokenType($tokenType);
+        }
+
         $this->term->addParentTokenType($tokenType);
     }
 
