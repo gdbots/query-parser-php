@@ -1,5 +1,7 @@
 <?php
 
+require dirname(__DIR__) . '/../vendor/autoload.php';
+
 use Gdbots\QueryParser\Parser\QueryParser;
 use Gdbots\QueryParser\Visitor\QueryItemPrinter;
 
