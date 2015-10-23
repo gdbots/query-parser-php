@@ -12,9 +12,9 @@ abstract class ExpressionList extends QueryItem implements \Countable
     /**
      * @param array $expressions
      */
-    public function __construct($expressions = array())
+    public function __construct(array $expressions = array())
     {
-        $this->expressions = $expressions;
+        $this->expressions = array_unique($expressions, SORT_REGULAR);
     }
 
     public function getExpressions()

@@ -126,7 +126,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
             ['a:>b^2abc', 'Or>Term:^2>>Term:a:>b>Word:abc', ['BOOST' => 1, 'FILTER' => 1, 'WORD' => 1]],
             ['a + b', 'Or>Word:a>Word:b', ['WORD' => 2]],
             ['+(a:>b)-c:>d -e:<f', 'Or>Term:a:>b>ExcludeTerm>>Term:c:>d>ExcludeTerm>>Term:e:<f', ['FILTER' => 3, 'EXCLUDE' => 2]],
-            ['#cats #cats #cats', 'Or>Hashtag>>Word:cats>Hashtag>>Word:cats>Hashtag>>Word:cats', ['HASHTAG' => 3]],
+            ['#cats #cats #cats', 'Or>Hashtag>>Word:cats', ['HASHTAG' => 1]],
             ['http://www.google.com/#lol', 'Url:http://www.google.com/#lol', ['URL' => 1]],
             ['http://www.google.com/?q=a+b+c+#lol', 'Url:http://www.google.com/?q=a+b+c+#lol', ['URL' => 1]],
             ['http://www.google.com/?q=a-c&s=a+@mention', 'Url:http://www.google.com/?q=a-c&s=a+@mention', ['URL' => 1]],
