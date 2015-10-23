@@ -12,7 +12,7 @@ class Mention extends CompositeExpression
     public function toArray()
     {
         return [
-            'Operator' => 'MENTION',
+            'Operator' => 'Mention',
             'Expression' => $this->expression
         ];
     }

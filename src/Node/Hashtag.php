@@ -12,7 +12,7 @@ class Hashtag extends CompositeExpression
     public function toArray()
     {
         return [
-            'Operator' => 'HASHTAG',
+            'Operator' => 'Hashtag',
             'Expression' => $this->expression
         ];
     }

@@ -12,7 +12,7 @@ class AndExpressionList extends ExpressionList
     public function toArray()
     {
         return [
-            'Operator' => 'OR',
+            'Operator' => 'AND',
             'Expressions' => $this->expressions
         ];
     }
