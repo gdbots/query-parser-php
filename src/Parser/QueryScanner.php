@@ -221,13 +221,17 @@ class QueryScanner
         $openParenthesis = 0;
 
         // find all strings and rebuild input string with "OR"
-        if (preg_match_all('/[^\s\"\']+'.
+        if (preg_match_all('/[^\s\(\)\"\']+'.
+
+                // parentheses
+                '|'.'(\()'.
+                '|'.'(\))'.
 
                 // exclude
-                '|'.'([\s]?\-[^\-\+\^\s\)]*)'.
+                '|'.'([\s]?\-[^\-\+\^\s\(\)]*)'.
 
                 // include
-                '|'.'([\s]?\+[^\+\-^\s\)]*)'.
+                '|'.'([\s]?\+[^\+\-^\s\(\)]*)'.
 
                 // hashtag
                 '|'.'([\s]?\#[\d_\p{L}]*[_\p{L}][\d_\p{L}]*)'.
@@ -236,7 +240,7 @@ class QueryScanner
                 '|'.'([\s]?\@[\d_\-\p{L}]*[_\-\p{L}][\d_\-\p{L}]*)'.
 
                 // boost
-                '|'.'(\^[-+]?\d*\.?\d+)'.
+                '|'.'[^\)](\^[-+]?\d*\.?\d+)'.
 
                 // url
                 '|'.'([\w-]+:\/\/[^\s\/$.?#].[^\s]*)'.
@@ -292,26 +296,9 @@ class QueryScanner
 
                 // wrap special characters with double quote
                 if (preg_match(self::REGEX_TOKENS, $value, $m) && $m[0] == $value) {
+                    unset($matches[$key]);
 
-                    // remove duplicate
-                    if (isset($matches[$key+1]) && substr($matches[$key+1], 0, strlen($value)) == $value) {
-                        unset($matches[$key]);
-
-                        continue;
-                    } else {
-                        $value = sprintf('"%s"', $value);
-                    }
-                }
-
-                // strip non-allowed characters
-                foreach ([self::T_HASHTAG, self::T_MENTION] as $regEx) {
-                    if (preg_match($this->regEx[$regEx], $value, $m)) {
-                        if (!preg_match('/^([\w\d\-\^_.])/', $m[2], $m1)) {
-                            $value = substr($value, 1);
-                        } else {
-                            $value = substr($value, 0, 1).preg_replace('/[^\w\d\-\^_.]/', '', $value);
-                        }
-                    }
+                    continue;
                 }
 
                 if (
@@ -328,6 +315,12 @@ class QueryScanner
                         preg_match($this->regEx[self::T_FILTER], $value, $m) &&
                         preg_match(self::REGEX_FILTER_VALUE, $m[2]) &&
                         !preg_match(self::REGEX_FILTER_KEY, $matches[$key-1])
+                    ) ||
+
+                    // parentheses
+                    (
+                        isset($matches[$key-1]) && $matches[$key-1] == ')' &&
+                        preg_match($this->regEx[self::T_BOOST], $value)
                     )
                 ) {
                     unset($matches[$key]);
