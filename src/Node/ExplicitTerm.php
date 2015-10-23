@@ -41,13 +41,10 @@ class ExplicitTerm extends QueryItem
         $this->term = $term;
 
         if ($this->nominator instanceof CompositeExpression) {
-            $this->nominator->getExpression()->addParentTokenType($tokenType);
+            $this->nominator->getExpression()->addParentTokenType($tokenType, $this->term->getToken());
+        } elseif (!($this->nominator instanceof SimpleTerm)) {
+            $this->nominator->addParentTokenType($tokenType, $this->term->getToken());
         }
-        if ($this->nominator instanceof QueryItem) {
-            $this->nominator->addParentTokenType($tokenType);
-        }
-
-        $this->term->addParentTokenType($tokenType);
     }
 
     /**
@@ -103,17 +100,28 @@ class ExplicitTerm extends QueryItem
     {
         $items = [];
 
-        if ($tokenType === null) {
-            $items[QueryScanner::$typeStrings[$this->getTokenType()]][] = $this;
-        } elseif ($this->getTokenType() == $tokenType) {
-            $items[] = $this;
-        }
-
-        if ($this->getNominator() && !($this->getNominator() instanceof SimpleTerm)) {
-            $items = array_merge_recursive($items, $this->getNominator()->getQueryItemsByTokenType($tokenType));
-        }
-        if ($this->getTerm() && !($this->getTerm() instanceof SimpleTerm)) {
-            $items = array_merge_recursive($items, $this->getTerm()->getQueryItemsByTokenType($tokenType));
+        if ($tokenType) {
+            if ($tokenType == $this->getTokenType()) {
+                if (in_array($this->getTokenType(), [QueryScanner::T_BOOST])) {
+                    if ($this->getNominator() && !($this->getNominator() instanceof SimpleTerm)) {
+                        $items = array_merge_recursive($items, $this->getNominator()->getQueryItemsByTokenType($this->getNominator()->getTokenType()));
+                    }
+                } else {
+                    $items[] = $this;
+                }
+            } else {
+                if ($this->getNominator() && !($this->getNominator() instanceof SimpleTerm)) {
+                    $items = array_merge_recursive($items, $this->getNominator()->getQueryItemsByTokenType($tokenType));
+                }
+            }
+        } else {
+            if (in_array($this->getTokenType(), [QueryScanner::T_BOOST])) {
+                if ($this->getNominator() && !($this->getNominator() instanceof SimpleTerm)) {
+                    $items = array_merge_recursive($items, $this->getNominator()->getQueryItemsByTokenType());
+                }
+            } else {
+                $items[QueryScanner::$typeStrings[$this->getTokenType()]][] = $this;
+            }
         }
 
         return $items;
