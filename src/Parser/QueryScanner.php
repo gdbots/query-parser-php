@@ -280,13 +280,6 @@ class QueryScanner
                     $value = preg_replace('/\:(?>\!)\K\!*/', '', $value);
                 }
 
-                // delete single character
-                if (strlen($value) === 1) {
-                    unset($matches[$key]);
-
-                    continue;
-                }
-
                 // merge url string
                 if (preg_match($this->regEx[self::T_URL], $value)) {
                     $orgKey = $key;
