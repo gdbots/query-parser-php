@@ -76,16 +76,16 @@ final class Lexer
     static private function pushToken($currentToken, $i)
     {
 
-        if($currentToken->getData() === null) {
+        if ($currentToken->getData() === null) {
             //if state is in phrase then the current token was an empty quoted string and does not need to be added
-            if($currentToken->getType() === Token::T_PHRASE) {
+            if ($currentToken->getType() === Token::T_PHRASE) {
                 $currentToken = new Token(Token::T_NONE, $i);
             }
             //$currentToken->setStartPosition($i);
             return $currentToken;
         }
         //if adding hashtag then use extract to cleanup hashtag
-        if($currentToken->getType() === Token::T_HASHTAG) {
+        if ($currentToken->getType() === Token::T_HASHTAG) {
             $hashtagArray = HashtagUtils::extract('#'.$currentToken->getData());
             $currentToken->setData($hashtagArray[0]);
             self::$tokens[] = $currentToken;
@@ -117,14 +117,14 @@ final class Lexer
     {
         if ($currentToken->getData() != null) {
             //only boost keywords/terms for now
-            if($currentToken->getType() === Token::T_KEYWORD || $currentToken->getType() === Token::T_NONE || $currentToken->getType() === Token::T_PHRASE || $currentToken->getType() === Token::T_HASHTAG ||  $currentToken->getType() === Token::T_MENTION) {
+            if ($currentToken->getType() === Token::T_KEYWORD || $currentToken->getType() === Token::T_NONE || $currentToken->getType() === Token::T_PHRASE || $currentToken->getType() === Token::T_HASHTAG ||  $currentToken->getType() === Token::T_MENTION) {
                 //grab the boost value
                 $boostValue = self::readInt($string, $i);
                 if (!empty($boostValue)) {
                     //change type to boost and set value to current token
                     $currentToken->setBoost($boostValue);
                     //if boosting a phrase just set the boost value and have quoted string tokenizer add the token
-                    if($currentToken->getType() !== Token::T_PHRASE) {
+                    if ($currentToken->getType() !== Token::T_PHRASE) {
                         $currentToken = self::pushToken($currentToken, $i);
                     }
                 }
@@ -143,7 +143,7 @@ final class Lexer
      */
     static private function tokenizeHashtag($currentToken, $i)
     {
-        if($currentToken->getData() != null){
+        if ($currentToken->getData() != null) {
             $currentToken = self::pushToken($currentToken, $i);
         } else {
             $currentToken->setStartPosition($i);
@@ -161,7 +161,7 @@ final class Lexer
      */
     static private function tokenizeMention($currentToken, $i)
     {
-        if($currentToken->getData() != null){
+        if ($currentToken->getData() != null) {
             $currentToken = self::pushToken($currentToken, $i);
         } else {
             $currentToken->setStartPosition($i);
@@ -179,7 +179,7 @@ final class Lexer
      */
     static private function tokenizeExclude($currentToken, $string, $i)
     {
-        if($currentToken->getData() != null){
+        if ($currentToken->getData() != null){
             $currentToken->addData(substr($string, $i, 1));
 
         } else {
@@ -196,7 +196,7 @@ final class Lexer
      */
     static private function tokenizeInclude($currentToken, $string, $i)
     {
-        if($currentToken->getData() != null){
+        if ($currentToken->getData() != null){
             $currentToken->addData(substr($string, $i, 1));
 
         } else {
@@ -226,9 +226,9 @@ final class Lexer
 
         //keep adding character to token until another quote or end of string
         while(++$i < strlen($string)) {
-            if(substr($string, $i, 1) == '\\') {
+            if (substr($string, $i, 1) == '\\') {
                 $currentToken->addData(substr($string, ++$i, 1));
-            } else if(substr($string, $i, 1) != '"') {
+            } else if (substr($string, $i, 1) != '"') {
                 $currentToken->addData(substr($string, $i, 1));
             } else {
                 //check to see if this phrase has a boost by looking ahead
@@ -254,8 +254,8 @@ final class Lexer
     {
         $value= null;
 
-        while(++$i < strlen($string)) {
-            if(in_array(substr($string, $i, 1), array('0', '1', '2', '3', '4', '5', '6', '7',
+        while (++$i < strlen($string)) {
+            if (in_array(substr($string, $i, 1), array('0', '1', '2', '3', '4', '5', '6', '7',
                 '8', '9'), true)) {
                 $value .= (substr($string, $i, 1));
             } else {

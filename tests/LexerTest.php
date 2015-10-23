@@ -46,15 +46,15 @@ class LexerTest extends \PHPUnit_Framework_TestCase
     public function testLexerTokenize($query, $expected)
     {
         $expectedTokenArray = array();
-        foreach($expected as $token){
+        foreach ($expected as $token) {
             $t = new Token($token['type'], null);
-            if(isset($token['data'])){
+            if (isset($token['data'])) {
                 $t->setData($token['data']);
             }
-            if(isset($token['boost'])){
+            if (isset($token['boost'])) {
                 $t->setBoost($token['boost']);
             }
-            if(isset($token['value'])){
+            if (isset($token['value'])) {
                 $t->setvalue($token['value']);
             }
             $expectedTokenArray[] = $t;
