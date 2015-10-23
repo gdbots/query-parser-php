@@ -23,20 +23,21 @@ class QueryScanner
 {
     const T_EOI                 = 0; // end of input
     const T_WORD                = 1; // word
-    const T_OPEN_PARENTHESIS    = 2; // "("
-    const T_CLOSE_PARENTHESIS   = 3; // ")"
-    const T_EXCLUDE             = 4; // "-"
-    const T_INCLUDE             = 5; // "+"
-    const T_HASHTAG             = 6; // "#"
-    const T_MENTION             = 7; // "@"
-    const T_FILTER              = 8; // ":", ":>", ":<" or ":!"
-    const T_BOOST               = 9; // "^"
-    const T_OR_OPERATOR         = 10; // "OR"
-    const T_AND_OPERATOR        = 11; // "AND"
-    const T_WSPC                = 12; // white-space
-    const T_PHRASE              = 13; // text between two quotes (parentheses)
-    const T_QUOTE               = 14; // double parentheses
-    const T_ILLEGAL             = 15; // illegal character
+    const T_URL                 = 2; // url
+    const T_OPEN_PARENTHESIS    = 3; // "("
+    const T_CLOSE_PARENTHESIS   = 4; // ")"
+    const T_EXCLUDE             = 5; // "-"
+    const T_INCLUDE             = 6; // "+"
+    const T_HASHTAG             = 7; // "#"
+    const T_MENTION             = 8; // "@"
+    const T_FILTER              = 9; // ":", ":>", ":<" or ":!"
+    const T_BOOST               = 10; // "^"
+    const T_OR_OPERATOR         = 11; // "OR"
+    const T_AND_OPERATOR        = 12; // "AND"
+    const T_WSPC                = 13; // white-space
+    const T_PHRASE              = 14; // text between two quotes (parentheses)
+    const T_QUOTE               = 15; // double parentheses
+    const T_ILLEGAL             = 16; // illegal character
 
     // Match basic emoticons
     const REGEX_EMOTICONS_BASIC = '/(?<=^|\s)(?:>:\-?\(|:\-?\)|:\'\(|:\-?\|:\-?\/|:\-?\(|:\-?\*|:\-?\||:o\)|:\-?o|=\-?\)|:\-?D|:\-?p|:\-?P|:\-?b|;\-?p|;\-?P|;\-?b|;\-?\))/';
@@ -95,6 +96,7 @@ class QueryScanner
     public static $typeStrings = array (
         self::T_EOI               => 'EOI',
         self::T_WORD              => 'WORD',
+        self::T_URL               => 'URL',
         self::T_OPEN_PARENTHESIS  => 'OPEN_PARENTHESIS',
         self::T_CLOSE_PARENTHESIS => 'CLOSE_PARENTHESIS',
         self::T_EXCLUDE           => 'EXCLUDE',
@@ -140,6 +142,9 @@ class QueryScanner
         // PHRASE matches every possible input between double brackets.
         // Double parentheses are part of the match.
         self::T_PHRASE => '/^(\"[^"]*\")(.*)/',
+
+        // URL matches all url patterns
+        self::T_URL => '/^([\w-]+:\/\/[^\s\/$.?#].[^\s]*)(.*)/',
 
         // OR matches by keyword "OR" (case sensitive)
         // when no text follows after "OR".
@@ -216,24 +221,25 @@ class QueryScanner
         $openParenthesis = 0;
 
         // find all strings and rebuild input string with "OR"
-        if (preg_match_all('/[^\s\^\-\+\#\@\"\']+'.
+        if (preg_match_all('/[^\s\"\']+'.
+
+                // exclude
+                '|'.'([\s]?\-[^\-\+\^\s\)]*)'.
+
+                // include
+                '|'.'([\s]?\+[^\+\-^\s\)]*)'.
+
+                // hashtag
+                '|'.'([\s]?\#[\d_\p{L}]*[_\p{L}][\d_\p{L}]*)'.
+
+                // mention
+                '|'.'([\s]?\@[\d_\-\p{L}]*[_\-\p{L}][\d_\-\p{L}]*)'.
 
                 // boost
                 '|'.'(\^[-+]?\d*\.?\d+)'.
 
-                // exclude
-                '|'.'(\s\-[^\-\^\s\)]*)'.
-                '|'.'(^\-[^\-\^\s\)]*)'.
-
-                // include
-                '|'.'(\s\+[^\+\^\s\)]*)'.
-                '|'.'(^\+[^\+\^\s\)]*)'.
-
-                // hashtag
-                '|'.'(\#[\d_\p{L}]*[_\p{L}][\d_\p{L}]*)'.
-
-                // mention
-                '|'.'(\@[\d_\-\p{L}]*[_\-\p{L}][\d_\-\p{L}]*)'.
+                // url
+                '|'.'([\w-]+:\/\/[^\s\/$.?#].[^\s]*)'.
 
                 // double quote
                 '|'.'\"([^\"]*)\"'.

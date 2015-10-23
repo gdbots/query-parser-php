@@ -17,6 +17,11 @@ interface QueryItemVisitorinterface
     public function visitPhrase(Node\Phrase $phrase);
 
     /**
+     * @param Node\Url $url
+     */
+    public function visitUrl(Node\Url $url);
+
+    /**
      * @param Node\ExplicitTerm $term
      */
     public function visitExplicitTerm(Node\ExplicitTerm $term);

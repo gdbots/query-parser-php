@@ -120,6 +120,11 @@ class QueryParser
 
                 break;
 
+            case QueryScanner::T_URL:
+                $value = new Node\Url($this->scanner->getToken());
+
+                break;
+
             default:
                 $this->addError(sprintf('Error: Expected Word or Phrase. Found: "%s"', $this->scanner->getTokenTypeText()));
 
@@ -160,6 +165,10 @@ class QueryParser
             case QueryScanner::T_WORD:
                 $word = new Node\Word($this->scanner->getToken());
                 return $this->readTerm($this->scanner->next(), $word);
+
+            case QueryScanner::T_URL:
+                $url = new Node\Url($this->scanner->getToken());
+                return $this->readTerm($this->scanner->next(), $url);
 
             case QueryScanner::T_EXCLUDE:
                 $expression = $this->readExpression($this->scanner->next());

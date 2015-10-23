@@ -64,6 +64,14 @@ class QueryItemPrinter implements QueryItemVisitorinterface
     /**
      * {@inheritDoc}
      */
+    public function visitUrl(Node\Url $url)
+    {
+        $this->printIndentedLine(sprintf('Url: %s', $url->getToken()));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function visitExplicitTerm(Node\ExplicitTerm $term)
     {
         if ($term->getNominator() instanceof Node\SimpleTerm) {
