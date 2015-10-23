@@ -244,10 +244,12 @@ class QueryScanner
             '/', $input, $matches)
         ) {
             $input = '';
+
             $matches = $matches[0];
             // phase 1: cleanup characters
             foreach ($matches as $key => $value) {
                 $value = trim($value);
+
 
                 if ($ignoreOperator) {
                     if ($value == 'AND') {
@@ -414,6 +416,7 @@ class QueryScanner
         $input = preg_replace('/(\))/', ' $1', $input);
 
         $this->input = $input;
+
         $this->processed = '';
         $this->position = 0;
     }
