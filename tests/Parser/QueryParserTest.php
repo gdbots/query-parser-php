@@ -103,13 +103,13 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
             ['##one', 'Hashtag>Word:one', ['HASHTAG' => 1]],
             ['#one #two #three', 'Or>Hashtag>>Word:one>Hashtag>>Word:two>Hashtag>>Word:three', ['HASHTAG' => 3]],
             ['#one#two##three', 'Or>Hashtag>>Word:one>Hashtag>>Word:two>Hashtag>>Word:three', ['HASHTAG' => 3]],
-            ['#one!', 'Or>Hashtag>>Word:one>Word:!', array('HASHTAG' => 1, 'WORD' => 1)],
+            ['#one!', 'Or>Hashtag>>Word:one>Word:!', ['HASHTAG' => 1, 'WORD' => 1]],
             ['"#one^7 #two#three ##four!"', 'Phrase:#one^7#two#three##four!', ['PHRASE' => 1]],
-            ['a^b', 'Or>Word:a>Word:b', ['WORD' => 2]],
+            ['a^b', 'Term:a^b', ['BOOST' => 1]],
             ['a^^2', 'Term:a^2', ['BOOST' => 1]],
-            ['"abc"^def', 'Or>Phrase:abc>Word:def', ['PHRASE' => 1, 'WORD' => 1]],
-            ['"abc"^2"def ^ghi"jkl^mno^8', 'Or>Term:abc^2>Phrase:def^ghi>Word:jkl>Term:mno^8', ['BOOST' => 2, 'PHRASE' => 1, 'WORD' => 1]],
-            ['abc^2def', 'Or>Term:abc^2>Word:def', ['BOOST' => 1, 'WORD' => 1]],
+            ['"abc"^def', 'Term:abc^def', ['BOOST' => 1]],
+            ['"abc"^2"def ^ghi"jkl^mno^8', 'Or>Term:abc^2>Phrase:def^ghi>Term:^8>>Term:jkl^mno', ['BOOST' => 3, 'PHRASE' => 1]],
+            ['abc^2def', 'Term:abc^2def', ['BOOST' => 1]],
             ['#a^2', 'Term:^2>Hashtag>>Word:a', ['BOOST' => 1, 'HASHTAG' => 1]],
             ['a#b', 'Or>Word:a>Hashtag>>Word:b', ['WORD' => 1, 'HASHTAG' => 1]],
             ['"abc""def""ghi', 'Or>Phrase:abc>Phrase:def>Word:ghi', ['PHRASE' => 2, 'WORD' => 1]],
@@ -118,19 +118,19 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
             ['abc"def', 'Or>Word:abc>Word:def', ['WORD' => 2]],
             ['abc"def ghi"@j"@k l', 'Or>Word:abc>Phrase:defghi>Mention>>Word:j>Mention>>Word:k>Word:l', ['WORD' => 2, 'PHRASE' => 1, 'MENTION' => 2]],
             ['#a#b@c @d#e', 'Or>Hashtag>>Word:a>Hashtag>>Word:b>Mention>>Word:c>Mention>>Word:d>Hashtag>>Word:e', ['HASHTAG' => 3, 'MENTION' => 2]],
-            ['(a b)^2', 'Or>Word:a>Term:b^2', ['WORD' => 1, 'BOOST' => 1]],
-            ['+(a b c)-(d e f)^2', 'Or>IncludeTerm>>Word:a>Word:b>Word:c>Word:d>Word:e>Term:f^2', ['WORD' => 4, 'BOOST' => 1, 'INCLUDE' => 1]],
+            ['(a b)^2', 'Or>Word:a>Word:b>Term:^2', ['WORD' => 2, 'BOOST' => 1]],
+            ['+(a b c)-(d e f)^2', 'Or>Word:a>Word:b>Word:c>Word:d>Word:e>Word:f>Term:^2', ['WORD' => 6, 'BOOST' => 1]],
             ['a b:', 'Or>Word:a>Word:b:', ['WORD' => 2]],
-            ['http://a.com a:>500', 'Or>Word:http://a.com>Term:a:>500', ['FILTER' => 1, 'WORD' => 1]],
-            ['a (b/c d)^2 Father and Daughter', 'Or>Word:a>Word:b/c>Term:d^2>Word:Father>Word:and>Word:Daughter', ['WORD' => 5, 'BOOST' => 1]],
-            ['a:>b^2abc', 'Or>Term:^2>>Term:a:>b>Word:abc', ['FILTER' => 1, 'BOOST' => 1, 'WORD' => 1]],
-            ['a + b', 'Or>Word:a>Phrase:+>Word:b', ['WORD' => 2, 'PHRASE' => 1]],
-            ['+(a:>b)-c:>d -e:<f', 'Or>IncludeTerm>>Term:a:>b>Term:c:>d>ExcludeTerm>>Term:e:<f', ['INCLUDE' => 1, 'EXCLUDE' => 1, 'FILTER' => 3]],
-            ['#cats #cats #cats', 'Hashtag>Word:cats', ['HASHTAG' => 1]],
-            ['http://www.google.com/#lol', 'Hashtag>Word:http://www.google.com/#lol', ['WORD' => 1]],
-            ['http://www.google.com/?q=a+b+c+#lol', 'Hashtag>Word:http://www.google.com/?q=a+b+c+#lol', ['WORD' => 1]],
-            ['http://www.google.com/?q=a-c&s=a+@mention', 'Hashtag>Word:http://www.google.com/?q=a-c&s=a+@mention', ['WORD' => 1]],
-            ['http://warnerbros.112.2o7.net/b/ss/wbrostoofab/1/JS-1.5.1/s72034063232131?AQB=1&ndh=1&pf=1&t=22%2F9%2F2015%2016%3A1%3A39%204%20420&fid=64F69D01980887BB-1E04C009EEE2A59C&ce=UTF-8&ns=warnerbros&cdp=3&pageName=home%3Acollection%3A%3Ahome&g=http%3A%2F%2Ftoofab.com%2F&cc=USD&events=event6&c1=Toofab.us&v1=Toofab.us&c2=collection&v2=collection&c3=home&v3=home&c15=4%3A01PM&v15=4%3A01PM&c16=Thursday&v16=Thursday&c17=Weekday&v17=Weekday&c18=%2F&v18=%2F&c19=home%3Acollection%3A%3Ahome&v19=home%3Acollection%3A%3Ahome&c27=Repeat&v27=Repeat&c59=home&v59=home&s=1920x1080&c=24&j=1.6&v=Y&k=Y&bw=1552&bh=517&AQE=1', 'Word:http://warnerbros.112.2o7.net/b/ss/wbrostoofab/1/JS-1.5.1/s72034063232131?AQB=1&ndh=1&pf=1&t=22%2F9%2F2015%2016%3A1%3A39%204%20420&fid=64F69D01980887BB-1E04C009EEE2A59C&ce=UTF-8&ns=warnerbros&cdp=3&pageName=home%3Acollection%3A%3Ahome&g=http%3A%2F%2Ftoofab.com%2F&cc=USD&events=event6&c1=Toofab.us&v1=Toofab.us&c2=collection&v2=collection&c3=home&v3=home&c15=4%3A01PM&v15=4%3A01PM&c16=Thursday&v16=Thursday&c17=Weekday&v17=Weekday&c18=%2F&v18=%2F&c19=home%3Acollection%3A%3Ahome&v19=home%3Acollection%3A%3Ahome&c27=Repeat&v27=Repeat&c59=home&v59=home&s=1920x1080&c=24&j=1.6&v=Y&k=Y&bw=1552&bh=517&AQE=1', ['WORD' => 1]]
+            ['http://a.com a:>500', 'Or>Url:http://a.com>Term:a:>500', ['URL' => 1, 'FILTER' => 1]],
+            ['a (b/c d)^2 Father and Daughter', 'Or>Word:a>Word:b/c>Word:d>Term:^2>Word:Father>Word:and>Word:Daughter', ['WORD' => 6, 'BOOST' => 1]],
+            ['a:>b^2abc', 'Term:^2abc>Term:a:>b', ['BOOST' => 1, 'FILTER' => 1]],
+            ['a + b', 'Or>Word:a>Word:b', ['WORD' => 2]],
+            ['+(a:>b)-c:>d -e:<f', 'Or>Term:a:>b>ExcludeTerm>>Term:c:>d>ExcludeTerm>>Term:e:<f', ['FILTER' => 3, 'EXCLUDE' => 2]],
+            ['#cats #cats #cats', 'Or>Hashtag>>Word:cats>Hashtag>>Word:cats>Hashtag>>Word:cats', ['HASHTAG' => 3]],
+            ['http://www.google.com/#lol', 'Or>Url:http://www.google.com/>Hashtag>>Word:lol', ['URL' => 1, 'HASHTAG' => 1]],
+            ['http://www.google.com/?q=a+b+c+#lol', 'Or>Url:http://www.google.com/?q=a+b+c+>Hashtag>>Word:lol', ['URL' => 1, 'HASHTAG' => 1]],
+            ['http://www.google.com/?q=a-c&s=a+@mention', 'Or>Url:http://www.google.com/?q=a-c&s=a+>Mention>>Word:mention', ['URL' => 1, 'MENTION' => 1]],
+            ['http://warnerbros.112.2o7.net/b/ss/wbrostoofab/1/JS-1.5.1/s72034063232131?AQB=1&ndh=1&pf=1&t=22%2F9%2F2015%2016%3A1%3A39%204%20420&fid=64F69D01980887BB-1E04C009EEE2A59C&ce=UTF-8&ns=warnerbros&cdp=3&pageName=home%3Acollection%3A%3Ahome&g=http%3A%2F%2Ftoofab.com%2F&cc=USD&events=event6&c1=Toofab.us&v1=Toofab.us&c2=collection&v2=collection&c3=home&v3=home&c15=4%3A01PM&v15=4%3A01PM&c16=Thursday&v16=Thursday&c17=Weekday&v17=Weekday&c18=%2F&v18=%2F&c19=home%3Acollection%3A%3Ahome&v19=home%3Acollection%3A%3Ahome&c27=Repeat&v27=Repeat&c59=home&v59=home&s=1920x1080&c=24&j=1.6&v=Y&k=Y&bw=1552&bh=517&AQE=1', 'Url:http://warnerbros.112.2o7.net/b/ss/wbrostoofab/1/JS-1.5.1/s72034063232131?AQB=1&ndh=1&pf=1&t=22%2F9%2F2015%2016%3A1%3A39%204%20420&fid=64F69D01980887BB-1E04C009EEE2A59C&ce=UTF-8&ns=warnerbros&cdp=3&pageName=home%3Acollection%3A%3Ahome&g=http%3A%2F%2Ftoofab.com%2F&cc=USD&events=event6&c1=Toofab.us&v1=Toofab.us&c2=collection&v2=collection&c3=home&v3=home&c15=4%3A01PM&v15=4%3A01PM&c16=Thursday&v16=Thursday&c17=Weekday&v17=Weekday&c18=%2F&v18=%2F&c19=home%3Acollection%3A%3Ahome&v19=home%3Acollection%3A%3Ahome&c27=Repeat&v27=Repeat&c59=home&v59=home&s=1920x1080&c=24&j=1.6&v=Y&k=Y&bw=1552&bh=517&AQE=1', ['URL' => 1]],
         ];
     }
 
@@ -140,16 +140,8 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
         $query = $this->parser->parse();
 
         $this->assertInstanceOf('Gdbots\QueryParser\Node\Word', $query);
-        $this->assertEquals('phrase',$query->getToken());
-        $this->assertEquals(QueryScanner::T_WORD,$query->getTokenType());
-    }
-
-    public function testParseInvalidExcludeTermError()
-    {
-        $this->parser->readString('-"phrase');
-        $query = $this->parser->parse();
-        $this->assertNull($query);
-        $this->assertTrue($this->parser->hasErrors());
+        $this->assertEquals('phrase', $query->getToken());
+        $this->assertEquals(QueryScanner::T_WORD, $query->getTokenType());
     }
 
     public function testParseMultiHashtags()
@@ -198,15 +190,14 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
         $this->parser->readString('(("phrase" #phrase) table.fieldName:value)^123');
         $query = $this->parser->parse();
 
-        $output = " Term: ^ 123
-> Subexpression
->> Or
->>> Subexpression
->>>> Or
->>>>> Phrase: phrase
->>>>> Hashtag
->>>>>> Word: phrase
->>> Term: table.fieldName : value
+        $output = " Subexpression
+> Or
+>> Subexpression
+>>> Or
+>>>> Phrase: phrase
+>>>> Hashtag
+>>>>> Word: phrase
+>> Term: table.fieldName : value
 ";
 
         $this->assertEquals($output, $this->getPrintContent($query));
@@ -217,15 +208,14 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
         $this->parser->readString('(("phrase" OR #phrase) AND table.fieldName:value)^123');
         $query = $this->parser->parse();
 
-        $output = " Term: ^ 123
-> Subexpression
->> And
->>> Subexpression
->>>> Or
->>>>> Phrase: phrase
->>>>> Hashtag
->>>>>> Word: phrase
->>> Term: table.fieldName : value
+        $output = " Subexpression
+> And
+>> Subexpression
+>>> Or
+>>>> Phrase: phrase
+>>>> Hashtag
+>>>>> Word: phrase
+>> Term: table.fieldName : value
 ";
 
         $this->assertEquals($output, $this->getPrintContent($query));
@@ -240,8 +230,8 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
 > Phrase: phrase
 > Hashtag
 >> Word: phrase
+> Term: table.fieldName : value
 > Term: ^ 123
->> Term: table.fieldName : value
 ";
 
         $this->assertEquals($output, $this->getPrintContent($query));
