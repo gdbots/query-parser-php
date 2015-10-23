@@ -24,4 +24,16 @@ class SubExpression extends CompositeExpression
     {
         $visitor->visitSubExpression($this);
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getQueryItemsByTokenType($tokenType = null)
+    {
+        if ($this->getExpression()) {
+            return $this->getExpression()->getQueryItemsByTokenType($tokenType);
+        }
+
+        return [];
+    }
 }
