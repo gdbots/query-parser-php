@@ -109,10 +109,10 @@ class ExplicitTerm extends QueryItem
             $items[] = $this;
         }
 
-        if (!($this->getNominator() instanceof SimpleTerm)) {
+        if ($this->getNominator() && !($this->getNominator() instanceof SimpleTerm)) {
             $items = array_merge_recursive($items, $this->getNominator()->getQueryItemsByTokenType($tokenType));
         }
-        if (!($this->getTerm() instanceof SimpleTerm)) {
+        if ($this->getTerm() && !($this->getTerm() instanceof SimpleTerm)) {
             $items = array_merge_recursive($items, $this->getTerm()->getQueryItemsByTokenType($tokenType));
         }
 
