@@ -47,6 +47,21 @@ abstract class QueryItem
 
     /**
      * @param int   $parentTokenType
+     * @param mixed $default
+     *
+     * @return mixed
+     */
+    public function getParentTokenType($parentTokenType, $default = null)
+    {
+        if ($this->hasParentTokenType($parentTokenType)) {
+            return $this->parentTokenTypes[$parentTokenType];
+        }
+
+        return $default;
+    }
+
+    /**
+     * @param int   $parentTokenType
      * @param mixed $value
      *
      * @return QueryItem
