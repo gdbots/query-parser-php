@@ -59,7 +59,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
     /**
      * @dataProvider getTestParseWithPrintoutDataprovider
      */
-    public function testParseQuery($string, $print, $itemCount = null)
+    public function testParseQuery($string, $print)
     {
         $this->parser->readString($string, true);
         $query = $this->parser->parse();
@@ -69,36 +69,32 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
         $output = preg_replace('/\s+/', '', $output);
 
         $this->assertEquals($print, $output);
-
     }
 
     /**
      * @dataProvider getTestParseWithPrintoutDataprovider
      */
-    public function testGetQueryItemsByTokenType($string, $print, $itemCount=null){
-
+    public function testGetQueryItemsByTokenType($string, $print, $itemCount)
+    {
         $this->parser->readString($string, true);
         $query = $this->parser->parse();
 
-        if($itemCount) {
-            $tokens = $query->getQueryItemsByTokenType();
+        $tokens = $query->getQueryItemsByTokenType();
 
-
-            $totalCount = 0;
-            foreach($tokens as $tokenBuckets){
-                $totalCount += count($tokenBuckets);
-            }
-
-            $runningCount = 0;
-            foreach ($itemCount as $key => $value) {
-                $this->assertArrayHasKey($key, $tokens);
-                $this->assertEquals($value, count($tokens[$key]));
-                $runningCount += $value;
-            }
-
-            $this->assertEquals($totalCount, $runningCount);
+        $totalCount = 0;
+        foreach ($tokens as $tokenBuckets){
+            $totalCount += count($tokenBuckets);
         }
 
+        $runningCount = 0;
+        foreach ($itemCount as $key => $value) {
+            $runningCount += $value;
+
+            $this->assertArrayHasKey($key, $tokens);
+            $this->assertEquals($value, count($tokens[$key]));
+        }
+
+        $this->assertEquals($totalCount, $runningCount);
     }
 
     public function getTestParseWithPrintoutDataprovider()
@@ -128,7 +124,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
             ['http://a.com a:>500', 'Or>Word:http://a.com>Term:a:>500', ['FILTER' => 1, 'WORD' => 1]],
             ['a (b/c d)^2 Father and Daughter', 'Or>Word:a>Word:b/c>Term:d^2>Word:Father>Word:and>Word:Daughter', ['WORD' => 5, 'BOOST' => 1]],
             ['a:>b^2abc', 'Or>Term:^2>>Term:a:>b>Word:abc', ['FILTER' => 1, 'BOOST' => 1, 'WORD' => 1]],
-            ['a + b', 'Or>Word:a>Word:b', ['WORD' => 2]],
+            ['a + b', 'Or>Word:a>Phrase:+>Word:b', ['WORD' => 2, 'PHRASE' => 1]],
             ['+(a:>b)-c:>d -e:<f', 'Or>IncludeTerm>>Term:a:>b>Term:c:>d>ExcludeTerm>>Term:e:<f', ['INCLUDE' => 1, 'EXCLUDE' => 1, 'FILTER' => 3]],
             ['#cats #cats #cats', 'Hashtag>Word:cats', ['HASHTAG' => 1]],
             ['http://www.google.com/#lol', 'Hashtag>Word:http://www.google.com/#lol', ['WORD' => 1]],
