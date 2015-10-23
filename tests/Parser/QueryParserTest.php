@@ -134,6 +134,23 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
         ];
     }
 
+    public function testParseObject(){
+
+        //$string='a^2 #one abc "phaseone phrase two" +include -exclude a:>b @mention http://www.google.com #one^1 -@mention^1';
+        $string='a^2 #one #two^1 "phrase"';
+        $expected = array('HASHTAGS' => array(array('value' => 'one'), array('value' => 'two', 'boosted' =>1) ), 'PHRASE' => array(array('value' => 'phrase')), 'WORD' => array(array('value' => 'a', 'boosted' => 2)));
+        $resultObjectArray=array();
+
+        $this->parser->readString($string);
+        $query = $this->parser->parse();
+
+        foreach ($query->getExpressions() as $tokenItem) {
+            print_r($tokenItem);
+        }
+
+        exit;
+    }
+
     public function testParseTextWithUnclosedQuotes()
     {
         $this->parser->readString('"phrase');
