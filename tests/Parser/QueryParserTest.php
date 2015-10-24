@@ -97,6 +97,103 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($totalCount, $runningCount);
     }
 
+    /**
+     * @dataProvider getTestParseWithPrintoutDataprovider
+     */
+    public function testGetQueryItemsByTokenTypeUsingType($string, $print, $itemCount)
+    {
+        $this->parser->readString($string, true);
+        $query = $this->parser->parse();
+
+        foreach ($itemCount as $key => $value) {
+            $tokens = $query->getQueryItemsByTokenType(constant('Gdbots\QueryParser\Parser\QueryScanner::T_'.$key));
+            $count = count($tokens);
+            $this->assertEquals($value, $count);
+        }
+    }
+
+    public function testQueryParseObject(){
+
+        $tokenTypes = ['FILTER', 'HASHTAG', 'MENTION', 'PHRASE', 'URL', 'WORD'];
+        $string='a^2 "phrase" "boost phrase"^5 word -negated +required';
+        $expected = array('PHRASE' => array(array('value' => 'phrase'), array('value' => 'boost phrase', 'boost' => 5)), 'WORD' => array(array('value' => 'a', 'boost' => 2), array('value' => 'word'), array('value' => 'negated', 'negate' => true), array('value' => 'required', 'require' => true)) );
+
+        $this->parser->readString($string);
+        $query = $this->parser->parse();
+        $allTokenArray = [];
+
+        foreach ($tokenTypes as $tokenType) {
+            $tokens = $query->getQueryItemsByTokenType(constant('Gdbots\QueryParser\Parser\QueryScanner::T_'.$tokenType));
+
+            if (!empty($tokens)) {
+                foreach ($tokens as $token) {
+                    if (!($token instanceof \Gdbots\QueryParser\Node\SimpleTerm)) {
+                        if ($token->getTokenType() === QueryScanner::T_FILTER) {
+                            $tokenField = $token->getNominator()->getToken();
+                            $tokenValue = $token->getTerm()->getToken();
+                            $tokenTypeText = $token->getTokenTypeText();
+                            if ($token->hasParentTokenType(QueryScanner::T_BOOST)) {
+                                $boosted = $token->getParentTokenType(QueryScanner::T_BOOST);
+                            } else {
+                                $boosted = false;
+                            }
+                            $negated = $token->hasParentTokenType(QueryScanner::T_EXCLUDE);
+                            $required = $token->hasParentTokenType(QueryScanner::T_INCLUDE);
+                        }
+
+                        else {
+                            $tokenValue = $token->getExpression()->getToken();
+                            if ($token->getExpression()->hasParentTokenType(QueryScanner::T_BOOST)) {
+                                $boosted = $token->getExpression()->getParentTokenType(QueryScanner::T_BOOST);
+                            } else {
+                                $boosted = false;
+                            }
+                            $negated = $token->getExpression()->hasParentTokenType(QueryScanner::T_EXCLUDE);
+                            $required = $token->getExpression()->hasParentTokenType(QueryScanner::T_INCLUDE);
+                        }
+                     }
+                    else {
+                        $tokenValue = $token->getToken();
+                        if ($token->hasParentTokenType(QueryScanner::T_BOOST)){
+                            $boosted = $token->getParentTokenType(QueryScanner::T_BOOST);
+                        }
+                        else{
+                            $boosted = false;
+                        }
+                        $negated = $token->hasParentTokenType(QueryScanner::T_EXCLUDE);
+                        $required = $token->hasParentTokenType(QueryScanner::T_INCLUDE);
+                    }
+
+                    //build result array
+                    if ($token->getTokenType() === QueryScanner::T_FILTER){
+                        $tokenArray['field'] = $tokenField;
+                        $tokenArray['value'] = $tokenValue;
+                        $tokenArray['operator'] = $tokenTypeText;
+                    }
+                    else{
+                        $tokenArray['value'] = $tokenValue;
+                    }
+
+                    if ($boosted) {
+                        $tokenArray['boost'] = $boosted;
+                    }
+                    if ($negated) {
+                        $tokenArray['negate'] = true;
+                    }
+                    if ($required) {
+                        $tokenArray['require'] = true;
+                    }
+                    $allTokenArray[$tokenType][] = $tokenArray;
+                    $boosted = false;
+                    $required = false;
+                    $negated = false;
+                    $tokenArray = [];
+                }
+            }
+        }
+        $this->assertEquals($expected, $allTokenArray);
+    }
+
     public function getTestParseWithPrintoutDataprovider()
     {
         return [
@@ -134,22 +231,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
         ];
     }
 
-    public function testParseObject(){
 
-        //$string='a^2 #one abc "phaseone phrase two" +include -exclude a:>b @mention http://www.google.com #one^1 -@mention^1';
-        $string='a^2 #one #two^1 "phrase"';
-        $expected = array('HASHTAGS' => array(array('value' => 'one'), array('value' => 'two', 'boosted' =>1) ), 'PHRASE' => array(array('value' => 'phrase')), 'WORD' => array(array('value' => 'a', 'boosted' => 2)));
-        $resultObjectArray=array();
-
-        $this->parser->readString($string);
-        $query = $this->parser->parse();
-
-        foreach ($query->getExpressions() as $tokenItem) {
-            print_r($tokenItem);
-        }
-
-        exit;
-    }
 
     public function testParseTextWithUnclosedQuotes()
     {
