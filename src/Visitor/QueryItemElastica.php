@@ -59,36 +59,34 @@ class QueryItemElastica implements QueryItemVisitorInterface
      */
     public function visitExplicitTerm(Node\ExplicitTerm $term)
     {
-        // return boost object
-        if ($term->getTokenType() == QueryScanner::T_BOOST) {
-            return $term->getNominator()->accept($this);;
-        }
-
-        $query = null;
-
         if ($term->getNominator() instanceof Node\SimpleTerm) {
-            $query = new Term([
-                $term->getNominator()->getToken() => [
-                    'value' => $term->getTerm()->getToken()
-                ]
-            ]);
+            $operator = 'value';
 
-        } else {
-            $method = sprintf('visit%s', ucfirst(substr(get_class($term->getNominator()), 24)));
-            if (method_exists($this, $method)) {
-                $query = $this->$method($term->getNominator());
+            switch ($term->getTokenTypeText()) {
+                case ':>':
+                    $operator = 'gte';
+                    break;
+
+                case ':<';
+                    $operator = 'lt';
+                    break;
             }
+
+            $query = new Term([$term->getNominator()->getToken() => [$operator => $term->getTerm()->getToken()]]);
+
+            if ($term->hasParentTokenType(QueryScanner::T_BOOST)) {
+                $query->setParam('boost', $term->getParentTokenType(QueryScanner::T_BOOST));
+            }
+
+            return $query;
         }
 
-        if (!$query) {
-            return null;
+        $method = sprintf('visit%s', ucfirst(substr(get_class($term->getNominator()), 24)));
+        if (method_exists($this, $method)) {
+            return $this->$method($term->getNominator());
         }
 
-        if ($term->hasParentTokenType(QueryScanner::T_BOOST)) {
-            $query->setParam('boost', $term->getParentTokenType(QueryScanner::T_BOOST));
-        }
-
-        return $query;
+        return null;
     }
 
     /**
