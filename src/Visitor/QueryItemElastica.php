@@ -16,7 +16,13 @@ class QueryItemElastica implements QueryItemVisitorInterface
      */
     public function visitWord(Node\Word $word)
     {
-        return new QueryString($word->getToken());
+        $query = new QueryString($word->getToken());
+
+        if ($word->hasParentTokenType(QueryScanner::T_BOOST)) {
+            $query->setBoost($word->getParentTokenType(QueryScanner::T_BOOST));
+        }
+
+        return $query;
     }
 
     /**
@@ -24,7 +30,13 @@ class QueryItemElastica implements QueryItemVisitorInterface
      */
     public function visitPhrase(Node\Phrase $phrase)
     {
-        return new QueryString($phrase->getToken());
+        $query = new QueryString($phrase->getToken());
+
+        if ($phrase->hasParentTokenType(QueryScanner::T_BOOST)) {
+            $query->setBoost($phrase->getParentTokenType(QueryScanner::T_BOOST));
+        }
+
+        return $query;
     }
 
     /**
@@ -32,7 +44,13 @@ class QueryItemElastica implements QueryItemVisitorInterface
      */
     public function visitUrl(Node\Url $url)
     {
-        return new QueryString($url->getToken());
+        $query = new QueryString($url->getToken());
+
+        if ($url->hasParentTokenType(QueryScanner::T_BOOST)) {
+            $query->setBoost($url->getParentTokenType(QueryScanner::T_BOOST));
+        }
+
+        return $query;
     }
 
     /**
