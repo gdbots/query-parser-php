@@ -6,6 +6,7 @@ use Elastica\Filter\Query as FilterQuery;
 use Elastica\Query\BoolQuery;
 use Elastica\Query\Filtered;
 use Elastica\Query\QueryString;
+use Elastica\Query\Term;
 use Gdbots\QueryParser\Node;
 use Gdbots\QueryParser\Parser\QueryScanner;
 
@@ -63,23 +64,31 @@ class QueryItemElastica implements QueryItemVisitorInterface
             return $term->getNominator()->accept($this);;
         }
 
+        $query = null;
+
         if ($term->getNominator() instanceof Node\SimpleTerm) {
-            $queryNominator = $term->getNominator()->accept($this);
+            $query = new Term([
+                $term->getNominator()->getToken() => [
+                    'value' => $term->getTerm()->getToken()
+                ]
+            ]);
 
         } else {
             $method = sprintf('visit%s', ucfirst(substr(get_class($term->getNominator()), 24)));
             if (method_exists($this, $method)) {
-                $queryNominator = $this->$method($term->getNominator());
+                $query = $this->$method($term->getNominator());
             }
         }
 
-        $queryTerm = $term->getTerm()->accept($this);
-
-        if ($term->hasParentTokenType(QueryScanner::T_BOOST)) {
-            $queryTerm->setBoost($term->getParentTokenType(QueryScanner::T_BOOST));
+        if (!$query) {
+            return null;
         }
 
-        return new Filtered($queryNominator, new FilterQuery($queryTerm));
+        if ($term->hasParentTokenType(QueryScanner::T_BOOST)) {
+            $query->setParam('boost', $term->getParentTokenType(QueryScanner::T_BOOST));
+        }
+
+        return $query;
     }
 
     /**
