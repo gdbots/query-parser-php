@@ -62,7 +62,7 @@ abstract class CompositeExpression extends QueryItem
                 } else {
                     $items[] = $this;
                 }
-            } else {
+            } elseif (in_array($this->getTokenType(), [QueryScanner::T_EXCLUDE, QueryScanner::T_INCLUDE])) {
                 $items = array_merge_recursive($items, $this->getExpression()->getQueryItemsByTokenType($tokenType));
             }
         } else {

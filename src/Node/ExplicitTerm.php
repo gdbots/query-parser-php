@@ -109,7 +109,7 @@ class ExplicitTerm extends QueryItem
                 } else {
                     $items[] = $this;
                 }
-            } else {
+            } elseif (in_array($this->getTokenType(), [QueryScanner::T_BOOST])) {
                 if ($this->getNominator() && $this->getNominator() instanceof QueryItem) {
                     $items = array_merge_recursive($items, $this->getNominator()->getQueryItemsByTokenType($tokenType));
                 }
