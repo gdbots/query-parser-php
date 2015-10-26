@@ -4,7 +4,7 @@ namespace Gdbots\QueryParser\Visitor;
 
 use Gdbots\QueryParser\Node;
 
-class QueryItemPrinter implements QueryItemVisitorinterface
+class QueryItemPrinter implements QueryItemVisitorInterface
 {
     /**
      * @var integer depth

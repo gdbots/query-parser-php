@@ -3,7 +3,7 @@
 namespace Gdbots\QueryParser\Node;
 
 use Gdbots\QueryParser\Parser\QueryScanner;
-use Gdbots\QueryParser\Visitor\QueryItemVisitorinterface;
+use Gdbots\QueryParser\Visitor\QueryItemVisitorInterface;
 
 class ExplicitTerm extends QueryItem
 {
@@ -130,7 +130,7 @@ class ExplicitTerm extends QueryItem
     /**
      * {@inheritDoc}
      */
-    public function accept(QueryItemVisitorinterface $visitor)
+    public function accept(QueryItemVisitorInterface $visitor)
     {
         $visitor->visitExplicitTerm($this);
     }

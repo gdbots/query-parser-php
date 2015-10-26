@@ -2,7 +2,7 @@
 
 namespace Gdbots\QueryParser\Node;
 
-use Gdbots\QueryParser\Visitor\QueryItemVisitorinterface;
+use Gdbots\QueryParser\Visitor\QueryItemVisitorInterface;
 
 class ExcludeTerm extends CompositeExpression
 {
@@ -20,7 +20,7 @@ class ExcludeTerm extends CompositeExpression
     /**
      * {@inheritDoc}
      */
-    public function accept(QueryItemVisitorinterface $visitor)
+    public function accept(QueryItemVisitorInterface $visitor)
     {
         $visitor->visitExcludeTerm($this);
     }

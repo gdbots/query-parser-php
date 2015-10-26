@@ -3,7 +3,7 @@
 namespace Gdbots\QueryParser\Node;
 
 use Gdbots\QueryParser\Parser\QueryScanner;
-use Gdbots\QueryParser\Visitor\QueryItemVisitorinterface;
+use Gdbots\QueryParser\Visitor\QueryItemVisitorInterface;
 
 class Phrase extends SimpleTerm
 {
@@ -49,7 +49,7 @@ class Phrase extends SimpleTerm
     /**
      * {@inheritDoc}
      */
-    public function accept(QueryItemVisitorinterface $visitor)
+    public function accept(QueryItemVisitorInterface $visitor)
     {
         $visitor->visitPhrase($this);
     }

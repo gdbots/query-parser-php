@@ -2,7 +2,7 @@
 
 namespace Gdbots\QueryParser\Node;
 
-use Gdbots\QueryParser\Visitor\QueryItemVisitorinterface;
+use Gdbots\QueryParser\Visitor\QueryItemVisitorInterface;
 
 class Mention extends CompositeExpression
 {
@@ -20,7 +20,7 @@ class Mention extends CompositeExpression
     /**
      * {@inheritDoc}
      */
-    public function accept(QueryItemVisitorinterface $visitor)
+    public function accept(QueryItemVisitorInterface $visitor)
     {
         $visitor->visitMention($this);
     }

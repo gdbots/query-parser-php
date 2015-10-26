@@ -2,7 +2,7 @@
 
 namespace Gdbots\QueryParser\Node;
 
-use Gdbots\QueryParser\Visitor\QueryItemVisitorinterface;
+use Gdbots\QueryParser\Visitor\QueryItemVisitorInterface;
 
 class AndExpressionList extends ExpressionList
 {
@@ -20,7 +20,7 @@ class AndExpressionList extends ExpressionList
     /**
      * {@inheritDoc}
      */
-    public function accept(QueryItemVisitorinterface $visitor)
+    public function accept(QueryItemVisitorInterface $visitor)
     {
         $visitor->visitAndExpressionList($this);
     }

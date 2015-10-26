@@ -4,7 +4,7 @@ namespace Gdbots\QueryParser\Visitor;
 
 use Gdbots\QueryParser\Node;
 
-interface QueryItemVisitorinterface
+interface QueryItemVisitorInterface
 {
     /**
      * @param Node\Word $word

@@ -2,7 +2,7 @@
 
 namespace Gdbots\QueryParser\Node;
 
-use Gdbots\QueryParser\Visitor\QueryItemVisitorinterface;
+use Gdbots\QueryParser\Visitor\QueryItemVisitorInterface;
 
 abstract class QueryItem
 {
@@ -108,7 +108,7 @@ abstract class QueryItem
     }
 
     /**
-     * @param QueryItemVisitorinterface $visitor
+     * @param QueryItemVisitorInterface $visitor
      */
-    abstract public function accept(QueryItemVisitorinterface $visitor);
+    abstract public function accept(QueryItemVisitorInterface $visitor);
 }
