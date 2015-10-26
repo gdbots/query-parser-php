@@ -18,7 +18,7 @@ abstract class CompositeExpression extends QueryItem
     {
         $this->expression = $expression;
 
-        if (!($this->expression instanceof SimpleTerm)) {
+        if (in_array($this->getTokenType(), [QueryScanner::T_EXCLUDE, QueryScanner::T_INCLUDE])) {
             $this->expression->addParentTokenType($this->getTokenType());
         }
     }
