@@ -51,6 +51,6 @@ class Phrase extends SimpleTerm
      */
     public function accept(QueryItemVisitorInterface $visitor)
     {
-        $visitor->visitPhrase($this);
+        return $visitor->visitPhrase($this);
     }
 }

@@ -22,6 +22,6 @@ class IncludeTerm extends CompositeExpression
      */
     public function accept(QueryItemVisitorInterface $visitor)
     {
-        $visitor->visitIncludeTerm($this);
+        return $visitor->visitIncludeTerm($this);
     }
 }

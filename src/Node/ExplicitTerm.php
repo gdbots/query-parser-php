@@ -132,6 +132,6 @@ class ExplicitTerm extends QueryItem
      */
     public function accept(QueryItemVisitorInterface $visitor)
     {
-        $visitor->visitExplicitTerm($this);
+        return $visitor->visitExplicitTerm($this);
     }
 }

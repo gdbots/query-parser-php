@@ -22,6 +22,6 @@ class Hashtag extends CompositeExpression
      */
     public function accept(QueryItemVisitorInterface $visitor)
     {
-        $visitor->visitHashtag($this);
+        return $visitor->visitHashtag($this);
     }
 }

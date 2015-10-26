@@ -22,6 +22,6 @@ class ExcludeTerm extends CompositeExpression
      */
     public function accept(QueryItemVisitorInterface $visitor)
     {
-        $visitor->visitExcludeTerm($this);
+        return $visitor->visitExcludeTerm($this);
     }
 }

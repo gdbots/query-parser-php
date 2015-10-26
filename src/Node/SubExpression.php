@@ -22,7 +22,7 @@ class SubExpression extends CompositeExpression
      */
     public function accept(QueryItemVisitorInterface $visitor)
     {
-        $visitor->visitSubExpression($this);
+        return $visitor->visitSubExpression($this);
     }
 
     /**

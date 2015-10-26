@@ -22,6 +22,6 @@ class OrExpressionList extends ExpressionList
      */
     public function accept(QueryItemVisitorInterface $visitor)
     {
-        $visitor->visitOrExpressionList($this);
+        return $visitor->visitOrExpressionList($this);
     }
 }

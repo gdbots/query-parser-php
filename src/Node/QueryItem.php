@@ -109,6 +109,8 @@ abstract class QueryItem
 
     /**
      * @param QueryItemVisitorInterface $visitor
+     *
+     * @return mixed
      */
     abstract public function accept(QueryItemVisitorInterface $visitor);
 }

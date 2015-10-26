@@ -22,6 +22,6 @@ class AndExpressionList extends ExpressionList
      */
     public function accept(QueryItemVisitorInterface $visitor)
     {
-        $visitor->visitAndExpressionList($this);
+        return $visitor->visitAndExpressionList($this);
     }
 }

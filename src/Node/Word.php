@@ -31,6 +31,6 @@ class Word extends SimpleTerm
      */
     public function accept(QueryItemVisitorInterface $visitor)
     {
-        $visitor->visitWord($this);
+        return $visitor->visitWord($this);
     }
 }

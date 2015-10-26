@@ -31,6 +31,6 @@ class Url extends SimpleTerm
      */
     public function accept(QueryItemVisitorInterface $visitor)
     {
-        $visitor->visitUrl($this);
+        return $visitor->visitUrl($this);
     }
 }
