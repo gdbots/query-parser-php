@@ -115,8 +115,19 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
     public function testQueryParseObject(){
 
         $tokenTypes = ['FILTER', 'HASHTAG', 'MENTION', 'PHRASE', 'URL', 'WORD'];
-        $string='a^2 "phrase" "boost phrase"^5 word -negated +required';
-        $expected = array('PHRASE' => array(array('value' => 'phrase'), array('value' => 'boost phrase', 'boost' => 5)), 'WORD' => array(array('value' => 'a', 'boost' => 2), array('value' => 'word'), array('value' => 'negated', 'negate' => true), array('value' => 'required', 'require' => true)) );
+        $string = 'a^2 "phrase" "boost phrase"^5 word -excluded +included';
+        $expected = [
+            'PHRASE' => [
+                ['value' => 'phrase'],
+                ['value' => 'boost phrase', 'boost' => 5]
+            ],
+            'WORD' => [
+                ['value' => 'a', 'boost' => 2],
+                ['value' => 'word'],
+                ['value' => 'excluded', 'exclude' => true],
+                ['value' => 'included', 'include' => true]
+            ]
+        ];
 
         $this->parser->readString($string);
         $query = $this->parser->parse();
@@ -127,70 +138,54 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
 
             if (!empty($tokens)) {
                 foreach ($tokens as $token) {
-                    if (!($token instanceof \Gdbots\QueryParser\Node\SimpleTerm)) {
+                    $boosted = false;
+                    $included = false;
+                    $excluded = false;
+                    $tokenArray = [];
+
+                    if (!($token instanceof Node\SimpleTerm)) {
                         if ($token->getTokenType() === QueryScanner::T_FILTER) {
                             $tokenField = $token->getNominator()->getToken();
                             $tokenValue = $token->getTerm()->getToken();
                             $tokenTypeText = $token->getTokenTypeText();
-                            if ($token->hasParentTokenType(QueryScanner::T_BOOST)) {
-                                $boosted = $token->getParentTokenType(QueryScanner::T_BOOST);
-                            } else {
-                                $boosted = false;
-                            }
-                            $negated = $token->hasParentTokenType(QueryScanner::T_EXCLUDE);
-                            $required = $token->hasParentTokenType(QueryScanner::T_INCLUDE);
-                        }
-
-                        else {
+                            $boosted = $token->getParentTokenType(QueryScanner::T_BOOST, false);
+                            $excluded = $token->hasParentTokenType(QueryScanner::T_EXCLUDE);
+                            $included = $token->hasParentTokenType(QueryScanner::T_INCLUDE);
+                        } else {
                             $tokenValue = $token->getExpression()->getToken();
-                            if ($token->getExpression()->hasParentTokenType(QueryScanner::T_BOOST)) {
-                                $boosted = $token->getExpression()->getParentTokenType(QueryScanner::T_BOOST);
-                            } else {
-                                $boosted = false;
-                            }
-                            $negated = $token->getExpression()->hasParentTokenType(QueryScanner::T_EXCLUDE);
-                            $required = $token->getExpression()->hasParentTokenType(QueryScanner::T_INCLUDE);
+                            $boosted = $token->getExpression()->getParentTokenType(QueryScanner::T_BOOST, false);
+                            $excluded = $token->getExpression()->hasParentTokenType(QueryScanner::T_EXCLUDE);
+                            $included = $token->getExpression()->hasParentTokenType(QueryScanner::T_INCLUDE);
                         }
-                     }
-                    else {
+                    } else {
                         $tokenValue = $token->getToken();
-                        if ($token->hasParentTokenType(QueryScanner::T_BOOST)){
-                            $boosted = $token->getParentTokenType(QueryScanner::T_BOOST);
-                        }
-                        else{
-                            $boosted = false;
-                        }
-                        $negated = $token->hasParentTokenType(QueryScanner::T_EXCLUDE);
-                        $required = $token->hasParentTokenType(QueryScanner::T_INCLUDE);
+                        $boosted = $token->getParentTokenType(QueryScanner::T_BOOST, false);
+                        $excluded = $token->hasParentTokenType(QueryScanner::T_EXCLUDE);
+                        $included = $token->hasParentTokenType(QueryScanner::T_INCLUDE);
                     }
 
-                    //build result array
-                    if ($token->getTokenType() === QueryScanner::T_FILTER){
+                    if ($token->getTokenType() === QueryScanner::T_FILTER) {
                         $tokenArray['field'] = $tokenField;
                         $tokenArray['value'] = $tokenValue;
                         $tokenArray['operator'] = $tokenTypeText;
-                    }
-                    else{
+                    } else{
                         $tokenArray['value'] = $tokenValue;
                     }
-
                     if ($boosted) {
                         $tokenArray['boost'] = $boosted;
                     }
-                    if ($negated) {
-                        $tokenArray['negate'] = true;
+                    if ($excluded) {
+                        $tokenArray['exclude'] = true;
                     }
-                    if ($required) {
-                        $tokenArray['require'] = true;
+                    if ($included) {
+                        $tokenArray['include'] = true;
                     }
+
                     $allTokenArray[$tokenType][] = $tokenArray;
-                    $boosted = false;
-                    $required = false;
-                    $negated = false;
-                    $tokenArray = [];
                 }
             }
         }
+
         $this->assertEquals($expected, $allTokenArray);
     }
 
