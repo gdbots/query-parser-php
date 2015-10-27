@@ -157,10 +157,12 @@ class QueryItemPrinter implements QueryItemVisitorInterface
      */
     public function visitHashtag(Node\Hashtag $hashtag)
     {
-        $this->printIndentedLine('Hashtag');
-        $this->increaseIndent();
-        $hashtag->getExpression()->accept($this);
-        $this->decreaseIndent();
+        $this->printIndentedLine(sprintf(
+            'Hashtag: %s%s%s',
+            $this->printPrefix($hashtag),
+            $hashtag->getExpression()->getToken(),
+            $this->printPostfix($hashtag)
+        ));
     }
 
     /**
@@ -168,10 +170,12 @@ class QueryItemPrinter implements QueryItemVisitorInterface
      */
     public function visitMention(Node\Mention $mention)
     {
-        $this->printIndentedLine('Mention');
-        $this->increaseIndent();
-        $mention->getExpression()->accept($this);
-        $this->decreaseIndent();
+        $this->printIndentedLine(sprintf(
+            'Mention: %s%s%s',
+            $this->printPrefix($mention),
+            $mention->getExpression()->getToken(),
+            $this->printPostfix($mention)
+        ));
     }
 
     /**
