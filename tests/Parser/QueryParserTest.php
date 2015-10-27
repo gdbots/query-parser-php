@@ -134,46 +134,46 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
                     $excluded = false;
                     $tokenArray = [];
 
-                if (!($token instanceof Node\SimpleTerm)) {
-                    if ($token->getTokenType() === QueryScanner::T_FILTER) {
-                        $tokenField = $token->getNominator()->getToken();
-                        $tokenValue = $token->getTerm()->getToken();
-                        $tokenTypeText = $token->getTokenTypeText();
+                    if (!($token instanceof Node\SimpleTerm)) {
+                        if ($token->getTokenType() === QueryScanner::T_FILTER) {
+                            $tokenField = $token->getNominator()->getToken();
+                            $tokenValue = $token->getTerm()->getToken();
+                            $tokenTypeText = $token->getTokenTypeText();
+                            $boosted = $token->getParentTokenType(QueryScanner::T_BOOST, false);
+                            $excluded = $token->hasParentTokenType(QueryScanner::T_EXCLUDE);
+                            $included = $token->hasParentTokenType(QueryScanner::T_INCLUDE);
+                        } else {
+                            $tokenValue = $token->getExpression()->getToken();
+                            $boosted = $token->getExpression()->getParentTokenType(QueryScanner::T_BOOST, false);
+                            $excluded = $token->getExpression()->hasParentTokenType(QueryScanner::T_EXCLUDE);
+                            $included = $token->getExpression()->hasParentTokenType(QueryScanner::T_INCLUDE);
+                        }
+                    } else {
+                        $tokenValue = $token->getToken();
                         $boosted = $token->getParentTokenType(QueryScanner::T_BOOST, false);
                         $excluded = $token->hasParentTokenType(QueryScanner::T_EXCLUDE);
                         $included = $token->hasParentTokenType(QueryScanner::T_INCLUDE);
-                    } else {
-                        $tokenValue = $token->getExpression()->getToken();
-                        $boosted = $token->getExpression()->getParentTokenType(QueryScanner::T_BOOST, false);
-                        $excluded = $token->getExpression()->hasParentTokenType(QueryScanner::T_EXCLUDE);
-                        $included = $token->getExpression()->hasParentTokenType(QueryScanner::T_INCLUDE);
                     }
-                } else {
-                    $tokenValue = $token->getToken();
-                    $boosted = $token->getParentTokenType(QueryScanner::T_BOOST, false);
-                    $excluded = $token->hasParentTokenType(QueryScanner::T_EXCLUDE);
-                    $included = $token->hasParentTokenType(QueryScanner::T_INCLUDE);
-                }
 
-                if ($token->getTokenType() === QueryScanner::T_FILTER) {
-                    $tokenArray['field'] = $tokenField;
-                    $tokenArray['value'] = $tokenValue;
-                    $tokenArray['operator'] = $tokenTypeText;
-                } else {
-                    $tokenArray['value'] = $tokenValue;
-                }
+                    if ($token->getTokenType() === QueryScanner::T_FILTER) {
+                        $tokenArray['field'] = $tokenField;
+                        $tokenArray['value'] = $tokenValue;
+                        $tokenArray['operator'] = $tokenTypeText;
+                    } else {
+                        $tokenArray['value'] = $tokenValue;
+                    }
 
-                if ($boosted) {
-                    $tokenArray['boost'] = $boosted;
-                }
-                if ($excluded) {
-                    $tokenArray['exclude'] = true;
-                }
-                if ($included) {
-                    $tokenArray['include'] = true;
-                }
+                    if ($boosted) {
+                        $tokenArray['boost'] = $boosted;
+                    }
+                    if ($excluded) {
+                        $tokenArray['exclude'] = true;
+                    }
+                    if ($included) {
+                        $tokenArray['include'] = true;
+                    }
 
-                $allTokenArray[$tokenType][] = $tokenArray;
+                    $allTokenArray[$tokenType][] = $tokenArray;
                 }
             }
         }

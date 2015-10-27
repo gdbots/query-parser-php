@@ -75,13 +75,14 @@ class QueryItemPrinter implements QueryItemVisitorInterface
     public function visitExplicitTerm(Node\ExplicitTerm $term)
     {
         if ($term->getNominator() instanceof Node\SimpleTerm) {
-            $this->printIndentedLine(sprintf('Term: %s %s %s',
-                                                $term->getNominator()->getToken(),
-                                                $term->getTokenTypeText(),
-                                                $term->getTerm()->getToken()
-                                            )
-                                    );
-
+            $this->printIndentedLine(
+                sprintf(
+                    'Term: %s %s %s',
+                    $term->getNominator()->getToken(),
+                    $term->getTokenTypeText(),
+                    $term->getTerm()->getToken()
+                )
+            );
         } else {
             $this->printIndentedLine(sprintf('Term: %s %s', $term->getTokenTypeText(), $term->getTerm()->getToken()));
             $this->increaseIndent();
