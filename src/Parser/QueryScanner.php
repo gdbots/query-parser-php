@@ -168,7 +168,7 @@ class QueryScanner
         self::T_QUOTE   => '/^(\")([^\"]*)$/',
 
         // WORD matches letters, numbers, underscores, hyphens and
-        // points (think eg. To dibe_relict.101) Can not match up
+        // points (think eg. To hello_world.101) Can not match up
         // truncation characters and accents, which should be
         // encapsulated in quotes.
         self::T_WORD => '/^([\S][^\s\:\^]*)(.*)/',
@@ -296,9 +296,7 @@ class QueryScanner
                     }
 
                     $matches[$orgKey] = $value;
-                }
-                // update value
-                else {
+                } else {
                     $matches[$key] = $value;
                 }
             }
@@ -420,7 +418,7 @@ class QueryScanner
             $input .= ')';
         }
 
-        // remove duplicate charactors and spaces
+        // remove duplicate characters and spaces
         $input = preg_replace('/\s+/', ' ', $input);
         $input = preg_replace('/(OR|AND)(\s)(OR|AND)/', '$1', $input);
         $input = preg_replace('/(\()(\s?)(OR|AND)(\s?)/', '$1', $input);
@@ -446,7 +444,7 @@ class QueryScanner
     }
 
     /**
-     * Returns a textual verion of the token type:
+     * Returns a textual version of the token type:
      * - the token type (constant) if given
      * - the last processed token if no parameter is passed
      *

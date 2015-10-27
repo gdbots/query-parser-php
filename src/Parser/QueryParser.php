@@ -59,7 +59,7 @@ class QueryParser
     /**
      * Private function to add an error message to the errors array.
      *
-     * @param string $input
+     * @param string $message
      */
     protected function addError($message)
     {
@@ -101,9 +101,10 @@ class QueryParser
         }
 
         if ($tokenType == QueryScanner::T_FILTER && $term->getTokenType() == QueryScanner::T_PHRASE) {
-            $this->addError(
-                sprintf('Error: FILTER only support Word. Found: "%s"', $this->scanner->getTokenTypeText())
-            );
+            $this->addError(sprintf(
+                'Error: FILTER only support Word. Found: "%s"',
+                $this->scanner->getTokenTypeText()
+            ));
 
             return $term;
         }
@@ -128,9 +129,10 @@ class QueryParser
                 break;
 
             default:
-                $this->addError(
-                    sprintf('Error: Expected Word or Phrase. Found: "%s"', $this->scanner->getTokenTypeText())
-                );
+                $this->addError(sprintf(
+                    'Error: Expected Word or Phrase. Found: "%s"',
+                    $this->scanner->getTokenTypeText()
+                ));
 
                 return null;
         }
@@ -160,7 +162,7 @@ class QueryParser
     {
         switch ($tokenType) {
             case QueryScanner::T_OPEN_PARENTHESIS:
-                return $this->readSubQuery($tokenType);
+                return $this->readSubQuery();
 
             case QueryScanner::T_PHRASE:
                 $text = new Node\Phrase($this->scanner->getToken());
@@ -181,9 +183,12 @@ class QueryParser
                         $term = new Node\ExcludeTerm($expression->getNominator());
                         return new Node\ExplicitTerm($term, $expression->getTokenType(), '^', $expression->getTerm());
                     }
+
                     return new Node\ExcludeTerm($expression);
                 }
+
                 $this->addError('Error: EXCLUDE not followed by a valid expression.');
+
                 break;
 
             case QueryScanner::T_INCLUDE:
@@ -193,9 +198,12 @@ class QueryParser
                         $term = new Node\IncludeTerm($expression->getNominator());
                         return new Node\ExplicitTerm($term, $expression->getTokenType(), '^', $expression->getTerm());
                     }
+
                     return new Node\IncludeTerm($expression);
                 }
+
                 $this->addError('Error: INCLUDE not followed by a valid expression.');
+
                 break;
 
             case QueryScanner::T_HASHTAG:
@@ -205,9 +213,12 @@ class QueryParser
                         $term = new Node\Hashtag($expression->getNominator());
                         return new Node\ExplicitTerm($term, $expression->getTokenType(), '^', $expression->getTerm());
                     }
+
                     return new Node\Hashtag($expression);
                 }
+
                 $this->addError('Error: HASHTAG not followed by a valid expression.');
+
                 break;
 
             case QueryScanner::T_MENTION:
@@ -217,9 +228,12 @@ class QueryParser
                         $term = new Node\Mention($expression->getNominator());
                         return new Node\ExplicitTerm($term, $expression->getTokenType(), '^', $expression->getTerm());
                     }
+
                     return new Node\Mention($expression);
                 }
+
                 $this->addError('Error: MENTION not followed by a valid expression.');
+
                 break;
 
             case QueryScanner::T_ILLEGAL:
@@ -268,38 +282,36 @@ class QueryParser
      * - Expression
      * - Expression OR Expression OR ...
      *
-     * @param int $tokenType
-     *
      * @return \Gdbots\QueryParser\Node\QueryItem|null
      */
-    protected function readOrExpressionList($tokenType)
+    protected function readOrExpressionList()
     {
         $expressions = [];
-        $lastExpression = false;
 
         do {
             $lastExpression = $this->readExpression($this->scanner->getTokenType());
 
             if ($this->scanner->getTokenType() == QueryScanner::T_BOOST) {
-                $expression = $this->readExpression($this->scanner->next());
-                $lastExpression = new Node\ExplicitTerm($lastExpression, QueryScanner::T_BOOST, '^', $expression);
+
+                /** @var \Gdbots\QueryParser\Node\QueryItem|null $expression */
+                if ($expression = $this->readExpression($this->scanner->next())) {
+                    $lastExpression = new Node\ExplicitTerm($lastExpression, QueryScanner::T_BOOST, '^', $expression);
+                }
             }
 
             $expressions[] = $lastExpression;
 
-        } while ($lastExpression
-                    && $this->scanner->getTokenType() == QueryScanner::T_OR_OPERATOR
-                    && $this->scanner->next()
-                );
+        } while (
+            $lastExpression &&
+            $this->scanner->getTokenType() == QueryScanner::T_OR_OPERATOR &&
+            $this->scanner->next()
+        );
 
-        if ($lastExpression) {
-            if (count($expressions) === 1) {
-                return $expressions[0];
-            }
-            return new Node\OrExpressionList($expressions);
+        if (count($expressions) === 1) {
+            return $expressions[0];
         }
 
-        return null;
+        return new Node\OrExpressionList($expressions);
     }
 
     /**
@@ -307,23 +319,23 @@ class QueryParser
      * - Expression
      * - Expression AND Expression AND ...
      *
-     * @param int $tokenType
-     *
      * @return \Gdbots\QueryParser\Node\QueryItem|null
      */
-    protected function readAndExpressionList($tokenType)
+    protected function readAndExpressionList()
     {
+        $this->scanner->next();
+
         $expressions = [];
-        $lastExpression = false;
 
         do {
-            $lastExpression = $this->readOrExpressionList($this->scanner->getTokenType());
+            $lastExpression = $this->readOrExpressionList();
             $expressions[] = $lastExpression;
 
-        } while ($lastExpression
-                    && $this->scanner->getTokenType() == QueryScanner::T_AND_OPERATOR
-                    && $this->scanner->next()
-                );
+        } while (
+            $lastExpression &&
+            $this->scanner->getTokenType() == QueryScanner::T_AND_OPERATOR &&
+            $this->scanner->next()
+        );
 
         switch ($this->scanner->getTokenType()) {
             case QueryScanner::T_CLOSE_PARENTHESIS:
@@ -331,6 +343,7 @@ class QueryParser
                 if (count($expressions) === 1) {
                     return $expressions[0];
                 }
+
                 return new Node\AndExpressionList($expressions);
         }
 
@@ -342,13 +355,11 @@ class QueryParser
     /**
      * Makes the parser read expressions between parentheses.
      *
-     * @param int $tokenType
-     *
      * @return \Gdbots\QueryParser\Node\QueryItem|null
      */
-    protected function readSubQuery($tokenType)
+    protected function readSubQuery()
     {
-        $expressionlist = $this->readAndExpressionList($this->scanner->next());
+        $expressionlist = $this->readAndExpressionList();
         if ($this->scanner->getTokenType() == QueryScanner::T_CLOSE_PARENTHESIS) {
             $this->scanner->next();
 
@@ -371,6 +382,6 @@ class QueryParser
      */
     public function parse()
     {
-        return $this->readAndExpressionList($this->scanner->next());
+        return $this->readAndExpressionList();
     }
 }
