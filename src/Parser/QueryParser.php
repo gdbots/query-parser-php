@@ -101,7 +101,9 @@ class QueryParser
         }
 
         if ($tokenType == QueryScanner::T_FILTER && $term->getTokenType() == QueryScanner::T_PHRASE) {
-            $this->addError(sprintf('Error: FILTER only support Word. Found: "%s"', $this->scanner->getTokenTypeText()));
+            $this->addError(
+                sprintf('Error: FILTER only support Word. Found: "%s"', $this->scanner->getTokenTypeText())
+            );
 
             return $term;
         }
@@ -126,7 +128,9 @@ class QueryParser
                 break;
 
             default:
-                $this->addError(sprintf('Error: Expected Word or Phrase. Found: "%s"', $this->scanner->getTokenTypeText()));
+                $this->addError(
+                    sprintf('Error: Expected Word or Phrase. Found: "%s"', $this->scanner->getTokenTypeText())
+                );
 
                 return null;
         }
@@ -176,13 +180,10 @@ class QueryParser
                     if ($expression->getTokenType() == QueryScanner::T_BOOST) {
                         $term = new Node\ExcludeTerm($expression->getNominator());
                         return new Node\ExplicitTerm($term, $expression->getTokenType(), '^', $expression->getTerm());
-                    } else {
-                        return new Node\ExcludeTerm($expression);
                     }
-                } else {
-                    $this->addError('Error: EXCLUDE not followed by a valid expression.');
+                    return new Node\ExcludeTerm($expression);
                 }
-
+                $this->addError('Error: EXCLUDE not followed by a valid expression.');
                 break;
 
             case QueryScanner::T_INCLUDE:
@@ -191,13 +192,10 @@ class QueryParser
                     if ($expression->getTokenType() == QueryScanner::T_BOOST) {
                         $term = new Node\IncludeTerm($expression->getNominator());
                         return new Node\ExplicitTerm($term, $expression->getTokenType(), '^', $expression->getTerm());
-                    } else {
-                        return new Node\IncludeTerm($expression);
                     }
-                } else {
-                    $this->addError('Error: INCLUDE not followed by a valid expression.');
+                    return new Node\IncludeTerm($expression);
                 }
-
+                $this->addError('Error: INCLUDE not followed by a valid expression.');
                 break;
 
             case QueryScanner::T_HASHTAG:
@@ -206,13 +204,10 @@ class QueryParser
                     if ($expression->getTokenType() == QueryScanner::T_BOOST) {
                         $term = new Node\Hashtag($expression->getNominator());
                         return new Node\ExplicitTerm($term, $expression->getTokenType(), '^', $expression->getTerm());
-                    } else {
-                        return new Node\Hashtag($expression);
                     }
-                } else {
-                    $this->addError('Error: HASHTAG not followed by a valid expression.');
+                    return new Node\Hashtag($expression);
                 }
-
+                $this->addError('Error: HASHTAG not followed by a valid expression.');
                 break;
 
             case QueryScanner::T_MENTION:
@@ -221,13 +216,10 @@ class QueryParser
                     if ($expression->getTokenType() == QueryScanner::T_BOOST) {
                         $term = new Node\Mention($expression->getNominator());
                         return new Node\ExplicitTerm($term, $expression->getTokenType(), '^', $expression->getTerm());
-                    } else {
-                        return new Node\Mention($expression);
                     }
-                } else {
-                    $this->addError('Error: MENTION not followed by a valid expression.');
+                    return new Node\Mention($expression);
                 }
-
+                $this->addError('Error: MENTION not followed by a valid expression.');
                 break;
 
             case QueryScanner::T_ILLEGAL:
@@ -295,14 +287,16 @@ class QueryParser
 
             $expressions[] = $lastExpression;
 
-        } while ($lastExpression && $this->scanner->getTokenType() == QueryScanner::T_OR_OPERATOR && $this->scanner->next());
+        } while ($lastExpression
+                    && $this->scanner->getTokenType() == QueryScanner::T_OR_OPERATOR
+                    && $this->scanner->next()
+                );
 
         if ($lastExpression) {
             if (count($expressions) === 1) {
                 return $expressions[0];
-            } else {
-                return new Node\OrExpressionList($expressions);
             }
+            return new Node\OrExpressionList($expressions);
         }
 
         return null;
@@ -326,7 +320,10 @@ class QueryParser
             $lastExpression = $this->readOrExpressionList($this->scanner->getTokenType());
             $expressions[] = $lastExpression;
 
-        } while ($lastExpression && $this->scanner->getTokenType() == QueryScanner::T_AND_OPERATOR && $this->scanner->next());
+        } while ($lastExpression
+                    && $this->scanner->getTokenType() == QueryScanner::T_AND_OPERATOR
+                    && $this->scanner->next()
+                );
 
         switch ($this->scanner->getTokenType()) {
             case QueryScanner::T_CLOSE_PARENTHESIS:

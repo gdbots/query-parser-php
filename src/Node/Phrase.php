@@ -41,9 +41,9 @@ class Phrase extends SimpleTerm
     {
         if (strlen($text) > 2) {
             return substr($text, 1, strlen($text)-2);
-        } else {
-            return $text;
         }
+        return $text;
+
     }
 
     /**

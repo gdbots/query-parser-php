@@ -67,7 +67,7 @@ class QueryItemElastica implements QueryItemVisitorInterface
                     $operator = 'gte';
                     break;
 
-                case ':<';
+                case ':<':
                     $operator = 'lt';
                     break;
             }

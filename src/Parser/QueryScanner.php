@@ -306,7 +306,6 @@ class QueryScanner
             // phase 2: modify special characters
             $prevKey = -1;
             foreach ($matches as $key => $value) {
-
                 // delete value that is a special characters
                 if (preg_match(self::REGEX_TOKENS, $value, $m) && $m[0] == $value) {
                     unset($matches[$key]);
