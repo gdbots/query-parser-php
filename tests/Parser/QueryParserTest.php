@@ -164,12 +164,9 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
         $query = $this->parser->parse();
 
         $output = " Or
-> Hashtag
->> Word: one
-> Hashtag
->> Word: two
-> Hashtag
->> Word: three
+> Hashtag: one
+> Hashtag: two
+> Hashtag: three
 ";
 
         $this->assertEquals($output, $this->getPrintContent($query));
@@ -180,8 +177,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
         $this->parser->readString('##phrase');
         $query = $this->parser->parse();
 
-        $output = " Hashtag
-> Word: phrase
+        $output = " Hashtag: phrase
 ";
 
         $this->assertEquals($output, $this->getPrintContent($query));
@@ -208,8 +204,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
 >> Subexpression
 >>> Or
 >>>> Phrase: phrase
->>>> Hashtag
->>>>> Word: phrase
+>>>> Hashtag: phrase
 >> Term: table.fieldName : value
 ";
 
@@ -226,8 +221,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
 >> Subexpression
 >>> Or
 >>>> Phrase: phrase
->>>> Hashtag
->>>>> Word: phrase
+>>>> Hashtag: phrase
 >> Term: table.fieldName : value
 ";
 
@@ -241,8 +235,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
 
         $output = " Or
 > Phrase: phrase
-> Hashtag
->> Word: phrase
+> Hashtag: phrase
 > Term: table.fieldName : value ^ 123.00
 ";
 
@@ -256,8 +249,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
 
         $output = " And
 > Or
->> Hashtag
->>> Word: emoji
+>> Hashtag: emoji
 >> Phrase: &#x1f4a9;
 > Or
 >> Phrase: &#x1f366;
@@ -275,8 +267,8 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
         $hasttags = $query->getQueryItemsByTokenType(\Gdbots\QueryParser\QueryScanner::T_HASHTAG);
 
         $this->assertEquals(2, count($hasttags));
-        $this->assertEquals('phrase', $hasttags[0]->getExpression()->getToken());
-        $this->assertEquals('boost', $hasttags[1]->getExpression()->getToken());
+        $this->assertEquals('phrase', $hasttags[0]->getToken());
+        $this->assertEquals('boost', $hasttags[1]->getToken());
     }
 
     /**
