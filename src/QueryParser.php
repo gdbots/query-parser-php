@@ -180,11 +180,6 @@ class QueryParser
                 $expression = $this->readExpression($this->scanner->next());
                 if ($expression) {
                     $expression->setExcluded(true);
-
-                    if ($expression->getTokenType() == QueryScanner::T_BOOST) {
-                        $expression->setBoostBy($expression->getTerm()->getToken());
-                    }
-
                     return $expression;
                 }
 
@@ -196,11 +191,6 @@ class QueryParser
                 $expression = $this->readExpression($this->scanner->next());
                 if ($expression) {
                     $expression->setIncluded(true);
-
-                    if ($expression->getTokenType() == QueryScanner::T_BOOST) {
-                        $expression->setBoostBy($expression->getTerm()->getToken());
-                    }
-
                     return $expression;
                 }
 
