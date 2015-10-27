@@ -15,18 +15,13 @@ if ($query = $parser->parse()) {
 /*
  Or
 > Word: a
-> IncludeTerm
->> Word: b
-> ExcludeTerm
->> Word: c
-> IncludeTerm
->> Word: d
+> Word: -b
+> Word: +c
+> Word: -d
 > Subexpression
 >> Or
->>> Term: ^ 1.5
->>>> Term: f : v
->>> IncludeTerm
->>>> Word: 6
+>>> Term: f : v ^ 1.50
+>>> Word: -6
 */
 
     echo "\n\nCompiled query:\n\n";
@@ -40,158 +35,141 @@ a OR +b OR -c OR +d OR ( f:v^1.5 OR +6 )
     var_dump($query);
 
 /*
-object(Gdbots\QueryParser\Node\OrExpressionList)#598 (2) {
+object(Gdbots\QueryParser\Node\OrExpressionList)#597 (4) {
   ["expressions":protected]=>
   array(5) {
     [0]=>
-    object(Gdbots\QueryParser\Node\Word)#582 (3) {
+    object(Gdbots\QueryParser\Node\Word)#586 (5) {
       ["tokenType":protected]=>
       int(1)
       ["token":protected]=>
       string(1) "a"
-      ["parentTokenTypes":protected]=>
-      array(0) {
-      }
+      ["excluded":protected]=>
+      bool(false)
+      ["included":protected]=>
+      bool(false)
+      ["boostBy":protected]=>
+      NULL
     }
     [1]=>
-    object(Gdbots\QueryParser\Node\IncludeTerm)#585 (2) {
-      ["expression":protected]=>
-      object(Gdbots\QueryParser\Node\Word)#584 (3) {
-        ["tokenType":protected]=>
-        int(1)
-        ["token":protected]=>
-        string(1) "b"
-        ["parentTokenTypes":protected]=>
-        array(0) {
-        }
-      }
-      ["parentTokenTypes":protected]=>
-      array(0) {
-      }
+    object(Gdbots\QueryParser\Node\Word)#588 (5) {
+      ["tokenType":protected]=>
+      int(1)
+      ["token":protected]=>
+      string(1) "b"
+      ["excluded":protected]=>
+      bool(false)
+      ["included":protected]=>
+      bool(true)
+      ["boostBy":protected]=>
+      NULL
     }
     [2]=>
-    object(Gdbots\QueryParser\Node\ExcludeTerm)#588 (2) {
-      ["expression":protected]=>
-      object(Gdbots\QueryParser\Node\Word)#586 (3) {
-        ["tokenType":protected]=>
-        int(1)
-        ["token":protected]=>
-        string(1) "c"
-        ["parentTokenTypes":protected]=>
-        array(0) {
-        }
-      }
-      ["parentTokenTypes":protected]=>
-      array(0) {
-      }
+    object(Gdbots\QueryParser\Node\Word)#589 (5) {
+      ["tokenType":protected]=>
+      int(1)
+      ["token":protected]=>
+      string(1) "c"
+      ["excluded":protected]=>
+      bool(true)
+      ["included":protected]=>
+      bool(false)
+      ["boostBy":protected]=>
+      NULL
     }
     [3]=>
-    object(Gdbots\QueryParser\Node\IncludeTerm)#589 (2) {
-      ["expression":protected]=>
-      object(Gdbots\QueryParser\Node\Word)#587 (3) {
-        ["tokenType":protected]=>
-        int(1)
-        ["token":protected]=>
-        string(1) "d"
-        ["parentTokenTypes":protected]=>
-        array(0) {
-        }
-      }
-      ["parentTokenTypes":protected]=>
-      array(0) {
-      }
+    object(Gdbots\QueryParser\Node\Word)#590 (5) {
+      ["tokenType":protected]=>
+      int(1)
+      ["token":protected]=>
+      string(1) "d"
+      ["excluded":protected]=>
+      bool(false)
+      ["included":protected]=>
+      bool(true)
+      ["boostBy":protected]=>
+      NULL
     }
     [4]=>
-    object(Gdbots\QueryParser\Node\SubExpression)#599 (2) {
+    object(Gdbots\QueryParser\Node\SubExpression)#593 (4) {
       ["expression":protected]=>
-      object(Gdbots\QueryParser\Node\OrExpressionList)#597 (2) {
+      object(Gdbots\QueryParser\Node\OrExpressionList)#596 (4) {
         ["expressions":protected]=>
         array(2) {
           [0]=>
-          object(Gdbots\QueryParser\Node\ExplicitTerm)#594 (5) {
+          object(Gdbots\QueryParser\Node\ExplicitTerm)#594 (7) {
             ["nominator":protected]=>
-            object(Gdbots\QueryParser\Node\ExplicitTerm)#593 (5) {
-              ["nominator":protected]=>
-              object(Gdbots\QueryParser\Node\Word)#590 (3) {
-                ["tokenType":protected]=>
-                int(1)
-                ["token":protected]=>
-                string(1) "f"
-                ["parentTokenTypes":protected]=>
-                array(1) {
-                  [9]=>
-                  string(1) "v"
-                }
-              }
+            object(Gdbots\QueryParser\Node\Word)#591 (5) {
               ["tokenType":protected]=>
-              int(9)
-              ["tokenTypeText":protected]=>
-              string(1) ":"
-              ["term":protected]=>
-              object(Gdbots\QueryParser\Node\Word)#591 (3) {
-                ["tokenType":protected]=>
-                int(1)
-                ["token":protected]=>
-                string(1) "v"
-                ["parentTokenTypes":protected]=>
-                array(0) {
-                }
-              }
-              ["parentTokenTypes":protected]=>
-              array(1) {
-                [10]=>
-                string(3) "1.5"
-              }
+              int(1)
+              ["token":protected]=>
+              string(1) "f"
+              ["excluded":protected]=>
+              bool(false)
+              ["included":protected]=>
+              bool(false)
+              ["boostBy":protected]=>
+              NULL
             }
             ["tokenType":protected]=>
-            int(10)
+            int(9)
             ["tokenTypeText":protected]=>
-            string(1) "^"
+            string(1) ":"
             ["term":protected]=>
-            object(Gdbots\QueryParser\Node\Word)#592 (3) {
+            object(Gdbots\QueryParser\Node\Word)#592 (5) {
               ["tokenType":protected]=>
               int(1)
               ["token":protected]=>
-              string(3) "1.5"
-              ["parentTokenTypes":protected]=>
-              array(0) {
-              }
+              string(1) "v"
+              ["excluded":protected]=>
+              bool(false)
+              ["included":protected]=>
+              bool(false)
+              ["boostBy":protected]=>
+              NULL
             }
-            ["parentTokenTypes":protected]=>
-            array(0) {
-            }
+            ["excluded":protected]=>
+            bool(false)
+            ["included":protected]=>
+            bool(false)
+            ["boostBy":protected]=>
+            string(3) "1.5"
           }
           [1]=>
-          object(Gdbots\QueryParser\Node\IncludeTerm)#596 (2) {
-            ["expression":protected]=>
-            object(Gdbots\QueryParser\Node\Word)#595 (3) {
-              ["tokenType":protected]=>
-              int(1)
-              ["token":protected]=>
-              string(1) "6"
-              ["parentTokenTypes":protected]=>
-              array(0) {
-              }
-            }
-            ["parentTokenTypes":protected]=>
-            array(0) {
-            }
+          object(Gdbots\QueryParser\Node\Word)#595 (5) {
+            ["tokenType":protected]=>
+            int(1)
+            ["token":protected]=>
+            string(1) "6"
+            ["excluded":protected]=>
+            bool(false)
+            ["included":protected]=>
+            bool(true)
+            ["boostBy":protected]=>
+            NULL
           }
         }
-        ["parentTokenTypes":protected]=>
-        array(1) {
-          [""]=>
-          NULL
-        }
+        ["excluded":protected]=>
+        bool(false)
+        ["included":protected]=>
+        bool(false)
+        ["boostBy":protected]=>
+        NULL
       }
-      ["parentTokenTypes":protected]=>
-      array(0) {
-      }
+      ["excluded":protected]=>
+      bool(false)
+      ["included":protected]=>
+      bool(false)
+      ["boostBy":protected]=>
+      NULL
     }
   }
-  ["parentTokenTypes":protected]=>
-  array(0) {
-  }
+  ["excluded":protected]=>
+  bool(false)
+  ["included":protected]=>
+  bool(false)
+  ["boostBy":protected]=>
+  NULL
 }
 */
 
@@ -203,91 +181,111 @@ array(2) {
   ["WORD"]=>
   array(5) {
     [0]=>
-    object(Gdbots\QueryParser\Node\Word)#582 (3) {
+    object(Gdbots\QueryParser\Node\Word)#586 (5) {
       ["tokenType":protected]=>
       int(1)
       ["token":protected]=>
       string(1) "a"
-      ["parentTokenTypes":protected]=>
-      array(0) {
-      }
+      ["excluded":protected]=>
+      bool(false)
+      ["included":protected]=>
+      bool(false)
+      ["boostBy":protected]=>
+      NULL
     }
     [1]=>
-    object(Gdbots\QueryParser\Node\Word)#584 (3) {
+    object(Gdbots\QueryParser\Node\Word)#588 (5) {
       ["tokenType":protected]=>
       int(1)
       ["token":protected]=>
       string(1) "b"
-      ["parentTokenTypes":protected]=>
-      array(0) {
-      }
+      ["excluded":protected]=>
+      bool(false)
+      ["included":protected]=>
+      bool(true)
+      ["boostBy":protected]=>
+      NULL
     }
     [2]=>
-    object(Gdbots\QueryParser\Node\Word)#586 (3) {
+    object(Gdbots\QueryParser\Node\Word)#589 (5) {
       ["tokenType":protected]=>
       int(1)
       ["token":protected]=>
       string(1) "c"
-      ["parentTokenTypes":protected]=>
-      array(0) {
-      }
+      ["excluded":protected]=>
+      bool(true)
+      ["included":protected]=>
+      bool(false)
+      ["boostBy":protected]=>
+      NULL
     }
     [3]=>
-    object(Gdbots\QueryParser\Node\Word)#587 (3) {
+    object(Gdbots\QueryParser\Node\Word)#590 (5) {
       ["tokenType":protected]=>
       int(1)
       ["token":protected]=>
       string(1) "d"
-      ["parentTokenTypes":protected]=>
-      array(0) {
-      }
+      ["excluded":protected]=>
+      bool(false)
+      ["included":protected]=>
+      bool(true)
+      ["boostBy":protected]=>
+      NULL
     }
     [4]=>
-    object(Gdbots\QueryParser\Node\Word)#595 (3) {
+    object(Gdbots\QueryParser\Node\Word)#595 (5) {
       ["tokenType":protected]=>
       int(1)
       ["token":protected]=>
       string(1) "6"
-      ["parentTokenTypes":protected]=>
-      array(0) {
-      }
+      ["excluded":protected]=>
+      bool(false)
+      ["included":protected]=>
+      bool(true)
+      ["boostBy":protected]=>
+      NULL
     }
   }
   ["FILTER"]=>
   array(1) {
     [0]=>
-    object(Gdbots\QueryParser\Node\ExplicitTerm)#593 (5) {
+    object(Gdbots\QueryParser\Node\ExplicitTerm)#594 (7) {
       ["nominator":protected]=>
-      object(Gdbots\QueryParser\Node\Word)#590 (3) {
+      object(Gdbots\QueryParser\Node\Word)#591 (5) {
         ["tokenType":protected]=>
         int(1)
         ["token":protected]=>
         string(1) "f"
-        ["parentTokenTypes":protected]=>
-        array(1) {
-          [9]=>
-          string(1) "v"
-        }
+        ["excluded":protected]=>
+        bool(false)
+        ["included":protected]=>
+        bool(false)
+        ["boostBy":protected]=>
+        NULL
       }
       ["tokenType":protected]=>
       int(9)
       ["tokenTypeText":protected]=>
       string(1) ":"
       ["term":protected]=>
-      object(Gdbots\QueryParser\Node\Word)#591 (3) {
+      object(Gdbots\QueryParser\Node\Word)#592 (5) {
         ["tokenType":protected]=>
         int(1)
         ["token":protected]=>
         string(1) "v"
-        ["parentTokenTypes":protected]=>
-        array(0) {
-        }
+        ["excluded":protected]=>
+        bool(false)
+        ["included":protected]=>
+        bool(false)
+        ["boostBy":protected]=>
+        NULL
       }
-      ["parentTokenTypes":protected]=>
-      array(1) {
-        [10]=>
-        string(3) "1.5"
-      }
+      ["excluded":protected]=>
+      bool(false)
+      ["included":protected]=>
+      bool(false)
+      ["boostBy":protected]=>
+      string(3) "1.5"
     }
   }
 }
