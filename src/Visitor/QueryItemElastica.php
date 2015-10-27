@@ -118,7 +118,7 @@ class QueryItemElastica implements QueryItemVisitorInterface
             $query = new Term([$term->getNominator()->getToken() => [$operator => $term->getTerm()->getToken()]]);
 
             if ($term->isBoosted()) {
-                $query->setBoost($term->getBoostBy());
+                $query->addParam('boost', $term->getBoostBy());
             }
             if ($term->isExcluded()) {
                 $boolQuery = new BoolQuery();
