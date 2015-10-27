@@ -79,7 +79,7 @@ class QueryParser
     /**
      * Returns an array with error messages from the parser.
      *
-     * @return bool
+     * @return array
      */
     public function getErrors()
     {
@@ -330,9 +330,8 @@ class QueryParser
             case QueryScanner::T_EOI:
                 if (count($expressions) === 1) {
                     return $expressions[0];
-                } else {
-                    return new Node\AndExpressionList($expressions);
                 }
+                return new Node\AndExpressionList($expressions);
         }
 
         $this->addError(sprintf('Error: Expected Expression. Found: "%s"', $this->scanner->getTokenTypeText()));

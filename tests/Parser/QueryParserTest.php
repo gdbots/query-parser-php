@@ -125,7 +125,11 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
         $allTokenArray = [];
 
         foreach ($tokenTypes as $tokenType) {
-            $tokens = $query->getQueryItemsByTokenType(constant('Gdbots\QueryParser\Parser\QueryScanner::T_' . $tokenType));
+            $tokens = $query->getQueryItemsByTokenType(
+                constant(
+                    'Gdbots\QueryParser\Parser\QueryScanner::T_' . $tokenType
+                )
+            );
 
             if (!empty($tokens)) {
                 foreach ($tokens as $token) {
@@ -157,12 +161,11 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
 
                     if ($token->getTokenType() === QueryScanner::T_FILTER) {
                         $tokenArray['field'] = $tokenField;
-                        $tokenArray['value'] = $tokenValue;
                         $tokenArray['operator'] = $tokenTypeText;
-                    } else {
-                        $tokenArray['value'] = $tokenValue;
-                    }
 
+                    }
+                    $tokenArray['value'] = $tokenValue;
+                    
                     if ($boosted) {
                         $tokenArray['boost'] = $boosted;
                     }
@@ -452,7 +455,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
                         ['URL' => 1, 'FILTER' => 1],
                         [
                             'FILTER' => [
-                                ['field' => 'a', 'value' => '500', 'operator' => ':>']
+                                ['field' => 'a', 'operator' => ':>', 'value' => '500', ]
                             ],
                             'URL' => [
                                 ['value' => 'http://a.com']
@@ -480,7 +483,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
                         ['FILTER' => 1, 'WORD' => 1],
                         [
                             'FILTER' => [
-                                ['field' => 'a', 'value' => 'b', 'operator' => ':>', 'boost' => 2]
+                                ['field' => 'a', 'operator' => ':>','value' => 'b', 'boost' => 2]
                             ],
                             'WORD' => [
                                 ['value' => 'abc']
@@ -504,9 +507,9 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
                         ['FILTER' => 3],
                         [
                             'FILTER' => [
-                                ['field' => 'a', 'value' => 'b', 'operator' => ':>', 'include' => true],
-                                ['field' => 'c', 'value' => 'd', 'operator' => ':>'],
-                                ['field' => 'e', 'value' => 'f', 'operator' => ':<', 'exclude' => true]
+                                ['field' => 'a', 'operator' => ':>', 'value' => 'b', 'include' => true],
+                                ['field' => 'c', 'operator' => ':>', 'value' => 'd'],
+                                ['field' => 'e', 'operator' => ':<', 'value' => 'f', 'exclude' => true]
                             ]
                         ]
                     ],
