@@ -313,11 +313,9 @@ class QueryParser
      * - Expression
      * - Expression AND Expression AND ...
      *
-     * @param int $tokenType
-     *
      * @return \Gdbots\QueryParser\Node\QueryItem|null
      */
-    protected function readAndExpressionList($tokenType)
+    protected function readAndExpressionList()
     {
         $expressions = [];
         $lastExpression = false;
@@ -346,11 +344,9 @@ class QueryParser
     /**
      * Makes the parser read expressions between parentheses.
      *
-     * @param int $tokenType
-     *
      * @return \Gdbots\QueryParser\Node\QueryItem|null
      */
-    protected function readSubQuery($tokenType)
+    protected function readSubQuery()
     {
         $expressionlist = $this->readAndExpressionList($this->scanner->next());
         if ($this->scanner->getTokenType() == QueryScanner::T_CLOSE_PARENTHESIS) {
