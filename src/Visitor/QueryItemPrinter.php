@@ -64,7 +64,7 @@ class QueryItemPrinter implements QueryItemVisitorInterface
     private function printPostfix(Node\QueryItem $item)
     {
         if ($item->isBoosted()) {
-            return sprintf(' ^ %02f', $item->getBoostBy());
+            return sprintf(' ^ %.2f', $item->getBoostBy());
         }
     }
 
@@ -120,7 +120,7 @@ class QueryItemPrinter implements QueryItemVisitorInterface
                 $term->getNominator()->getToken(),
                 $term->getTokenTypeText(),
                 $term->getTerm()->getToken(),
-                $this->printPrefix($term)
+                $this->printPostfix($term)
             ));
         } else {
             $this->printIndentedLine(sprintf(
@@ -128,7 +128,7 @@ class QueryItemPrinter implements QueryItemVisitorInterface
                 $this->printPrefix($term),
                 $term->getTokenTypeText(),
                 $term->getTerm()->getToken(),
-                $this->printPrefix($term)
+                $this->printPostfix($term)
             ));
             $this->increaseIndent();
 
