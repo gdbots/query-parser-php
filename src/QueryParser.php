@@ -96,7 +96,7 @@ class QueryParser
      */
     protected function readTerm($tokenType, $term)
     {
-        if (!in_array($tokenType, [QueryScanner::T_FILTER, QueryScanner::T_BOOST])) {
+        if (!in_array($tokenType, [QueryScanner::T_FILTER])) {
             return $term;
         }
 
@@ -179,12 +179,13 @@ class QueryParser
             case QueryScanner::T_EXCLUDE:
                 $expression = $this->readExpression($this->scanner->next());
                 if ($expression) {
+                    $expression->setExcluded(true);
+
                     if ($expression->getTokenType() == QueryScanner::T_BOOST) {
-                        $term = new Node\ExcludeTerm($expression->getNominator());
-                        return new Node\ExplicitTerm($term, $expression->getTokenType(), '^', $expression->getTerm());
+                        $expression->setBoostBy($expression->getTerm()->getToken());
                     }
 
-                    return new Node\ExcludeTerm($expression);
+                    return $expression;
                 }
 
                 $this->addError('Error: EXCLUDE not followed by a valid expression.');
@@ -194,12 +195,13 @@ class QueryParser
             case QueryScanner::T_INCLUDE:
                 $expression = $this->readExpression($this->scanner->next());
                 if ($expression) {
+                    $expression->setIncluded(true);
+
                     if ($expression->getTokenType() == QueryScanner::T_BOOST) {
-                        $term = new Node\IncludeTerm($expression->getNominator());
-                        return new Node\ExplicitTerm($term, $expression->getTokenType(), '^', $expression->getTerm());
+                        $expression->setBoostBy($expression->getTerm()->getToken());
                     }
 
-                    return new Node\IncludeTerm($expression);
+                    return $expression;
                 }
 
                 $this->addError('Error: INCLUDE not followed by a valid expression.');
@@ -211,7 +213,8 @@ class QueryParser
                 if ($expression) {
                     if ($expression->getTokenType() == QueryScanner::T_BOOST) {
                         $term = new Node\Hashtag($expression->getNominator());
-                        return new Node\ExplicitTerm($term, $expression->getTokenType(), '^', $expression->getTerm());
+                        $term->setBoostBy($expression->getTerm()->getToken());
+                        return $term;
                     }
 
                     return new Node\Hashtag($expression);
@@ -226,7 +229,8 @@ class QueryParser
                 if ($expression) {
                     if ($expression->getTokenType() == QueryScanner::T_BOOST) {
                         $term = new Node\Mention($expression->getNominator());
-                        return new Node\ExplicitTerm($term, $expression->getTokenType(), '^', $expression->getTerm());
+                        $term->setBoostBy($expression->getTerm()->getToken());
+                        return $term;
                     }
 
                     return new Node\Mention($expression);
@@ -295,7 +299,7 @@ class QueryParser
 
                 /** @var \Gdbots\QueryParser\Node\QueryItem|null $expression */
                 if ($expression = $this->readExpression($this->scanner->next())) {
-                    $lastExpression = new Node\ExplicitTerm($lastExpression, QueryScanner::T_BOOST, '^', $expression);
+                    $lastExpression->setBoostBy($expression->getToken());
                 }
             }
 

@@ -17,10 +17,6 @@ abstract class CompositeExpression extends QueryItem
     public function __construct(QueryItem $expression)
     {
         $this->expression = $expression;
-
-        if (in_array($this->getTokenType(), [QueryScanner::T_EXCLUDE, QueryScanner::T_INCLUDE])) {
-            $this->expression->addParentTokenType($this->getTokenType());
-        }
     }
 
     /**
@@ -42,12 +38,6 @@ abstract class CompositeExpression extends QueryItem
         if ($this instanceof Hashtag) {
             return QueryScanner::T_HASHTAG;
         }
-        if ($this instanceof ExcludeTerm) {
-            return QueryScanner::T_EXCLUDE;
-        }
-        if ($this instanceof IncludeTerm) {
-            return QueryScanner::T_INCLUDE;
-        }
 
         return null;
     }
@@ -65,22 +55,10 @@ abstract class CompositeExpression extends QueryItem
 
         if ($tokenType) {
             if ($tokenType == $this->getTokenType()) {
-                if (in_array($this->getTokenType(), [QueryScanner::T_EXCLUDE, QueryScanner::T_INCLUDE])) {
-                    $items = array_merge_recursive($items,
-                        $this->getExpression()->getQueryItemsByTokenType($this->getExpression()->getTokenType())
-                    );
-                } else {
-                    $items[] = $this;
-                }
-            } elseif (in_array($this->getTokenType(), [QueryScanner::T_EXCLUDE, QueryScanner::T_INCLUDE])) {
-                $items = array_merge_recursive($items, $this->getExpression()->getQueryItemsByTokenType($tokenType));
+                $items[] = $this;
             }
         } else {
-            if (in_array($this->getTokenType(), [QueryScanner::T_EXCLUDE, QueryScanner::T_INCLUDE])) {
-                $items = array_merge_recursive($items, $this->getExpression()->getQueryItemsByTokenType());
-            } else {
-                $items[QueryScanner::$typeStrings[$this->getTokenType()]][] = $this;
-            }
+            $items[QueryScanner::$typeStrings[$this->getTokenType()]][] = $this;
         }
 
         return $items;

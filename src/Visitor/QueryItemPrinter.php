@@ -46,11 +46,40 @@ class QueryItemPrinter implements QueryItemVisitorInterface
     }
 
     /**
+     * @param Node\QueryItem $item
+     */
+    private function printPrefix(Node\QueryItem $item)
+    {
+        if ($item->isExcluded()) {
+            return '+';
+        }
+        if ($item->isIncluded()) {
+            return '-';
+        }
+    }
+
+    /**
+     * @param Node\QueryItem $item
+     */
+    private function printPostfix(Node\QueryItem $item)
+    {
+        if ($item->isBoosted()) {
+            return sprintf(' ^ %02f', $item->getBoostBy());
+        }
+    }
+
+    /**
      * {@inheritDoc}
      */
     public function visitWord(Node\Word $word)
     {
-        $this->printIndentedLine(sprintf('Word: %s', $word->getToken()));
+
+        $this->printIndentedLine(sprintf(
+            'Word: %s%s%s',
+            $this->printPrefix($word),
+            $word->getToken(),
+            $this->printPostfix($word)
+        ));
     }
 
     /**
@@ -58,7 +87,12 @@ class QueryItemPrinter implements QueryItemVisitorInterface
      */
     public function visitPhrase(Node\Phrase $phrase)
     {
-        $this->printIndentedLine(sprintf('Phrase: %s', $phrase->getToken()));
+        $this->printIndentedLine(sprintf(
+            'Phrase: %s%s%s',
+            $this->printPrefix($phrase),
+            $phrase->getToken(),
+            $this->printPostfix($phrase)
+        ));
     }
 
     /**
@@ -66,7 +100,12 @@ class QueryItemPrinter implements QueryItemVisitorInterface
      */
     public function visitUrl(Node\Url $url)
     {
-        $this->printIndentedLine(sprintf('Url: %s', $url->getToken()));
+        $this->printIndentedLine(sprintf(
+            'Url: %s%s%s',
+            $this->printPrefix($url),
+            $url->getToken(),
+            $this->printPostfix($url)
+        ));
     }
 
     /**
@@ -76,13 +115,21 @@ class QueryItemPrinter implements QueryItemVisitorInterface
     {
         if ($term->getNominator() instanceof Node\SimpleTerm) {
             $this->printIndentedLine(sprintf(
-                'Term: %s %s %s',
+                'Term: %s%s %s %s%s',
+                $this->printPrefix($term),
                 $term->getNominator()->getToken(),
                 $term->getTokenTypeText(),
-                $term->getTerm()->getToken()
+                $term->getTerm()->getToken(),
+                $this->printPrefix($term)
             ));
         } else {
-            $this->printIndentedLine(sprintf('Term: %s %s', $term->getTokenTypeText(), $term->getTerm()->getToken()));
+            $this->printIndentedLine(sprintf(
+                'Term: %s%s %s%s',
+                $this->printPrefix($term),
+                $term->getTokenTypeText(),
+                $term->getTerm()->getToken(),
+                $this->printPrefix($term)
+            ));
             $this->increaseIndent();
 
             $method = sprintf('visit%s', ucfirst(substr(get_class($term->getNominator()), 24)));
@@ -102,28 +149,6 @@ class QueryItemPrinter implements QueryItemVisitorInterface
         $this->printIndentedLine('Subexpression');
         $this->increaseIndent();
         $sub->getExpression()->accept($this);
-        $this->decreaseIndent();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function visitExcludeTerm(Node\ExcludeTerm $term)
-    {
-        $this->printIndentedLine('ExcludeTerm');
-        $this->increaseIndent();
-        $term->getExpression()->accept($this);
-        $this->decreaseIndent();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function visitIncludeTerm(Node\IncludeTerm $term)
-    {
-        $this->printIndentedLine('IncludeTerm');
-        $this->increaseIndent();
-        $term->getExpression()->accept($this);
         $this->decreaseIndent();
     }
 

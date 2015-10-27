@@ -32,16 +32,6 @@ interface QueryItemVisitorInterface
     public function visitSubExpression(Node\SubExpression $sub);
 
     /**
-     * @param Node\ExcludeTerm $term
-     */
-    public function visitExcludeTerm(Node\ExcludeTerm $term);
-
-    /**
-     * @param Node\IncludeTerm $term
-     */
-    public function visitIncludeTerm(Node\IncludeTerm $term);
-
-    /**
      * @param Node\Hashtag $hashtag
      */
     public function visitHashtag(Node\Hashtag $hashtag);

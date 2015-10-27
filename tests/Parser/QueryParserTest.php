@@ -108,24 +108,19 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
 
                 if ($item instanceof Node\SimpleTerm) {
                     $tokenValue = $item->getToken();
-                    $boosted = $item->getParentTokenType(QueryScanner::T_BOOST, false);
-                    $excluded = $item->hasParentTokenType(QueryScanner::T_EXCLUDE);
-                    $included = $item->hasParentTokenType(QueryScanner::T_INCLUDE);
                 } else {
                     if ($item->getTokenType() === QueryScanner::T_FILTER) {
                         $tokenField = $item->getNominator()->getToken();
                         $tokenValue = $item->getTerm()->getToken();
                         $tokenTypeText = $item->getTokenTypeText();
-                        $boosted = $item->getParentTokenType(QueryScanner::T_BOOST, false);
-                        $excluded = $item->hasParentTokenType(QueryScanner::T_EXCLUDE);
-                        $included = $item->hasParentTokenType(QueryScanner::T_INCLUDE);
                     } else {
                         $tokenValue = $item->getExpression()->getToken();
-                        $boosted = $item->getExpression()->getParentTokenType(QueryScanner::T_BOOST, false);
-                        $excluded = $item->getExpression()->hasParentTokenType(QueryScanner::T_EXCLUDE);
-                        $included = $item->getExpression()->hasParentTokenType(QueryScanner::T_INCLUDE);
                     }
                 }
+
+                $boosted = $item->getBoostBy();
+                $excluded = $item->isExcluded();
+                $included = $item->isIncluded();
 
                 if ($item->getTokenType() === QueryScanner::T_FILTER) {
                     $tokenArray['field'] = $tokenField;

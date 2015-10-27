@@ -2,91 +2,89 @@
 
 namespace Gdbots\QueryParser\Node;
 
+use Gdbots\QueryParser\QueryScanner;
 use Gdbots\QueryParser\Visitor\QueryItemVisitorInterface;
 
 abstract class QueryItem
 {
     /**
-     * @var array
+     * @var bool
      */
-    protected $parentTokenTypes = [];
+    protected $excluded = false;
 
     /**
-     * @param int $parentTokenType
+     * @var bool
+     */
+    protected $included = false;
+
+    /**
+     * @var float
+     */
+    protected $boostBy = null;
+
+    /**
+     * @param bool $bool
      *
+     * @return self
+     */
+    public function setExcluded($bool = false)
+    {
+        $this->excluded = $bool;
+        return $this;
+    }
+
+    /**
      * @return bool
      */
-    public function hasParentTokenType($parentTokenType)
+    public function isExcluded()
     {
-        return array_key_exists($parentTokenType, $this->parentTokenTypes);
+        return $this->excluded;
     }
 
     /**
-     * @param array $parentTokenTypes
+     * @param bool $bool
      *
-     * @return QueryItem
+     * @return self
      */
-    public function setParentTokenTypes(array $parentTokenTypes)
+    public function setIncluded($bool = false)
     {
-        $this->parentTokenTypes = [];
-
-        foreach ($parentTokenTypes as $parentTokenType => $value) {
-            $this->addParentTokenType($parentTokenType, $value);
-        }
-
+        $this->included = $bool;
         return $this;
     }
 
     /**
-     * @return \Traversable
+     * @return bool
      */
-    public function getParentTokenTypes()
+    public function isIncluded()
     {
-        return $this->parentTokenTypes ?: $this->parentTokenTypes = [];
+        return $this->included;
     }
 
     /**
-     * @param int   $parentTokenType
-     * @param mixed $default
+     * @param float $boostBy
      *
-     * @return mixed
+     * @return self
      */
-    public function getParentTokenType($parentTokenType, $default = null)
+    public function setBoostBy($boostBy)
     {
-        if ($this->hasParentTokenType($parentTokenType)) {
-            return $this->parentTokenTypes[$parentTokenType];
-        }
-
-        return $default;
-    }
-
-    /**
-     * @param int   $parentTokenType
-     * @param mixed $value
-     *
-     * @return QueryItem
-     */
-    public function addParentTokenType($parentTokenType, $value = null)
-    {
-        if (!$this->hasParentTokenType($parentTokenType)) {
-            $this->parentTokenTypes[$parentTokenType] = $value;
-        }
-
+        $this->boostBy = $boostBy;
         return $this;
     }
 
     /**
-     * @param int $parentTokenType
-     *
-     * @return QueryItem
+     * @return float
      */
-    public function removeParentTokenType($parentTokenType)
+    public function getBoostBy()
     {
-        if ($this->hasParentTokenType($parentTokenType)) {
-            unset($this->parentTokenTypes[$parentTokenType]);
-        }
+        return $this->boostBy;
+    }
 
-        return $this;
+    /**
+     * @return bool
+     */
+    public function isBoosted()
+    {
+        return (bool)$this->boostBy;
     }
 
     /**
