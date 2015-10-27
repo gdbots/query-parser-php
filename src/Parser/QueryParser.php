@@ -59,7 +59,7 @@ class QueryParser
     /**
      * Private function to add an error message to the errors array.
      *
-     * @param string $input
+     * @param string $message
      */
     protected function addError($message)
     {
@@ -156,7 +156,7 @@ class QueryParser
     {
         switch ($tokenType) {
             case QueryScanner::T_OPEN_PARENTHESIS:
-                return $this->readSubQuery($tokenType);
+                return $this->readSubQuery();
 
             case QueryScanner::T_PHRASE:
                 $text = new Node\Phrase($this->scanner->getToken());
@@ -276,33 +276,31 @@ class QueryParser
      * - Expression
      * - Expression OR Expression OR ...
      *
-     * @param int $tokenType
-     *
      * @return \Gdbots\QueryParser\Node\QueryItem|null
      */
-    protected function readOrExpressionList($tokenType)
+    protected function readOrExpressionList()
     {
         $expressions = [];
-        $lastExpression = false;
 
         do {
             $lastExpression = $this->readExpression($this->scanner->getTokenType());
 
             if ($this->scanner->getTokenType() == QueryScanner::T_BOOST) {
-                $expression = $this->readExpression($this->scanner->next());
-                $lastExpression = new Node\ExplicitTerm($lastExpression, QueryScanner::T_BOOST, '^', $expression);
+
+                /** @var \Gdbots\QueryParser\Node\QueryItem|null $expression */
+                if ($expression = $this->readExpression($this->scanner->next())) {
+                    $lastExpression = new Node\ExplicitTerm($lastExpression, QueryScanner::T_BOOST, '^', $expression);
+                }
             }
 
             $expressions[] = $lastExpression;
 
         } while ($lastExpression && $this->scanner->getTokenType() == QueryScanner::T_OR_OPERATOR && $this->scanner->next());
 
-        if ($lastExpression) {
-            if (count($expressions) === 1) {
-                return $expressions[0];
-            } else {
-                return new Node\OrExpressionList($expressions);
-            }
+        if (count($expressions) === 1) {
+            return $expressions[0];
+        } else {
+            return new Node\OrExpressionList($expressions);
         }
 
         return null;
@@ -317,11 +315,12 @@ class QueryParser
      */
     protected function readAndExpressionList()
     {
+        $this->scanner->next();
+
         $expressions = [];
-        $lastExpression = false;
 
         do {
-            $lastExpression = $this->readOrExpressionList($this->scanner->getTokenType());
+            $lastExpression = $this->readOrExpressionList();
             $expressions[] = $lastExpression;
 
         } while ($lastExpression && $this->scanner->getTokenType() == QueryScanner::T_AND_OPERATOR && $this->scanner->next());
@@ -348,7 +347,7 @@ class QueryParser
      */
     protected function readSubQuery()
     {
-        $expressionlist = $this->readAndExpressionList($this->scanner->next());
+        $expressionlist = $this->readAndExpressionList();
         if ($this->scanner->getTokenType() == QueryScanner::T_CLOSE_PARENTHESIS) {
             $this->scanner->next();
 
@@ -371,6 +370,6 @@ class QueryParser
      */
     public function parse()
     {
-        return $this->readAndExpressionList($this->scanner->next());
+        return $this->readAndExpressionList();
     }
 }

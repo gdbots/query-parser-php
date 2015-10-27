@@ -35,6 +35,8 @@ class Phrase extends SimpleTerm
     }
 
     /**
+     * @param string $text
+     *
      * @return string
      */
     public function stripQuotes($text)
