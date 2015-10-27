@@ -35,15 +35,15 @@ class Phrase extends SimpleTerm
     }
 
     /**
+     * @param string $text
+     *
      * @return string
      */
     public function stripQuotes($text)
     {
-        if (strlen($text) > 2) {
-            return substr($text, 1, strlen($text)-2);
-        }
-        return $text;
-
+        return strlen($text) > 2
+            ? substr($text, 1, strlen($text)-2)
+            : $text;
     }
 
     /**

@@ -66,8 +66,9 @@ abstract class CompositeExpression extends QueryItem
         if ($tokenType) {
             if ($tokenType == $this->getTokenType()) {
                 if (in_array($this->getTokenType(), [QueryScanner::T_EXCLUDE, QueryScanner::T_INCLUDE])) {
-                    $items = array_merge_recursive($items, $this->getExpression()
-                            ->getQueryItemsByTokenType($this->getExpression()->getTokenType()));
+                    $items = array_merge_recursive($items,
+                        $this->getExpression()->getQueryItemsByTokenType($this->getExpression()->getTokenType())
+                    );
                 } else {
                     $items[] = $this;
                 }
