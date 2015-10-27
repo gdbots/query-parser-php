@@ -263,6 +263,12 @@ class QueryScanner
                     $value = str_replace(')', '', $value);
                 }
 
+                if (empty($value)) {
+                    unset($matches[$key]);
+
+                    continue;
+                }
+
                 // remove duplicate special characters
                 $found = false;
                 if (preg_match('/\"([^\"]*)\"/', $value)) {

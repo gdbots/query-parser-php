@@ -172,11 +172,11 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
             ['abc"def', 'Or>Word:abc>Word:def', ['WORD' => 2], ['WORD' => [['value' => 'abc'],['value' => 'def']]]],
             ['abc"def ghi"@j"@k l', 'Or>Word:abc>Phrase:defghi>Mention>>Word:j>Mention>>Word:k>Word:l', ['WORD' => 2, 'PHRASE' => 1, 'MENTION' => 2], ['WORD' => [['value' => 'abc'],['value' => 'l']],'PHRASE' => [['value' => 'def ghi']],'MENTION' => [['value' => 'j'],['value' => 'k']]]],
             ['#a#b@c @d#e', 'Or>Hashtag>>Word:a>Hashtag>>Word:b>Mention>>Word:c>Mention>>Word:d>Hashtag>>Word:e', ['HASHTAG' => 3, 'MENTION' => 2], ['HASHTAG' => [['value' => 'a'],['value' => 'b'],['value' => 'e']],'MENTION' => [['value' => 'c'],['value' => 'd']]]],
-            ['(a b)^2', 'Or>Word:a>Word:b>Term:^2', ['WORD' => 2], ['WORD' => [['value' => 'a'],['value' => 'b']]]],
-            ['+(a b c)-(d e f)^2', 'Or>Word:a>Word:b>Word:c>Word:d>Word:e>Word:f>Term:^2', ['WORD' => 6], ['WORD' => [['value' => 'a'],['value' => 'b'],['value' => 'c'],['value' => 'd'],['value' => 'e'],['value' => 'f']]]],
+            ['(a b)^2', 'Or>Word:a>Term:b^2', ['WORD' => 2], ['WORD' => [['value' => 'a'],['value' => 'b','boost' => '2']]]],
+            ['+(a b c)-(d e f)^2', 'Or>Word:a>Word:b>Word:c>Word:d>Word:e>Term:f^2', ['WORD' => 6], ['WORD' => [['value' => 'a'],['value' => 'b'],['value' => 'c'],['value' => 'd'],['value' => 'e'],['value' => 'f','boost' => '2']]]],
             ['a b:', 'Or>Word:a>Word:b:', ['WORD' => 2], ['WORD' => [['value' => 'a'],['value' => 'b:']]]],
             ['http://a.com a:>500', 'Or>Url:http://a.com>Term:a:>500', ['URL' => 1, 'FILTER' => 1], ['URL' => [['value' => 'http://a.com']],'FILTER' => [['field' => 'a','operator' => ':>','value' => '500']]]],
-            ['a (b/c d)^2 Father and Daughter', 'Or>Word:a>Word:b/c>Word:d>Term:^2>Word:Father>Word:and>Word:Daughter', ['WORD' => 6], ['WORD' => [['value' => 'a'],['value' => 'b/c'],['value' => 'd'],['value' => 'Father'],['value' => 'and'],['value' => 'Daughter']]]],
+            ['a (b/c d)^2 Father and Daughter', 'Or>Word:a>Word:b/c>Term:d^2>Word:Father>Word:and>Word:Daughter', ['WORD' => 6], ['WORD' => [['value' => 'a'],['value' => 'b/c'],['value' => 'd','boost' => '2'],['value' => 'Father'],['value' => 'and'],['value' => 'Daughter']]]],
             ['a:>b^2abc', 'Or>Term:^2>>Term:a:>b>Word:abc', ['FILTER' => 1, 'WORD' => 1], ['FILTER' => [['field' => 'a','operator' => ':>','value' => 'b','boost' => '2']],'WORD' => [['value' => 'abc']]]],
             ['a + b', 'Or>Word:a>Word:b', ['WORD' => 2], ['WORD' => [['value' => 'a'],['value' => 'b']]]],
             ['+(a:>b)-c:>d -e:<f', 'Or>Term:a:>b>ExcludeTerm>>Term:c:>d>ExcludeTerm>>Term:e:<f', ['FILTER' => 3], ['FILTER' => [['field' => 'a','operator' => ':>','value' => 'b'],['field' => 'c','operator' => ':>','value' => 'd','exclude' => true],['field' => 'e','operator' => ':<','value' => 'f','exclude' => true]]]],
@@ -284,8 +284,8 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
 > Phrase: phrase
 > Hashtag
 >> Word: phrase
-> Term: table.fieldName : value
 > Term: ^ 123
+>> Term: table.fieldName : value
 ";
 
         $this->assertEquals($output, $this->getPrintContent($query));
