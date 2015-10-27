@@ -51,7 +51,8 @@ abstract class SimpleTerm extends QueryItem
      *
      * @return string
      */
-    protected function encodeEmoji($content) {
+    protected function encodeEmoji($content)
+    {
         $regex = '/(
 		         \x23\xE2\x83\xA3             # Digits
 		         [\x30-\x39]\xE2\x83\xA3
@@ -65,7 +66,7 @@ abstract class SimpleTerm extends QueryItem
         $matches = array();
         if (preg_match_all($regex, $content, $matches)) {
             if (! empty($matches[1])) {
-                foreach($matches[1] as $emoji) {
+                foreach ($matches[1] as $emoji) {
                     /*
 					 * UTF-32's hex encoding is the same as HTML's hex encoding.
 					 * So, by converting the emoji from UTF-8 to UTF-32, we magically

@@ -41,11 +41,9 @@ class Phrase extends SimpleTerm
      */
     public function stripQuotes($text)
     {
-        if (strlen($text) > 2) {
-            return substr($text, 1, strlen($text)-2);
-        } else {
-            return $text;
-        }
+        return strlen($text) > 2
+            ? substr($text, 1, strlen($text)-2)
+            : $text;
     }
 
     /**
