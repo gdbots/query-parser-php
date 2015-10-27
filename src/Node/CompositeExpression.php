@@ -2,7 +2,7 @@
 
 namespace Gdbots\QueryParser\Node;
 
-use Gdbots\QueryParser\Parser\QueryScanner;
+use Gdbots\QueryParser\QueryScanner;
 
 abstract class CompositeExpression extends QueryItem
 {

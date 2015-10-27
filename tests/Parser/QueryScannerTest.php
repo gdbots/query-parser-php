@@ -2,7 +2,7 @@
 
 namespace Gdbots\Tests\QueryParser\Parser;
 
-use Gdbots\QueryParser\Parser\QueryScanner;
+use Gdbots\QueryParser\QueryScanner;
 
 class QueryScannerTest extends \PHPUnit_Framework_TestCase
 {

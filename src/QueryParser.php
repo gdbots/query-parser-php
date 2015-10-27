@@ -1,6 +1,6 @@
 <?php
 
-namespace Gdbots\QueryParser\Parser;
+namespace Gdbots\QueryParser;
 
 use Gdbots\QueryParser\Node;
 

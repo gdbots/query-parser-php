@@ -2,7 +2,7 @@
 
 namespace Gdbots\QueryParser\Node;
 
-use Gdbots\QueryParser\Parser\QueryScanner;
+use Gdbots\QueryParser\QueryScanner;
 use Gdbots\QueryParser\Visitor\QueryItemVisitorInterface;
 
 class ExplicitTerm extends QueryItem

@@ -23,7 +23,7 @@ It supports the following features:
 ``` php
 <?php
 
-use Gdbots\QueryParser\Parser\QueryParser;
+use Gdbots\QueryParser\QueryParser;
 use Gdbots\QueryParser\Visitor\QueryItemPrinter;
 
 $parser = new QueryParser();
@@ -63,8 +63,8 @@ To pull list of `QueryItem` by token type, use:
 ``` php
 <?php
 
-use Gdbots\QueryParser\Parser\QueryParser;
-use Gdbots\QueryParser\Parser\QueryScanner;
+use Gdbots\QueryParser\QueryParser;
+use Gdbots\QueryParser\QueryScanner;
 
 $parser = new QueryParser();
 $parser->readString('#hashtag1 AND #hashtag2');

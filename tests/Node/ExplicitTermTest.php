@@ -2,7 +2,7 @@
 
 namespace Gdbots\Tests\QueryParser\Node;
 
-use Gdbots\QueryParser\Parser\QueryScanner;
+use Gdbots\QueryParser\QueryScanner;
 use Gdbots\QueryParser\Node\Word;
 use Gdbots\QueryParser\Node\ExplicitTerm;
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace Gdbots\QueryParser\Parser;
+namespace Gdbots\QueryParser;
 
 /**
  * A simple scanner for search queries. The scanner also functions as tokenizer, returning
