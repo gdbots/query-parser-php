@@ -56,7 +56,7 @@ class QueryScannerTest extends \PHPUnit_Framework_TestCase
             ['AND', QueryScanner::T_AND_OPERATOR],
             ['"phrase"', QueryScanner::T_PHRASE],
             ['"', QueryScanner::T_QUOTE]
-       ];
+        ];
     }
 
     public function testGetTokenTypeText()

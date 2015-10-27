@@ -51,7 +51,8 @@ abstract class SimpleTerm extends QueryItem
      *
      * @return string
      */
-    protected function encodeEmoji($content) {
+    protected function encodeEmoji($content)
+    {
         $regex = '/(
 		         \x23\xE2\x83\xA3             # Digits
 		         [\x30-\x39]\xE2\x83\xA3

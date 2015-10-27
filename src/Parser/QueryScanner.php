@@ -297,7 +297,6 @@ class QueryScanner
 
                     $matches[$orgKey] = $value;
                 }
-
                 // update value
                 else {
                     $matches[$key] = $value;
