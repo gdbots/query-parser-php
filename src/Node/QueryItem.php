@@ -30,6 +30,7 @@ abstract class QueryItem
     public function setExcluded($bool = false)
     {
         $this->excluded = $bool;
+
         return $this;
     }
 
@@ -49,6 +50,7 @@ abstract class QueryItem
     public function setIncluded($bool = false)
     {
         $this->included = $bool;
+
         return $this;
     }
 
@@ -68,6 +70,7 @@ abstract class QueryItem
     public function setBoostBy($boostBy)
     {
         $this->boostBy = $boostBy;
+
         return $this;
     }
 
