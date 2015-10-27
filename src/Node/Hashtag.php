@@ -2,10 +2,19 @@
 
 namespace Gdbots\QueryParser\Node;
 
+use Gdbots\QueryParser\QueryScanner;
 use Gdbots\QueryParser\Visitor\QueryItemVisitorInterface;
 
-class Hashtag extends CompositeExpression
+class Hashtag extends SimpleTerm
 {
+    /**
+     * @param string $word
+     */
+    public function __construct($word)
+    {
+        parent::__construct(QueryScanner::T_HASHTAG, $word);
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -13,7 +22,7 @@ class Hashtag extends CompositeExpression
     {
         return [
             'Operator' => 'Hashtag',
-            'Expression' => $this->expression
+            'Term' => $this->getToken()
         ];
     }
 

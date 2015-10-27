@@ -84,6 +84,22 @@ class QueryItemElastica implements QueryItemVisitorInterface
     /**
      * {@inheritDoc}
      */
+    public function visitHashtag(Node\Hashtag $hashtag)
+    {
+        // todo:
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function visitMention(Node\Mention $mention)
+    {
+        // todo:
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function visitExplicitTerm(Node\ExplicitTerm $term)
     {
         if ($term->getNominator() instanceof Node\SimpleTerm) {
@@ -131,22 +147,6 @@ class QueryItemElastica implements QueryItemVisitorInterface
     public function visitSubExpression(Node\SubExpression $sub)
     {
         return $sub->getExpression()->accept($this);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function visitHashtag(Node\Hashtag $hashtag)
-    {
-        // todo:
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function visitMention(Node\Mention $mention)
-    {
-        // todo:
     }
 
     /**

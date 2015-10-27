@@ -22,16 +22,6 @@ interface QueryItemVisitorInterface
     public function visitUrl(Node\Url $url);
 
     /**
-     * @param Node\ExplicitTerm $term
-     */
-    public function visitExplicitTerm(Node\ExplicitTerm $term);
-
-    /**
-     * @param Node\SubExpression $sub
-     */
-    public function visitSubExpression(Node\SubExpression $sub);
-
-    /**
      * @param Node\Hashtag $hashtag
      */
     public function visitHashtag(Node\Hashtag $hashtag);
@@ -40,6 +30,16 @@ interface QueryItemVisitorInterface
      * @param Node\Mention $mention
      */
     public function visitMention(Node\Mention $mention);
+
+    /**
+     * @param Node\ExplicitTerm $term
+     */
+    public function visitExplicitTerm(Node\ExplicitTerm $term);
+
+    /**
+     * @param Node\SubExpression $sub
+     */
+    public function visitSubExpression(Node\SubExpression $sub);
 
     /**
      * @param Node\OrExpressionList $list

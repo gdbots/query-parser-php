@@ -2,10 +2,19 @@
 
 namespace Gdbots\QueryParser\Node;
 
+use Gdbots\QueryParser\QueryScanner;
 use Gdbots\QueryParser\Visitor\QueryItemVisitorInterface;
 
-class Mention extends CompositeExpression
+class Mention extends SimpleTerm
 {
+    /**
+     * @param string $word
+     */
+    public function __construct($word)
+    {
+        parent::__construct(QueryScanner::T_MENTION, $word);
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -13,7 +22,7 @@ class Mention extends CompositeExpression
     {
         return [
             'Operator' => 'Mention',
-            'Expression' => $this->expression
+            'Term' => $this->getToken()
         ];
     }
 

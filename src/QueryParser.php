@@ -100,7 +100,7 @@ class QueryParser
             return $term;
         }
 
-        if ($tokenType == QueryScanner::T_FILTER && $term->getTokenType() == QueryScanner::T_PHRASE) {
+        if ($tokenType == QueryScanner::T_FILTER && $term->getTokenType() != QueryScanner::T_WORD) {
             $this->addError(sprintf(
                 'Error: FILTER only support Word. Found: "%s"',
                 $this->scanner->getTokenTypeText()
@@ -113,13 +113,14 @@ class QueryParser
         $tokenTypeText = $this->scanner->getToken();
 
         switch ($this->scanner->next()) {
-            case QueryScanner::T_PHRASE:
-                $value = new Node\Phrase($this->scanner->getToken());
-
-                break;
 
             case QueryScanner::T_WORD:
                 $value = new Node\Word($this->scanner->getToken());
+
+                break;
+
+            case QueryScanner::T_PHRASE:
+                $value = new Node\Phrase($this->scanner->getToken());
 
                 break;
 
@@ -130,7 +131,7 @@ class QueryParser
 
             default:
                 $this->addError(sprintf(
-                    'Error: Expected Word or Phrase. Found: "%s"',
+                    'Error: Expected Word, Phrase, or Url. Found: "%s"',
                     $this->scanner->getTokenTypeText()
                 ));
 
@@ -176,6 +177,38 @@ class QueryParser
                 $url = new Node\Url($this->scanner->getToken());
                 return $this->readTerm($this->scanner->next(), $url);
 
+            case QueryScanner::T_HASHTAG:
+                $expression = $this->readExpression($this->scanner->next());
+                if ($expression) {
+                    if ($expression->getTokenType() == QueryScanner::T_BOOST) {
+                        $hashtag = new Node\Hashtag($expression->getNominator()->getToken());
+                        $hashtag->setBoostBy($expression->getTerm()->getToken());
+                        return $hashtag;
+                    }
+
+                    return new Node\Hashtag($expression->getToken());
+                }
+
+                $this->addError('Error: HASHTAG not followed by a valid expression.');
+
+                break;
+
+            case QueryScanner::T_MENTION:
+                $expression = $this->readExpression($this->scanner->next());
+                if ($expression) {
+                    if ($expression->getTokenType() == QueryScanner::T_BOOST) {
+                        $mention = new Node\Mention($expression->getNominator()->getToken());
+                        $mention->setBoostBy($expression->getTerm()->getToken());
+                        return $mention;
+                    }
+
+                    return new Node\Mention($expression->getToken());
+                }
+
+                $this->addError('Error: MENTION not followed by a valid expression.');
+
+                break;
+
             case QueryScanner::T_EXCLUDE:
                 $expression = $this->readExpression($this->scanner->next());
                 if ($expression) {
@@ -195,38 +228,6 @@ class QueryParser
                 }
 
                 $this->addError('Error: INCLUDE not followed by a valid expression.');
-
-                break;
-
-            case QueryScanner::T_HASHTAG:
-                $expression = $this->readExpression($this->scanner->next());
-                if ($expression) {
-                    if ($expression->getTokenType() == QueryScanner::T_BOOST) {
-                        $term = new Node\Hashtag($expression->getNominator());
-                        $term->setBoostBy($expression->getTerm()->getToken());
-                        return $term;
-                    }
-
-                    return new Node\Hashtag($expression);
-                }
-
-                $this->addError('Error: HASHTAG not followed by a valid expression.');
-
-                break;
-
-            case QueryScanner::T_MENTION:
-                $expression = $this->readExpression($this->scanner->next());
-                if ($expression) {
-                    if ($expression->getTokenType() == QueryScanner::T_BOOST) {
-                        $term = new Node\Mention($expression->getNominator());
-                        $term->setBoostBy($expression->getTerm()->getToken());
-                        return $term;
-                    }
-
-                    return new Node\Mention($expression);
-                }
-
-                $this->addError('Error: MENTION not followed by a valid expression.');
 
                 break;
 

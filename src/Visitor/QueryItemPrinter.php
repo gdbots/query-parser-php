@@ -111,6 +111,32 @@ class QueryItemPrinter implements QueryItemVisitorInterface
     /**
      * {@inheritDoc}
      */
+    public function visitHashtag(Node\Hashtag $hashtag)
+    {
+        $this->printIndentedLine(sprintf(
+            'Hashtag: %s%s%s',
+            $this->printPrefix($hashtag),
+            $hashtag->getToken(),
+            $this->printPostfix($hashtag)
+        ));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function visitMention(Node\Mention $mention)
+    {
+        $this->printIndentedLine(sprintf(
+            'Mention: %s%s%s',
+            $this->printPrefix($mention),
+            $mention->getToken(),
+            $this->printPostfix($mention)
+        ));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function visitExplicitTerm(Node\ExplicitTerm $term)
     {
         if ($term->getNominator() instanceof Node\SimpleTerm) {
@@ -150,32 +176,6 @@ class QueryItemPrinter implements QueryItemVisitorInterface
         $this->increaseIndent();
         $sub->getExpression()->accept($this);
         $this->decreaseIndent();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function visitHashtag(Node\Hashtag $hashtag)
-    {
-        $this->printIndentedLine(sprintf(
-            'Hashtag: %s%s%s',
-            $this->printPrefix($hashtag),
-            $hashtag->getExpression()->getToken(),
-            $this->printPostfix($hashtag)
-        ));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function visitMention(Node\Mention $mention)
-    {
-        $this->printIndentedLine(sprintf(
-            'Mention: %s%s%s',
-            $this->printPrefix($mention),
-            $mention->getExpression()->getToken(),
-            $this->printPostfix($mention)
-        ));
     }
 
     /**
