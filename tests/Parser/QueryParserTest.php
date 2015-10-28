@@ -145,7 +145,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
 
     public function getTestParseQueriesDataprovider()
     {
-        return json_encode(file_get_contents(__DIR__.'/../Fixtures/query-string.json'), true);
+        return json_decode(file_get_contents(__DIR__.'/../Fixtures/query-string.json'), true);
     }
 
     public function testParseTextWithUnclosedQuotes()

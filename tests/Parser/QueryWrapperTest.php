@@ -50,7 +50,7 @@ class QueryWrapperTest extends \PHPUnit_Framework_TestCase
 
         // check single type item count
         foreach ($tokens as $key => $token) {
-            $method = 'get'.ucfirst(strtolower($key));
+            $method = 'get'.ucfirst(strtolower($key)).'s';
 
             $this->assertEquals(1+count($this->wrapper->$method()), count($token));
         }
@@ -107,7 +107,7 @@ class QueryWrapperTest extends \PHPUnit_Framework_TestCase
 
     public function getTestParseQueriesDataprovider()
     {
-        return json_encode(file_get_contents(__DIR__.'/../Fixtures/query-string.json'), true);
+        return json_decode(file_get_contents(__DIR__.'/../Fixtures/query-string.json'), true);
     }
 
     /**
