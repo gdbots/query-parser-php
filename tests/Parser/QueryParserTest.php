@@ -57,7 +57,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @dataProvider getTestParseWithPrintoutDataprovider
+     * @dataProvider getTestParseQueriesDataprovider
      */
     public function testParseQuery($string, $print, array $itemCount = [], array $queryItems = [])
     {
@@ -143,9 +143,9 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($queryItems, $allTokenArray);
     }
 
-    public function getTestParseWithPrintoutDataprovider()
+    public function getTestParseQueriesDataprovider()
     {
-        return json_encode(file_get_contents(__DIR__.'/../Fixtures/query-string.json'));
+        return json_encode(file_get_contents(__DIR__.'/../Fixtures/query-string.json'), true);
     }
 
     public function testParseTextWithUnclosedQuotes()
