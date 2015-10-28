@@ -5,7 +5,7 @@ namespace Gdbots\QueryParser;
 use Gdbots\QueryParser\Node;
 
 /**
- * A parser using the QueryScanner as input for tokens. The parser builds a
+ * A parser using the QueryLexer as input for tokens. The parser builds a
  * a query tree, representing the query expression delivered as input.
  * The parser returns a Query Tree if the parsing is successful or null if it failed.
  * The parser will try to parse the entire input string and delivers errors,
@@ -14,7 +14,7 @@ use Gdbots\QueryParser\Node;
 class QueryParser
 {
     /**
-     * @var QueryScanner
+     * @var QueryLexer
      */
     protected $scanner;
 
@@ -31,13 +31,13 @@ class QueryParser
      */
     public function __construct()
     {
-        $this->scanner = new QueryScanner();
+        $this->scanner = new QueryLexer();
     }
 
     /**
      * Returns scanner instance.
      *
-     * @return QueryScanner
+     * @return QueryLexer
      */
     public function getScanner()
     {
@@ -92,15 +92,15 @@ class QueryParser
      * @param int    $tokenType
      * @param string $term
      *
-     * @return \Gdbots\QueryParser\Node\QueryItem|null
+     * @return \Gdbots\QueryParser\Node\AbstractQueryItem|null
      */
     protected function readTerm($tokenType, $term)
     {
-        if (!in_array($tokenType, [QueryScanner::T_FILTER])) {
+        if (!in_array($tokenType, [QueryLexer::T_FILTER])) {
             return $term;
         }
 
-        if ($tokenType == QueryScanner::T_FILTER && $term->getTokenType() != QueryScanner::T_WORD) {
+        if ($tokenType == QueryLexer::T_FILTER && $term->getTokenType() != QueryLexer::T_WORD) {
             $this->addError(sprintf(
                 'Error: FILTER only support Word. Found: "%s"',
                 $this->scanner->getTokenTypeText()
@@ -114,17 +114,17 @@ class QueryParser
 
         switch ($this->scanner->next()) {
 
-            case QueryScanner::T_WORD:
+            case QueryLexer::T_WORD:
                 $value = new Node\Word($this->scanner->getToken());
 
                 break;
 
-            case QueryScanner::T_PHRASE:
+            case QueryLexer::T_PHRASE:
                 $value = new Node\Phrase($this->scanner->getToken());
 
                 break;
 
-            case QueryScanner::T_URL:
+            case QueryLexer::T_URL:
                 $value = new Node\Url($this->scanner->getToken());
 
                 break;
@@ -157,30 +157,30 @@ class QueryParser
      *
      * @param int $tokenType
      *
-     * @return \Gdbots\QueryParser\Node\QueryItem|null
+     * @return \Gdbots\QueryParser\Node\AbstractQueryItem|null
      */
     protected function readExpression($tokenType)
     {
         switch ($tokenType) {
-            case QueryScanner::T_OPEN_PARENTHESIS:
+            case QueryLexer::T_OPEN_PARENTHESIS:
                 return $this->readSubQuery();
 
-            case QueryScanner::T_PHRASE:
+            case QueryLexer::T_PHRASE:
                 $text = new Node\Phrase($this->scanner->getToken());
                 return $this->readTerm($this->scanner->next(), $text);
 
-            case QueryScanner::T_WORD:
+            case QueryLexer::T_WORD:
                 $word = new Node\Word($this->scanner->getToken());
                 return $this->readTerm($this->scanner->next(), $word);
 
-            case QueryScanner::T_URL:
+            case QueryLexer::T_URL:
                 $url = new Node\Url($this->scanner->getToken());
                 return $this->readTerm($this->scanner->next(), $url);
 
-            case QueryScanner::T_HASHTAG:
+            case QueryLexer::T_HASHTAG:
                 $expression = $this->readExpression($this->scanner->next());
                 if ($expression) {
-                    if ($expression->getTokenType() == QueryScanner::T_BOOST) {
+                    if ($expression->getTokenType() == QueryLexer::T_BOOST) {
                         $hashtag = new Node\Hashtag($expression->getNominator()->getToken());
                         $hashtag->setBoostBy($expression->getTerm()->getToken());
                         return $hashtag;
@@ -193,10 +193,10 @@ class QueryParser
 
                 break;
 
-            case QueryScanner::T_MENTION:
+            case QueryLexer::T_MENTION:
                 $expression = $this->readExpression($this->scanner->next());
                 if ($expression) {
-                    if ($expression->getTokenType() == QueryScanner::T_BOOST) {
+                    if ($expression->getTokenType() == QueryLexer::T_BOOST) {
                         $mention = new Node\Mention($expression->getNominator()->getToken());
                         $mention->setBoostBy($expression->getTerm()->getToken());
                         return $mention;
@@ -209,7 +209,7 @@ class QueryParser
 
                 break;
 
-            case QueryScanner::T_EXCLUDE:
+            case QueryLexer::T_EXCLUDE:
                 $expression = $this->readExpression($this->scanner->next());
                 if ($expression) {
                     $expression->setExcluded(true);
@@ -220,7 +220,7 @@ class QueryParser
 
                 break;
 
-            case QueryScanner::T_INCLUDE:
+            case QueryLexer::T_INCLUDE:
                 $expression = $this->readExpression($this->scanner->next());
                 if ($expression) {
                     $expression->setIncluded(true);
@@ -231,7 +231,7 @@ class QueryParser
 
                 break;
 
-            case QueryScanner::T_ILLEGAL:
+            case QueryLexer::T_ILLEGAL:
                 $this->addError(sprintf(
                     'Error: Expected Expression. Found illegal character: "%s"',
                     $this->scanner->getTokenTypeText()
@@ -239,7 +239,7 @@ class QueryParser
 
                 break;
 
-            case QueryScanner::T_QUOTE:
+            case QueryLexer::T_QUOTE:
                 $this->addError(sprintf(
                     'Error: Opening quote at pos %s lacks closing quote: "%s"',
                     $this->scanner->getPosition(),
@@ -248,7 +248,7 @@ class QueryParser
 
                 break;
 
-            case QueryScanner::T_OR_OPERATOR:
+            case QueryLexer::T_OR_OPERATOR:
                 $this->addError(sprintf(
                     'Error: Expected Expression. OR operator found at pos %s "%s" remaining: "%s"',
                     $this->scanner->getPosition(),
@@ -258,7 +258,7 @@ class QueryParser
 
                 break;
 
-            case QueryScanner::T_AND_OPERATOR:
+            case QueryLexer::T_AND_OPERATOR:
                 $this->addError(sprintf(
                     'Error: Expected Expression. AND operator found at pos %s "%s" remaining: "%s"',
                     $this->scanner->getPosition(),
@@ -277,7 +277,7 @@ class QueryParser
      * - Expression
      * - Expression OR Expression OR ...
      *
-     * @return \Gdbots\QueryParser\Node\QueryItem|null
+     * @return \Gdbots\QueryParser\Node\AbstractQueryItem|null
      */
     protected function readOrExpressionList()
     {
@@ -286,9 +286,9 @@ class QueryParser
         do {
             $lastExpression = $this->readExpression($this->scanner->getTokenType());
 
-            if ($this->scanner->getTokenType() == QueryScanner::T_BOOST) {
+            if ($this->scanner->getTokenType() == QueryLexer::T_BOOST) {
 
-                /** @var \Gdbots\QueryParser\Node\QueryItem|null $expression */
+                /** @var \Gdbots\QueryParser\Node\AbstractQueryItem|null $expression */
                 if ($expression = $this->readExpression($this->scanner->next())) {
                     $lastExpression->setBoostBy($expression->getToken());
                 }
@@ -298,7 +298,7 @@ class QueryParser
 
         } while (
             $lastExpression &&
-            $this->scanner->getTokenType() == QueryScanner::T_OR_OPERATOR &&
+            $this->scanner->getTokenType() == QueryLexer::T_OR_OPERATOR &&
             $this->scanner->next()
         );
 
@@ -314,7 +314,7 @@ class QueryParser
      * - Expression
      * - Expression AND Expression AND ...
      *
-     * @return \Gdbots\QueryParser\Node\QueryItem|null
+     * @return \Gdbots\QueryParser\Node\AbstractQueryItem|null
      */
     protected function readAndExpressionList()
     {
@@ -328,13 +328,13 @@ class QueryParser
 
         } while (
             $lastExpression &&
-            $this->scanner->getTokenType() == QueryScanner::T_AND_OPERATOR &&
+            $this->scanner->getTokenType() == QueryLexer::T_AND_OPERATOR &&
             $this->scanner->next()
         );
 
         switch ($this->scanner->getTokenType()) {
-            case QueryScanner::T_CLOSE_PARENTHESIS:
-            case QueryScanner::T_EOI:
+            case QueryLexer::T_CLOSE_PARENTHESIS:
+            case QueryLexer::T_EOI:
                 if (count($expressions) === 1) {
                     return $expressions[0];
                 }
@@ -350,15 +350,15 @@ class QueryParser
     /**
      * Makes the parser read expressions between parentheses.
      *
-     * @return \Gdbots\QueryParser\Node\QueryItem|null
+     * @return \Gdbots\QueryParser\Node\AbstractQueryItem|null
      */
     protected function readSubQuery()
     {
         $expressionlist = $this->readAndExpressionList();
-        if ($this->scanner->getTokenType() == QueryScanner::T_CLOSE_PARENTHESIS) {
+        if ($this->scanner->getTokenType() == QueryLexer::T_CLOSE_PARENTHESIS) {
             $this->scanner->next();
 
-            if (!($expressionlist instanceof Node\ExpressionList)) {
+            if (!($expressionlist instanceof Node\AbstractExpressionList)) {
                 return $expressionlist;
             }
 
@@ -373,7 +373,7 @@ class QueryParser
     /**
      * Makes the parser build an expression tree from the given input.
      *
-     * @return \Gdbots\QueryParser\Node\QueryItem|null
+     * @return \Gdbots\QueryParser\Node\AbstractQueryItem|null
      */
     public function parse()
     {

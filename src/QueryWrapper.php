@@ -20,9 +20,9 @@ class QueryWrapper
     protected $ignoreOperator = true;
 
     /**
-     * The parsed QueryItem instance
+     * The parsed AbstractQueryItem instance
      *
-     * @var QueryItem
+     * @var AbstractQueryItem
      */
     protected $queryItem = null;
 
@@ -102,7 +102,7 @@ class QueryWrapper
     }
 
     /**
-     * @return \Gdbots\QueryParser\Node\QueryItem
+     * @return \Gdbots\QueryParser\Node\AbstractQueryItem
      */
     public function getParseResultQueryItem()
     {
@@ -114,7 +114,7 @@ class QueryWrapper
      */
     public function getFilters()
     {
-        return $this->filters ?: $this->filters = $this->queryItem->getQueryItemsByTokenType(QueryScanner::T_FILTER);
+        return $this->filters ?: $this->filters = $this->queryItem->getQueryItemsByTokenType(QueryLexer::T_FILTER);
     }
 
     /**
@@ -122,7 +122,7 @@ class QueryWrapper
      */
     public function getHashtags()
     {
-        return $this->hashtags ?: $this->hashtags = $this->queryItem->getQueryItemsByTokenType(QueryScanner::T_HASHTAG);
+        return $this->hashtags ?: $this->hashtags = $this->queryItem->getQueryItemsByTokenType(QueryLexer::T_HASHTAG);
     }
 
     /**
@@ -130,7 +130,7 @@ class QueryWrapper
      */
     public function getMentions()
     {
-        return $this->mentions ?: $this->mentions = $this->queryItem->getQueryItemsByTokenType(QueryScanner::T_MENTION);
+        return $this->mentions ?: $this->mentions = $this->queryItem->getQueryItemsByTokenType(QueryLexer::T_MENTION);
     }
 
     /**
@@ -138,7 +138,7 @@ class QueryWrapper
      */
     public function getPhrases()
     {
-        return $this->phrases ?: $this->phrases = $this->queryItem->getQueryItemsByTokenType(QueryScanner::T_PHRASE);
+        return $this->phrases ?: $this->phrases = $this->queryItem->getQueryItemsByTokenType(QueryLexer::T_PHRASE);
     }
 
     /**
@@ -146,7 +146,7 @@ class QueryWrapper
      */
     public function getWords()
     {
-        return $this->words ?: $this->words = $this->queryItem->getQueryItemsByTokenType(QueryScanner::T_WORD);
+        return $this->words ?: $this->words = $this->queryItem->getQueryItemsByTokenType(QueryLexer::T_WORD);
     }
 
     /**
@@ -154,6 +154,6 @@ class QueryWrapper
      */
     public function getUrls()
     {
-        return $this->urls ?: $this->urls = $this->queryItem->getQueryItemsByTokenType(QueryScanner::T_URL);
+        return $this->urls ?: $this->urls = $this->queryItem->getQueryItemsByTokenType(QueryLexer::T_URL);
     }
 }

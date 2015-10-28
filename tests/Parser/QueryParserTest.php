@@ -4,7 +4,7 @@ namespace Gdbots\Tests\QueryParser\Parser;
 
 use Gdbots\QueryParser\Node;
 use Gdbots\QueryParser\QueryParser;
-use Gdbots\QueryParser\QueryScanner;
+use Gdbots\QueryParser\QueryLexer;
 use Gdbots\QueryParser\Visitor\QueryItemPrinter;
 
 class QueryParserTest extends \PHPUnit_Framework_TestCase
@@ -87,7 +87,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
             $this->assertEquals($value, count($tokens[$key]));
 
             // check single type item count
-            $items = $query->getQueryItemsByTokenType(constant('Gdbots\QueryParser\QueryScanner::T_'.$key));
+            $items = $query->getQueryItemsByTokenType(constant('Gdbots\QueryParser\QueryLexer::T_'.$key));
             $this->assertEquals($value, count($items));
         }
 
@@ -98,7 +98,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
         $tokenTypes = ['FILTER', 'HASHTAG', 'MENTION', 'PHRASE', 'URL', 'WORD'];
 
         foreach ($tokenTypes as $tokenType) {
-            $items = $query->getQueryItemsByTokenType(constant('Gdbots\QueryParser\QueryScanner::T_'.$tokenType));
+            $items = $query->getQueryItemsByTokenType(constant('Gdbots\QueryParser\QueryLexer::T_'.$tokenType));
 
             foreach ($items as $item) {
                 $tokenArray = [];
@@ -117,7 +117,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
                 $excluded = $item->isExcluded();
                 $included = $item->isIncluded();
 
-                if ($item->getTokenType() === QueryScanner::T_FILTER) {
+                if ($item->getTokenType() === QueryLexer::T_FILTER) {
                     $tokenArray['field'] = $tokenField;
                     $tokenArray['operator'] = $tokenTypeText;
 
@@ -153,7 +153,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
 
         $this->assertInstanceOf('Gdbots\QueryParser\Node\Word', $query);
         $this->assertEquals('phrase', $query->getToken());
-        $this->assertEquals(QueryScanner::T_WORD, $query->getTokenType());
+        $this->assertEquals(QueryLexer::T_WORD, $query->getTokenType());
     }
 
     public function testParseMultiHashtags()
@@ -262,7 +262,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
         $this->parser->readString('(("phrase" OR #phrase) AND table.fieldName:value) #boost');
         $query = $this->parser->parse();
 
-        $hasttags = $query->getQueryItemsByTokenType(\Gdbots\QueryParser\QueryScanner::T_HASHTAG);
+        $hasttags = $query->getQueryItemsByTokenType(\Gdbots\QueryParser\QueryLexer::T_HASHTAG);
 
         $this->assertEquals(2, count($hasttags));
         $this->assertEquals('phrase', $hasttags[0]->getToken());
@@ -272,7 +272,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
     /**
      * @return string
      */
-    private function getPrintContent(Node\QueryItem $query)
+    private function getPrintContent(Node\AbstractQueryItem $query)
     {
         ob_start();
 

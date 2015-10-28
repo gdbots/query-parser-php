@@ -2,10 +2,10 @@
 
 namespace Gdbots\QueryParser\Node;
 
-use Gdbots\QueryParser\QueryScanner;
+use Gdbots\QueryParser\QueryLexer;
 use Gdbots\QueryParser\Visitor\QueryItemVisitorInterface;
 
-class ExplicitTerm extends QueryItem
+class ExplicitTerm extends AbstractQueryItem
 {
     /**
      * @var string
@@ -99,7 +99,7 @@ class ExplicitTerm extends QueryItem
                 $items[] = $this;
             }
         } else {
-            $items[QueryScanner::$typeStrings[$this->getTokenType()]][] = $this;
+            $items[QueryLexer::$typeStrings[$this->getTokenType()]][] = $this;
         }
 
         return $items;

@@ -4,7 +4,7 @@ namespace Gdbots\Tests\QueryParser\Node;
 
 use Gdbots\QueryParser\Node\Word;
 
-abstract class ExpressionListTest extends \PHPUnit_Framework_TestCase
+abstract class AbstractExpressionListTest extends \PHPUnit_Framework_TestCase
 {
     /** @var string */
     protected $word1;
@@ -12,7 +12,7 @@ abstract class ExpressionListTest extends \PHPUnit_Framework_TestCase
     /** @var string */
     protected $word2;
 
-    /** @var ExpressionList */
+    /** @var AbstractExpressionList */
     protected $expressionList;
 
     public function setUp()

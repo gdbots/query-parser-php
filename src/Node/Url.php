@@ -2,7 +2,7 @@
 
 namespace Gdbots\QueryParser\Node;
 
-use Gdbots\QueryParser\QueryScanner;
+use Gdbots\QueryParser\QueryLexer;
 use Gdbots\QueryParser\Visitor\QueryItemVisitorInterface;
 
 class Url extends SimpleTerm
@@ -12,7 +12,7 @@ class Url extends SimpleTerm
      */
     public function __construct($url)
     {
-        parent::__construct(QueryScanner::T_URL, $url);
+        parent::__construct(QueryLexer::T_URL, $url);
     }
 
     /**

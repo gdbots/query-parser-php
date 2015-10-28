@@ -4,7 +4,7 @@ namespace Gdbots\Tests\QueryParser\Node;
 
 use Gdbots\QueryParser\Node\OrExpressionList;
 
-class OrExpressionListTest extends ExpressionListTest
+class OrExpressionListTest extends AbstractExpressionListTest
 {
     public function setUp()
     {

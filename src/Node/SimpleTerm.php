@@ -2,9 +2,9 @@
 
 namespace Gdbots\QueryParser\Node;
 
-use Gdbots\QueryParser\QueryScanner;
+use Gdbots\QueryParser\QueryLexer;
 
-abstract class SimpleTerm extends QueryItem
+abstract class SimpleTerm extends AbstractQueryItem
 {
     /**
      * @var int
@@ -39,7 +39,7 @@ abstract class SimpleTerm extends QueryItem
      */
     public function getToken()
     {
-        if (preg_match(QueryScanner::REGEX_EMOTICONS_UTF8, $this->token)) {
+        if (preg_match(QueryLexer::REGEX_EMOTICONS_UTF8, $this->token)) {
             return $this->encodeEmoji($this->token);
         }
 
@@ -94,7 +94,7 @@ abstract class SimpleTerm extends QueryItem
                 return [$this];
             }
         } else {
-            return [QueryScanner::$typeStrings[$this->getTokenType()] => [$this]];
+            return [QueryLexer::$typeStrings[$this->getTokenType()] => [$this]];
         }
 
         return [];

@@ -4,7 +4,7 @@ namespace Gdbots\QueryParser\Node;
 
 use Gdbots\QueryParser\Visitor\QueryItemVisitorInterface;
 
-class AndExpressionList extends ExpressionList
+class AndExpressionList extends AbstractExpressionList
 {
     /**
      * {@inheritDoc}

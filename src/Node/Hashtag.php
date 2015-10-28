@@ -2,7 +2,7 @@
 
 namespace Gdbots\QueryParser\Node;
 
-use Gdbots\QueryParser\QueryScanner;
+use Gdbots\QueryParser\QueryLexer;
 use Gdbots\QueryParser\Visitor\QueryItemVisitorInterface;
 
 class Hashtag extends SimpleTerm
@@ -12,7 +12,7 @@ class Hashtag extends SimpleTerm
      */
     public function __construct($word)
     {
-        parent::__construct(QueryScanner::T_HASHTAG, $word);
+        parent::__construct(QueryLexer::T_HASHTAG, $word);
     }
 
     /**

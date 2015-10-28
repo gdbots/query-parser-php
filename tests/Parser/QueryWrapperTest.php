@@ -4,7 +4,7 @@ namespace Gdbots\Tests\QueryParser\Parser;
 
 use Gdbots\QueryParser\Node;
 use Gdbots\QueryParser\QueryWrapper;
-use Gdbots\QueryParser\QueryScanner;
+use Gdbots\QueryParser\QueryLexer;
 use Gdbots\QueryParser\Visitor\QueryItemPrinter;
 
 class QueryWrapperTest extends \PHPUnit_Framework_TestCase
@@ -80,7 +80,7 @@ class QueryWrapperTest extends \PHPUnit_Framework_TestCase
                 $excluded = $item->isExcluded();
                 $included = $item->isIncluded();
 
-                if ($item->getTokenType() === QueryScanner::T_FILTER) {
+                if ($item->getTokenType() === QueryLexer::T_FILTER) {
                     $tokenArray['field'] = $tokenField;
                     $tokenArray['operator'] = $tokenTypeText;
 
@@ -112,7 +112,7 @@ class QueryWrapperTest extends \PHPUnit_Framework_TestCase
     /**
      * @return string
      */
-    private function getPrintContent(Node\QueryItem $query)
+    private function getPrintContent(Node\AbstractQueryItem $query)
     {
         ob_start();
 

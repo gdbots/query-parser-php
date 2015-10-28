@@ -4,7 +4,7 @@ namespace Gdbots\Tests\QueryParser\Node;
 
 use Gdbots\QueryParser\Node\AndExpressionList;
 
-class AndExpressionListTest extends ExpressionListTest
+class AndExpressionListTest extends AbstractExpressionListTest
 {
     public function setUp()
     {

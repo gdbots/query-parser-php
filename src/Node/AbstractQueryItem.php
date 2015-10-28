@@ -2,10 +2,10 @@
 
 namespace Gdbots\QueryParser\Node;
 
-use Gdbots\QueryParser\QueryScanner;
+use Gdbots\QueryParser\QueryLexer;
 use Gdbots\QueryParser\Visitor\QueryItemVisitorInterface;
 
-abstract class QueryItem
+abstract class AbstractQueryItem
 {
     /**
      * @var bool

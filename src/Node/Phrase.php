@@ -2,7 +2,7 @@
 
 namespace Gdbots\QueryParser\Node;
 
-use Gdbots\QueryParser\QueryScanner;
+use Gdbots\QueryParser\QueryLexer;
 use Gdbots\QueryParser\Visitor\QueryItemVisitorInterface;
 
 class Phrase extends SimpleTerm
@@ -12,7 +12,7 @@ class Phrase extends SimpleTerm
      */
     public function __construct($text)
     {
-        parent::__construct(QueryScanner::T_PHRASE, $this->stripQuotes($text));
+        parent::__construct(QueryLexer::T_PHRASE, $this->stripQuotes($text));
     }
 
     /**

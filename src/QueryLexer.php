@@ -19,7 +19,7 @@ namespace Gdbots\QueryParser;
  * For debugging and error reporting reasons, the scanner retains all input to be processed,
  * all input that is processed and the position of the scanner in the original input string.
  */
-class QueryScanner
+class QueryLexer
 {
     const T_EOI                 = 0; // end of input
     const T_WORD                = 1; // word

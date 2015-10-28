@@ -2,25 +2,25 @@
 
 namespace Gdbots\QueryParser\Node;
 
-use Gdbots\QueryParser\QueryScanner;
+use Gdbots\QueryParser\QueryLexer;
 
-abstract class CompositeExpression extends QueryItem
+abstract class AbstractCompositeExpression extends AbstractQueryItem
 {
     /**
-     * @var QueryItem
+     * @var AbstractQueryItem
      */
     protected $expression;
 
     /**
-     * @param QueryItem $expression
+     * @param AbstractQueryItem $expression
      */
-    public function __construct(QueryItem $expression)
+    public function __construct(AbstractQueryItem $expression)
     {
         $this->expression = $expression;
     }
 
     /**
-     * @return QueryItem
+     * @return AbstractQueryItem
      */
     public function getExpression()
     {
@@ -32,13 +32,6 @@ abstract class CompositeExpression extends QueryItem
      */
     public function getTokenType()
     {
-        if ($this instanceof Mention) {
-            return QueryScanner::T_MENTION;
-        }
-        if ($this instanceof Hashtag) {
-            return QueryScanner::T_HASHTAG;
-        }
-
         return null;
     }
 
@@ -58,7 +51,7 @@ abstract class CompositeExpression extends QueryItem
                 $items[] = $this;
             }
         } else {
-            $items[QueryScanner::$typeStrings[$this->getTokenType()]][] = $this;
+            $items[QueryLexer::$typeStrings[$this->getTokenType()]][] = $this;
         }
 
         return $items;

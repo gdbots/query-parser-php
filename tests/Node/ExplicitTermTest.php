@@ -2,7 +2,7 @@
 
 namespace Gdbots\Tests\QueryParser\Node;
 
-use Gdbots\QueryParser\QueryScanner;
+use Gdbots\QueryParser\QueryLexer;
 use Gdbots\QueryParser\Node\Word;
 use Gdbots\QueryParser\Node\ExplicitTerm;
 
@@ -17,7 +17,7 @@ class ExplicitTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->word = new Word('John');
-        $this->explicitTerm = new ExplicitTerm('people', QueryScanner::T_FILTER, ':', $this->word);
+        $this->explicitTerm = new ExplicitTerm('people', QueryLexer::T_FILTER, ':', $this->word);
     }
 
     public function tearDown()
@@ -42,7 +42,7 @@ class ExplicitTest extends \PHPUnit_Framework_TestCase
             'Expression' => 'Explicit Term',
             'Nominator' => 'people',
             'Term' => $this->word,
-            'TokenType' => QueryScanner::T_FILTER,
+            'TokenType' => QueryLexer::T_FILTER,
             'TokenTypeText' => ':'
         ];
 

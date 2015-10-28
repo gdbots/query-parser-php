@@ -2,16 +2,16 @@
 
 namespace Gdbots\Tests\QueryParser\Parser;
 
-use Gdbots\QueryParser\QueryScanner;
+use Gdbots\QueryParser\QueryLexer;
 
-class QueryScannerTest extends \PHPUnit_Framework_TestCase
+class QueryLexerTest extends \PHPUnit_Framework_TestCase
 {
-    /** QueryScanner */
+    /** QueryLexer */
     protected $scanner;
 
     public function setUp()
     {
-        $this->scanner = new QueryScanner();
+        $this->scanner = new QueryLexer();
     }
 
     public function tearDown()
@@ -41,27 +41,27 @@ class QueryScannerTest extends \PHPUnit_Framework_TestCase
     public function getTestNextWithOneTokenDataprovider()
     {
         return [
-            ['phrase', QueryScanner::T_WORD],
-            ['', QueryScanner::T_EOI],
-            ['-phrase', QueryScanner::T_EXCLUDE],
-            ['+phrase', QueryScanner::T_INCLUDE],
-            ['#phrase', QueryScanner::T_HASHTAG],
-            ['@phrase', QueryScanner::T_MENTION],
-            ['^123', QueryScanner::T_BOOST],
-            [':phrase', QueryScanner::T_FILTER],
-            [':>phrase', QueryScanner::T_FILTER],
-            [':<phrase', QueryScanner::T_FILTER],
-            [':!phrase', QueryScanner::T_FILTER],
-            ['OR', QueryScanner::T_OR_OPERATOR],
-            ['AND', QueryScanner::T_AND_OPERATOR],
-            ['"phrase"', QueryScanner::T_PHRASE],
-            ['"', QueryScanner::T_QUOTE]
+            ['phrase', QueryLexer::T_WORD],
+            ['', QueryLexer::T_EOI],
+            ['-phrase', QueryLexer::T_EXCLUDE],
+            ['+phrase', QueryLexer::T_INCLUDE],
+            ['#phrase', QueryLexer::T_HASHTAG],
+            ['@phrase', QueryLexer::T_MENTION],
+            ['^123', QueryLexer::T_BOOST],
+            [':phrase', QueryLexer::T_FILTER],
+            [':>phrase', QueryLexer::T_FILTER],
+            [':<phrase', QueryLexer::T_FILTER],
+            [':!phrase', QueryLexer::T_FILTER],
+            ['OR', QueryLexer::T_OR_OPERATOR],
+            ['AND', QueryLexer::T_AND_OPERATOR],
+            ['"phrase"', QueryLexer::T_PHRASE],
+            ['"', QueryLexer::T_QUOTE]
         ];
     }
 
     public function testGetTokenTypeText()
     {
-        $this->assertEquals('PHRASE', $this->scanner->getTokenTypeText(QueryScanner::T_PHRASE));
+        $this->assertEquals('PHRASE', $this->scanner->getTokenTypeText(QueryLexer::T_PHRASE));
     }
 
     public function testGetTokenTypeTextCurrenToken()

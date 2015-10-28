@@ -46,9 +46,9 @@ class QueryItemPrinter implements QueryItemVisitorInterface
     }
 
     /**
-     * @param Node\QueryItem $item
+     * @param Node\AbstractQueryItem $item
      */
-    private function printPrefix(Node\QueryItem $item)
+    private function printPrefix(Node\AbstractQueryItem $item)
     {
         if ($item->isExcluded()) {
             return '+';
@@ -59,9 +59,9 @@ class QueryItemPrinter implements QueryItemVisitorInterface
     }
 
     /**
-     * @param Node\QueryItem $item
+     * @param Node\AbstractQueryItem $item
      */
-    private function printPostfix(Node\QueryItem $item)
+    private function printPostfix(Node\AbstractQueryItem $item)
     {
         if ($item->isBoosted()) {
             return sprintf(' ^ %.2f', $item->getBoostBy());

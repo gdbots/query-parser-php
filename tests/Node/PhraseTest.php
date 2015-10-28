@@ -2,7 +2,7 @@
 
 namespace Gdbots\Tests\QueryParser\Node;
 
-use Gdbots\QueryParser\QueryScanner;
+use Gdbots\QueryParser\QueryLexer;
 use Gdbots\QueryParser\Node\Phrase;
 
 class PhraseTest extends \PHPUnit_Framework_TestCase
@@ -38,7 +38,7 @@ class PhraseTest extends \PHPUnit_Framework_TestCase
 
     public function testGetTokenType()
     {
-        $this->assertEquals(QueryScanner::T_PHRASE, $this->phrase->getTokenType());
+        $this->assertEquals(QueryLexer::T_PHRASE, $this->phrase->getTokenType());
     }
 
     public function testToArray()

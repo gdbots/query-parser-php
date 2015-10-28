@@ -2,7 +2,7 @@
 
 namespace Gdbots\Tests\QueryParser\Node;
 
-use Gdbots\QueryParser\QueryScanner;
+use Gdbots\QueryParser\QueryLexer;
 use Gdbots\QueryParser\Node\Word;
 
 class WordTest extends \PHPUnit_Framework_TestCase
@@ -27,7 +27,7 @@ class WordTest extends \PHPUnit_Framework_TestCase
 
     public function testGetTokenType()
     {
-        $this->assertEquals(QueryScanner::T_WORD, $this->word->getTokenType());
+        $this->assertEquals(QueryLexer::T_WORD, $this->word->getTokenType());
     }
 
     public function testToArray()

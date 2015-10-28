@@ -73,13 +73,13 @@ To pull list of `QueryItem` by token type, use:
 <?php
 
 use Gdbots\QueryParser\QueryParser;
-use Gdbots\QueryParser\QueryScanner;
+use Gdbots\QueryParser\QueryLexer;
 
 $parser = new QueryParser();
 $parser->readString('#hashtag1 AND #hashtag2');
 $query = $parser->parse();
 
-$hashtags = $query->getQueryItemsByTokenType(QueryScanner::T_HASHTAG);
+$hashtags = $query->getQueryItemsByTokenType(QueryLexer::T_HASHTAG);
 var_dump($hashtags);
 ```
 

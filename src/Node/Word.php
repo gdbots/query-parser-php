@@ -2,7 +2,7 @@
 
 namespace Gdbots\QueryParser\Node;
 
-use Gdbots\QueryParser\QueryScanner;
+use Gdbots\QueryParser\QueryLexer;
 use Gdbots\QueryParser\Visitor\QueryItemVisitorInterface;
 
 class Word extends SimpleTerm
@@ -12,7 +12,7 @@ class Word extends SimpleTerm
      */
     public function __construct($word)
     {
-        parent::__construct(QueryScanner::T_WORD, $word);
+        parent::__construct(QueryLexer::T_WORD, $word);
     }
 
     /**

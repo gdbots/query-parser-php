@@ -2,7 +2,7 @@
 
 namespace Gdbots\QueryParser\Node;
 
-abstract class ExpressionList extends QueryItem implements \Countable
+abstract class AbstractExpressionList extends AbstractQueryItem implements \Countable
 {
     /**
      * @var array

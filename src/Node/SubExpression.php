@@ -4,7 +4,7 @@ namespace Gdbots\QueryParser\Node;
 
 use Gdbots\QueryParser\Visitor\QueryItemVisitorInterface;
 
-class SubExpression extends CompositeExpression
+class SubExpression extends AbstractCompositeExpression
 {
     /**
      * {@inheritDoc}

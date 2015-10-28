@@ -8,7 +8,7 @@ use Elastica\Query\Filtered;
 use Elastica\Query\QueryString;
 use Elastica\Query\Term;
 use Gdbots\QueryParser\Node;
-use Gdbots\QueryParser\QueryScanner;
+use Gdbots\QueryParser\QueryLexer;
 
 class QueryItemElastica implements QueryItemVisitorInterface
 {
