@@ -40,7 +40,7 @@ use Gdbots\QueryParser\QueryParser;
 use Gdbots\QueryParser\Visitor\QueryItemPrinter;
 
 $parser = new QueryParser();
-$parser->readString('+mandatoryWord AND -excludedWord fieldName:"value"', true);
+$parser->readString('+mandatoryWord AND -excludedWord fieldName:"value"');
 $query = $parser->parse();
 
 $printer = new QueryItemPrinter();
