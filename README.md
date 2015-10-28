@@ -24,9 +24,12 @@ It supports the following features:
 <?php
 use Gdbots\QueryParser\QueryWrapper;
 
-$wrapper = new QueryWrapper(false);
+$wrapper = new QueryWrapper();
 $query = $wrapper->parse('+mandatoryWord AND -excludedWord fieldName:"value"')->getParseResultQueryItem();
 ```
+
+> **Note:** You can also enable operator by using pasing **false** to `QueryWrapper`.
+
 
 **OR**
 
@@ -54,7 +57,7 @@ $query->accept($printer);
 >> Term: fieldName : value
 ```
 
-You can also ignore operator by using `$parser->readString('search query here', true)`, which will remove all AND and brackets.
+> **Note:** You can also ignore operator by using `$parser->readString('search query here', true)`, which will remove all AND and brackets.
 For the above example the result would be:
 
 ```
