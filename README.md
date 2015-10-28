@@ -28,7 +28,7 @@ $wrapper = new QueryWrapper();
 $query = $wrapper->parse('+mandatoryWord AND -excludedWord fieldName:"value"')->getParseResultQueryItem();
 ```
 
-> **Note:** You can also enable operator by using pasing **false** to `QueryWrapper`.
+> **Note:** You can also enable operator by using pasing **false** to `$wrapper->parse()`.
 
 
 **OR**

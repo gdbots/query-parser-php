@@ -10,14 +10,18 @@ namespace Gdbots\QueryParser;
 class QueryWrapper
 {
     /**
-     * @var QueryParser
+     * The string to parse
+     *
+     * @var string
      */
-    protected $parser;
+    protected $inputString;
 
     /**
-     * @var bool
+     * The parsed string
+     *
+     * @var string
      */
-    protected $ignoreOperator = true;
+    protected $compiledString;
 
     /**
      * The parsed AbstractQueryItem instance
@@ -69,36 +73,32 @@ class QueryWrapper
     protected $urls = [];
 
     /**
-     * @param bool $ignoreOperator
-     */
-    public function __construct($ignoreOperator = true)
-    {
-        $this->ignoreOperator = $ignoreOperator;
-
-        $this->parser = new QueryParser();
-    }
-
-    /**
-     * Parses Query String and returns array of tokens.
+     * Parses a given query string and assign all tokenized buckets.
      *
      * @param string $queryString
+     * @param bool   $ignoreOperator
      *
      * @return self
      */
-    public function parse($queryString)
+    public function parse($inputString, $ignoreOperator = true)
     {
-        $this->parser->readString($queryString, $this->ignoreOperator);
-        $this->queryItem = $this->parser->parse();
+        $this->inputString = $inputString;
+
+        $parser = new QueryParser();
+        $parser->readString($inputString, $ignoreOperator);
+        $this->queryItem = $parser->parse();
+        $this->compiledString = $parser->getLexer()->getProcessedData();
+
+        $items = $this->queryItem->getQueryItemsByTokenType();
+        foreach ($items as $tokenType => $items) {
+            $property = strtolower($tokenType);
+
+            if (property_exists($this, $property)) {
+                $this->$property = $items;
+            }
+        }
 
         return $this;
-    }
-
-    /**
-     * @return QueryParser
-     */
-    public function getParser()
-    {
-        return $this->parser;
     }
 
     /**
