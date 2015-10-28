@@ -25,7 +25,7 @@ if ($query = $parser->parse()) {
 */
 
     echo "\n\nCompiled query:\n\n";
-    echo $parser->getScanner()->getProcessedData();
+    echo $parser->getLexer()->getProcessedData();
 
 /*
 a OR +b OR -c OR +d OR ( f:v^1.5 OR +6 )

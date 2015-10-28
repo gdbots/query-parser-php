@@ -39,7 +39,7 @@ class QueryParser
      *
      * @return QueryLexer
      */
-    public function getScanner()
+    public function getLexer()
     {
         return $this->scanner;
     }
