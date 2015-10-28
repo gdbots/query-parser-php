@@ -82,11 +82,11 @@ class QueryWrapper
      */
     public function parse($inputString, $ignoreOperator = true)
     {
-        $this->inputString = $inputString;
-
         $parser = new QueryParser();
         $parser->readString($inputString, $ignoreOperator);
         $this->queryItem = $parser->parse();
+
+        $this->inputString = $inputString;
         $this->compiledString = $parser->getLexer()->getProcessedData();
 
         $items = $this->queryItem->getQueryItemsByTokenType();
