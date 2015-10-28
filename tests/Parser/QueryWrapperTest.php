@@ -32,8 +32,8 @@ class QueryWrapperTest extends \PHPUnit_Framework_TestCase
      */
     public function testWrapperParse($string, $print, array $itemCount = [], array $queryItems = [])
     {
-        $this->wrapper->parse($string);
-        $query = $this->wrapper->getParseResultQueryItem();
+        /** @var Node\AbstractQueryItem $query */
+        $query = $this->wrapper->parse($string);
 
         // check print output
         $output =  $this->getPrintContent($query);

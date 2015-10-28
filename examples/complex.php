@@ -7,7 +7,7 @@ use Gdbots\QueryParser\Visitor\QueryItemPrinter;
 
 $wrapper = new QueryWrapper();
 
-if ($query = $wrapper->parse('a+b -c +d (f:v^1.5+6)', false)->getParseResultQueryItem()) {
+if ($query = $wrapper->parse('a+b -c +d (f:v^1.5+6)', false)) {
     echo "Print output:\n\n";
     $query->accept(new QueryItemPrinter());
 

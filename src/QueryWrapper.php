@@ -78,7 +78,7 @@ class QueryWrapper
      * @param string $queryString
      * @param bool   $ignoreOperator
      *
-     * @return self
+     * @return \Gdbots\QueryParser\Node\AbstractQueryItem
      */
     public function parse($inputString, $ignoreOperator = true)
     {
@@ -91,14 +91,14 @@ class QueryWrapper
 
         $items = $this->queryItem->getQueryItemsByTokenType();
         foreach ($items as $tokenType => $items) {
-            $property = strtolower($tokenType);
+            $property = strtolower($tokenType).'s';
 
             if (property_exists($this, $property)) {
                 $this->$property = $items;
             }
         }
 
-        return $this;
+        return $this->getParseResultQueryItem();
     }
 
     /**
