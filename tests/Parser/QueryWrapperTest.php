@@ -52,7 +52,7 @@ class QueryWrapperTest extends \PHPUnit_Framework_TestCase
         foreach ($tokens as $key => $token) {
             $method = 'get'.ucfirst(strtolower($key)).'s';
 
-            $this->assertEquals(1+count($this->wrapper->$method()), count($token));
+            $this->assertEquals(count($this->wrapper->$method()), count($token));
         }
 
         // validate each token type item values
