@@ -60,21 +60,20 @@ class QueryWrapperTest extends \PHPUnit_Framework_TestCase
         $tokenTypes = ['FILTER', 'HASHTAG', 'MENTION', 'PHRASE', 'URL', 'WORD'];
 
         foreach ($tokenTypes as $tokenType) {
-            $items = $query->getQueryItemsByTokenType(constant('Gdbots\QueryParser\QueryScanner::T_'.$tokenType));
+            $method = 'get'.ucfirst(strtolower($tokenType)).'s';
+            $items = $this->wrapper->$method();
 
             foreach ($items as $item) {
                 $tokenArray = [];
 
                 if ($item instanceof Node\SimpleTerm) {
                     $tokenValue = $item->getToken();
-                } else {
-                    if ($item->getTokenType() === QueryScanner::T_FILTER) {
-                        $tokenField = $item->getNominator()->getToken();
-                        $tokenValue = $item->getTerm()->getToken();
-                        $tokenTypeText = $item->getTokenTypeText();
-                    } else {
-                        $tokenValue = $item->getExpression()->getToken();
-                    }
+                }
+
+                if ($item instanceof Node\ExplicitTerm) {
+                    $tokenField = $item->getNominator()->getToken();
+                    $tokenValue = $item->getTerm()->getToken();
+                    $tokenTypeText = $item->getTokenTypeText();
                 }
 
                 $boosted = $item->getBoostBy();

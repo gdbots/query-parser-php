@@ -105,16 +105,14 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
 
                 if ($item instanceof Node\SimpleTerm) {
                     $tokenValue = $item->getToken();
-                } else {
-                    if ($item->getTokenType() === QueryScanner::T_FILTER) {
-                        $tokenField = $item->getNominator()->getToken();
-                        $tokenValue = $item->getTerm()->getToken();
-                        $tokenTypeText = $item->getTokenTypeText();
-                    } else {
-                        $tokenValue = $item->getExpression()->getToken();
-                    }
                 }
 
+                if ($item instanceof Node\ExplicitTerm) {
+                    $tokenField = $item->getNominator()->getToken();
+                    $tokenValue = $item->getTerm()->getToken();
+                    $tokenTypeText = $item->getTokenTypeText();
+                }
+                
                 $boosted = $item->getBoostBy();
                 $excluded = $item->isExcluded();
                 $included = $item->isIncluded();
