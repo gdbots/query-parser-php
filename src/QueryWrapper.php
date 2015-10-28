@@ -15,12 +15,9 @@ class QueryWrapper
     protected $parser;
 
     /**
-     * An array containing strings with an error message for every expression
-     * that could not be parsed.
-     *
-     * @var array
+     * @var bool
      */
-    protected $errors = [];
+    protected $ignoreOperator = true;
 
     /**
      * The parsed QueryItem instance
@@ -72,10 +69,12 @@ class QueryWrapper
     protected $urls = [];
 
     /**
-     * __construct
+     * @param bool $ignoreOperator
      */
-    public function __construct()
+    public function __construct($ignoreOperator = true)
     {
+        $this->ignoreOperator = $ignoreOperator;
+
         $this->parser = new QueryParser();
     }
 
@@ -88,7 +87,7 @@ class QueryWrapper
      */
     public function parse($queryString)
     {
-        $this->parser->readString($queryString, true);
+        $this->parser->readString($queryString, $this->ignoreOperator);
         $this->queryItem = $this->parser->parse();
 
         return $this;
