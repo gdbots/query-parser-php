@@ -102,6 +102,22 @@ class QueryWrapper
     }
 
     /**
+     * @return string
+     */
+    public function getInputString()
+    {
+        return $this->inputString;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCompiledString()
+    {
+        return $this->compiledString;
+    }
+
+    /**
      * @return \Gdbots\QueryParser\Node\AbstractQueryItem
      */
     public function getParseResultQueryItem()
