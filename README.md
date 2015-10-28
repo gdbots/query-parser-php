@@ -22,6 +22,19 @@ It supports the following features:
 
 ``` php
 <?php
+use Gdbots\QueryParser\QueryWrapper;
+
+$wrapper = new QueryWrapper();
+$query = $wrapper->parse('+mandatoryWord AND -excludedWord fieldName:"value"')->getParseResultQueryItem();
+```
+
+> **Note:** You can also enable operator by using pasing **false** to `QueryWrapper`.
+
+
+**OR**
+
+``` php
+<?php
 
 use Gdbots\QueryParser\QueryParser;
 use Gdbots\QueryParser\Visitor\QueryItemPrinter;
@@ -38,23 +51,19 @@ $query->accept($printer);
 
 ```
  And
-> IncludeTerm
->> Word: mandatoryWord
+> Word: -mandatoryWord
 > Or
->> ExcludeTerm
->>> Word: excludedWord
+>> Word: +excludedWord
 >> Term: fieldName : value
 ```
 
-You can also ignore operator by using `$parser->readString('search query here', true)`, which will remove all AND and brackets.
+> **Note:** You can also ignore operator by using `$parser->readString('search query here', true)`, which will remove all AND and brackets.
 For the above example the result would be:
 
 ```
  Or
-> IncludeTerm
->> Word: mandatoryWord
-> ExcludeTerm
->> Word: excludedWord
+> Word: -mandatoryWord
+> Word: +excludedWord
 > Term: fieldName : value
 ```
 
@@ -79,24 +88,30 @@ var_dump($hashtags);
 ```
 array(2) {
   [0]=>
-  object(Gdbots\QueryParser\Node\Hashtag)#584 (1) {
-    ["expression":protected]=>
-    object(Gdbots\QueryParser\Node\Word)#582 (2) {
-      ["tokenType":protected]=>
-      int(1)
-      ["token":protected]=>
-      string(8) "hashtag1"
-    }
+  object(Gdbots\QueryParser\Node\Hashtag)#589 (5) {
+    ["tokenType":protected]=>
+    int(7)
+    ["token":protected]=>
+    string(8) "hashtag1"
+    ["excluded":protected]=>
+    bool(false)
+    ["included":protected]=>
+    bool(false)
+    ["boostBy":protected]=>
+    NULL
   }
   [1]=>
-  object(Gdbots\QueryParser\Node\Hashtag)#586 (1) {
-    ["expression":protected]=>
-    object(Gdbots\QueryParser\Node\Word)#585 (2) {
-      ["tokenType":protected]=>
-      int(1)
-      ["token":protected]=>
-      string(8) "hashtag2"
-    }
+  object(Gdbots\QueryParser\Node\Hashtag)#588 (5) {
+    ["tokenType":protected]=>
+    int(7)
+    ["token":protected]=>
+    string(8) "hashtag2"
+    ["excluded":protected]=>
+    bool(false)
+    ["included":protected]=>
+    bool(false)
+    ["boostBy":protected]=>
+    NULL
   }
 }
 ```
