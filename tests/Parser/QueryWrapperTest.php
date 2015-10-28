@@ -66,7 +66,7 @@ class QueryWrapperTest extends \PHPUnit_Framework_TestCase
             foreach ($items as $item) {
                 $tokenArray = [];
 
-                if ($item instanceof Node\SimpleTerm) {
+                if ($item instanceof Node\AbstractSimpleTerm) {
                     $tokenValue = $item->getToken();
                 }
 

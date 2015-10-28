@@ -5,7 +5,7 @@ namespace Gdbots\QueryParser\Node;
 use Gdbots\QueryParser\QueryLexer;
 use Gdbots\QueryParser\Visitor\QueryItemVisitorInterface;
 
-class Word extends SimpleTerm
+class Word extends AbstractSimpleTerm
 {
     /**
      * @param string $word

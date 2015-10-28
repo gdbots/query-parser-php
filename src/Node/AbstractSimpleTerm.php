@@ -4,7 +4,7 @@ namespace Gdbots\QueryParser\Node;
 
 use Gdbots\QueryParser\QueryLexer;
 
-abstract class SimpleTerm extends AbstractQueryItem
+abstract class AbstractSimpleTerm extends AbstractQueryItem
 {
     /**
      * @var int

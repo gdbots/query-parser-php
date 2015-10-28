@@ -102,7 +102,7 @@ class QueryItemElastica implements QueryItemVisitorInterface
      */
     public function visitExplicitTerm(Node\ExplicitTerm $term)
     {
-        if ($term->getNominator() instanceof Node\SimpleTerm) {
+        if ($term->getNominator() instanceof Node\AbstractSimpleTerm) {
             $operator = 'value';
 
             switch ($term->getTokenTypeText()) {

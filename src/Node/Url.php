@@ -5,7 +5,7 @@ namespace Gdbots\QueryParser\Node;
 use Gdbots\QueryParser\QueryLexer;
 use Gdbots\QueryParser\Visitor\QueryItemVisitorInterface;
 
-class Url extends SimpleTerm
+class Url extends AbstractSimpleTerm
 {
     /**
      * @param string $url

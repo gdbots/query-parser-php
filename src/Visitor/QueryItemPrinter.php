@@ -139,7 +139,7 @@ class QueryItemPrinter implements QueryItemVisitorInterface
      */
     public function visitExplicitTerm(Node\ExplicitTerm $term)
     {
-        if ($term->getNominator() instanceof Node\SimpleTerm) {
+        if ($term->getNominator() instanceof Node\AbstractSimpleTerm) {
             $this->printIndentedLine(sprintf(
                 'Term: %s%s %s %s%s',
                 $this->printPrefix($term),

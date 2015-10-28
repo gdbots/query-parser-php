@@ -23,7 +23,7 @@ class ExplicitTerm extends AbstractQueryItem
     protected $tokenTypeText;
 
     /**
-     * @var SimpleTerm
+     * @var AbstractSimpleTerm
      */
     protected $term;
 
@@ -31,9 +31,9 @@ class ExplicitTerm extends AbstractQueryItem
      * @param string|QueryItem $nominator
      * @param int              $tokenType
      * @param string           $tokenTypeText
-     * @param SimpleTerm       $term
+     * @param AbstractSimpleTerm       $term
      */
-    public function __construct($nominator, $tokenType, $tokenTypeText, SimpleTerm $term)
+    public function __construct($nominator, $tokenType, $tokenTypeText, AbstractSimpleTerm $term)
     {
         $this->nominator = $nominator;
         $this->tokenType = $tokenType;
@@ -66,7 +66,7 @@ class ExplicitTerm extends AbstractQueryItem
     }
 
     /**
-     * @return SimpleTerm
+     * @return AbstractSimpleTerm
      */
     public function getTerm()
     {
