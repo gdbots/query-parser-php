@@ -25,7 +25,7 @@ It supports the following features:
 use Gdbots\QueryParser\QueryWrapper;
 
 $wrapper = new QueryWrapper();
-$query = $wrapper->parse('+mandatoryWord AND -excludedWord fieldName:"value"')->getParseResultQueryItem();
+$query = $wrapper->parse('+mandatoryWord AND -excludedWord fieldName:"value"');
 ```
 
 > **Note:** You can also enable operator by using pasing **false** to `$wrapper->parse()`.
