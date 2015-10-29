@@ -107,11 +107,19 @@ class QueryItemElastica implements QueryItemVisitorInterface
 
             switch ($term->getTokenTypeText()) {
                 case ':>':
+                    $operator = 'gt';
+                    break;
+
+                case ':>=':
                     $operator = 'gte';
                     break;
 
                 case ':<':
                     $operator = 'lt';
+                    break;
+
+                case ':<=':
+                    $operator = 'lte';
                     break;
             }
 
