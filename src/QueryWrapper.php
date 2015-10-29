@@ -83,8 +83,7 @@ class QueryWrapper
     public function parse($inputString, $ignoreOperator = true)
     {
         $parser = new QueryParser();
-        $parser->readString($inputString, $ignoreOperator);
-        $this->queryItem = $parser->parse();
+        $this->queryItem = $parser->parse($inputString, $ignoreOperator);
 
         $this->inputString = $inputString;
         $this->compiledString = $parser->getLexer()->getProcessedData();

@@ -45,15 +45,19 @@ class QueryParser
     }
 
     /**
-     * Resets the input string and errors.
+     * Makes the parser build an expression tree from the given input.
      *
      * @param string $input
      * @param bool   $ignoreOperator
+     *
+     * @return \Gdbots\QueryParser\Node\AbstractQueryItem|null
      */
-    public function readString($input, $ignoreOperator = false)
+    public function parse($input, $ignoreOperator = false)
     {
         $this->scanner->readString($input, $ignoreOperator);
         $this->errors = [];
+
+        return $this->readAndExpressionList();
     }
 
     /**
@@ -368,15 +372,5 @@ class QueryParser
         $this->addError('Error: Expected `)` but end of stream reached.');
 
         return null;
-    }
-
-    /**
-     * Makes the parser build an expression tree from the given input.
-     *
-     * @return \Gdbots\QueryParser\Node\AbstractQueryItem|null
-     */
-    public function parse()
-    {
-        return $this->readAndExpressionList();
     }
 }

@@ -32,8 +32,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
      */
     public function testParseNode($string, $class)
     {
-        $this->parser->readString($string);
-        $query = $this->parser->parse();
+        $query = $this->parser->parse($string);
 
         $this->assertInstanceOf($class, $query);
     }
@@ -61,8 +60,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
      */
     public function testParseQuery($string, $print, array $itemCount = [], array $queryItems = [])
     {
-        $this->parser->readString($string, true);
-        $query = $this->parser->parse();
+        $query = $this->parser->parse($string, true);
 
         // check print output
         $output =  $this->getPrintContent($query);
@@ -112,7 +110,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
                     $tokenValue = $item->getTerm()->getToken();
                     $tokenTypeText = $item->getTokenTypeText();
                 }
-                
+
                 $boosted = $item->getBoostBy();
                 $excluded = $item->isExcluded();
                 $included = $item->isIncluded();
@@ -148,8 +146,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
 
     public function testParseTextWithUnclosedQuotes()
     {
-        $this->parser->readString('"phrase');
-        $query = $this->parser->parse();
+        $query = $this->parser->parse('"phrase');
 
         $this->assertInstanceOf('Gdbots\QueryParser\Node\Word', $query);
         $this->assertEquals('phrase', $query->getToken());
@@ -158,8 +155,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
 
     public function testParseMultiHashtags()
     {
-        $this->parser->readString('#one #two #three');
-        $query = $this->parser->parse();
+        $query = $this->parser->parse('#one #two #three');
 
         $output = " Or
 > Hashtag: one
@@ -172,8 +168,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
 
     public function testParseDuplicateHashtags()
     {
-        $this->parser->readString('##phrase');
-        $query = $this->parser->parse();
+        $query = $this->parser->parse('##phrase');
 
         $output = " Hashtag: phrase
 ";
@@ -183,8 +178,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
 
     public function testParseFilterWithBoost()
     {
-        $this->parser->readString('table.fieldName:value^123');
-        $query = $this->parser->parse();
+        $query = $this->parser->parse('table.fieldName:value^123');
 
         $output = " Term: table.fieldName : value ^ 123.00
 ";
@@ -194,8 +188,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
 
     public function testParseComplexQuery()
     {
-        $this->parser->readString('(("phrase" #phrase) table.fieldName:value)^123');
-        $query = $this->parser->parse();
+        $query = $this->parser->parse('(("phrase" #phrase) table.fieldName:value)^123');
 
         $output = " Subexpression
 > Or
@@ -211,8 +204,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
 
     public function testParseComplexQueryUsingOperator()
     {
-        $this->parser->readString('(("phrase" OR #phrase) AND table.fieldName:value)^123');
-        $query = $this->parser->parse();
+        $query = $this->parser->parse('(("phrase" OR #phrase) AND table.fieldName:value)^123');
 
         $output = " Subexpression
 > And
@@ -228,8 +220,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
 
     public function testParseComplexQueryWithIgnoreOperator()
     {
-        $this->parser->readString('(("phrase" OR #phrase) AND table.fieldName:value)^123', true);
-        $query = $this->parser->parse();
+        $query = $this->parser->parse('(("phrase" OR #phrase) AND table.fieldName:value)^123', true);
 
         $output = " Or
 > Phrase: phrase
@@ -242,8 +233,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
 
     public function testParseEmoji()
     {
-        $this->parser->readString('#emoji 💩 AND 🍦 OR 😳');
-        $query = $this->parser->parse();
+        $query = $this->parser->parse('#emoji 💩 AND 🍦 OR 😳');
 
         $output = " And
 > Or
@@ -259,8 +249,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
 
     public function testParseGetHashtagQueryItems()
     {
-        $this->parser->readString('(("phrase" OR #phrase) AND table.fieldName:value) #boost');
-        $query = $this->parser->parse();
+        $query = $this->parser->parse('(("phrase" OR #phrase) AND table.fieldName:value) #boost');
 
         $hasttags = $query->getQueryItemsByTokenType(\Gdbots\QueryParser\QueryLexer::T_HASHTAG);
 

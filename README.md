@@ -40,8 +40,7 @@ use Gdbots\QueryParser\QueryParser;
 use Gdbots\QueryParser\Visitor\QueryItemPrinter;
 
 $parser = new QueryParser();
-$parser->readString('+mandatoryWord AND -excludedWord fieldName:"value"');
-$query = $parser->parse();
+$query = $parser->parse('+mandatoryWord AND -excludedWord fieldName:"value"');
 
 $printer = new QueryItemPrinter();
 $query->accept($printer);
@@ -57,7 +56,7 @@ $query->accept($printer);
 >> Term: fieldName : value
 ```
 
-> **Note:** You can also ignore operator by using `$parser->readString('search query here', true)`, which will remove all AND and brackets.
+> **Note:** You can also ignore operator by using `$parser->parse('search query here', true)`, which will remove all AND and brackets.
 For the above example the result would be:
 
 ```
@@ -76,8 +75,7 @@ use Gdbots\QueryParser\QueryParser;
 use Gdbots\QueryParser\QueryLexer;
 
 $parser = new QueryParser();
-$parser->readString('#hashtag1 AND #hashtag2');
-$query = $parser->parse();
+$query = $parser->parse('#hashtag1 AND #hashtag2');
 
 $hashtags = $query->getQueryItemsByTokenType(QueryLexer::T_HASHTAG);
 var_dump($hashtags);
