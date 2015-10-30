@@ -25,7 +25,7 @@ class QueryLexer
     const T_WSPC                = 1; // white-space
 
     const T_WORD                = 2; // word
-    const T_PHRASE              = 3; // text between two quotes (parentheses)
+    const T_PHRASE              = 3; // text between two quotes
     const T_URL                 = 4; // url
 
     const T_EXCLUDE             = 10; // "-"
@@ -41,7 +41,7 @@ class QueryLexer
     const T_AND_OPERATOR        = 31; // "AND"
     const T_OPEN_PARENTHESIS    = 32; // "("
     const T_CLOSE_PARENTHESIS   = 33; // ")"
-    const T_QUOTE               = 34; // double parentheses
+    const T_QUOTE               = 34; // double quote
     const T_ILLEGAL             = 35; // illegal character
 
     // Match basic emoticons
@@ -149,8 +149,7 @@ class QueryLexer
         // WSPC matches in (frequent) spaces, tabs and newlines.
         self::T_WSPC => '/^([ \t\n]+)(.*)/',
 
-        // PHRASE matches every possible input between double brackets.
-        // Double parentheses are part of the match.
+        // PHRASE matches every possible input between double quote.
         self::T_PHRASE => '/^(\"[^"]*\")(.*)/',
 
         // URL matches all url patterns
