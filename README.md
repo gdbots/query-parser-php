@@ -75,14 +75,14 @@ var_dump($hashtags);
 
 use Gdbots\QueryParser\QueryResult;
 
-$wrapper = new QueryResult();
-$allTokens = $wrapper->parse('#hashtag1 AND #hashtag2');
+$result = new QueryResult();
+$allTokens = $result->parse('#hashtag1 AND #hashtag2');
 
-$hashtags = $wrapper->getHashtags();
+$hashtags = $result->getHashtags();
 var_dump($hashtags);
 ```
 
-> **Note:** You can also enable operator by using pasing **false** to `$wrapper->parse()`.
+> **Note:** You can also enable operator by using pasing **false** to `$result->parse()`.
 
 **Result:**
 
