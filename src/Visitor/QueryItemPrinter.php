@@ -51,10 +51,10 @@ class QueryItemPrinter implements QueryItemVisitorInterface
     private function printPrefix(Node\AbstractQueryItem $item)
     {
         if ($item->isExcluded()) {
-            return '+';
+            return '-';
         }
         if ($item->isIncluded()) {
-            return '-';
+            return '+';
         }
     }
 
