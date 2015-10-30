@@ -83,19 +83,20 @@ class QueryWrapper
     public function parse($inputString, $ignoreOperator = true)
     {
         $parser = new QueryParser();
-        $this->queryItem = $parser->parse($inputString, $ignoreOperator);
+
+        if ($this->queryItem = $parser->parse($inputString, $ignoreOperator)) {
+            $items = $this->queryItem->getQueryItemsByTokenType();
+            foreach ($items as $tokenType => $items) {
+                $property = strtolower($tokenType).'s';
+
+                if (property_exists($this, $property)) {
+                    $this->$property = $items;
+                }
+            }
+        }
 
         $this->inputString = $inputString;
         $this->compiledString = $parser->getLexer()->getProcessedData();
-
-        $items = $this->queryItem->getQueryItemsByTokenType();
-        foreach ($items as $tokenType => $items) {
-            $property = strtolower($tokenType).'s';
-
-            if (property_exists($this, $property)) {
-                $this->$property = $items;
-            }
-        }
 
         return $this->getParseResultQueryItem();
     }
@@ -129,7 +130,7 @@ class QueryWrapper
      */
     public function getFilters()
     {
-        return $this->filters ?: $this->filters = $this->queryItem->getQueryItemsByTokenType(QueryLexer::T_FILTER);
+        return $this->filters;
     }
 
     /**
@@ -137,7 +138,7 @@ class QueryWrapper
      */
     public function getHashtags()
     {
-        return $this->hashtags ?: $this->hashtags = $this->queryItem->getQueryItemsByTokenType(QueryLexer::T_HASHTAG);
+        return $this->hashtags;
     }
 
     /**
@@ -145,7 +146,7 @@ class QueryWrapper
      */
     public function getMentions()
     {
-        return $this->mentions ?: $this->mentions = $this->queryItem->getQueryItemsByTokenType(QueryLexer::T_MENTION);
+        return $this->mentions;
     }
 
     /**
@@ -153,7 +154,7 @@ class QueryWrapper
      */
     public function getPhrases()
     {
-        return $this->phrases ?: $this->phrases = $this->queryItem->getQueryItemsByTokenType(QueryLexer::T_PHRASE);
+        return $this->phrases;
     }
 
     /**
@@ -161,7 +162,7 @@ class QueryWrapper
      */
     public function getWords()
     {
-        return $this->words ?: $this->words = $this->queryItem->getQueryItemsByTokenType(QueryLexer::T_WORD);
+        return $this->words;
     }
 
     /**
@@ -169,6 +170,6 @@ class QueryWrapper
      */
     public function getUrls()
     {
-        return $this->urls ?: $this->urls = $this->queryItem->getQueryItemsByTokenType(QueryLexer::T_URL);
+        return $this->urls;
     }
 }
