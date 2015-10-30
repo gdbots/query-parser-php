@@ -3,47 +3,37 @@
 namespace Gdbots\Tests\QueryParser\Parser;
 
 use Gdbots\QueryParser\Node;
-use Gdbots\QueryParser\QueryWrapper;
+use Gdbots\QueryParser\QueryResult;
 use Gdbots\QueryParser\QueryLexer;
 use Gdbots\QueryParser\Visitor\QueryItemPrinter;
 
-class QueryWrapperTest extends \PHPUnit_Framework_TestCase
+class QueryResultTest extends \PHPUnit_Framework_TestCase
 {
-    /** QueryWrapper */
-    protected $wrapper;
+    /** QueryResult */
+    protected $result;
 
     /** QueryItemPrinter */
     protected $printer;
 
     public function setUp()
     {
-        $this->wrapper = new QueryWrapper();
+        $this->result = new QueryResult();
         $this->printer = new QueryItemPrinter();
     }
 
     public function tearDown()
     {
-        $this->wrapper = null;
+        $this->result = null;
         $this->printer = null;
     }
 
     /**
      * @dataProvider getTestParseQueriesDataprovider
      */
-    public function testWrapperParse($string, $print, array $itemCount = [], array $queryItems = [])
+    public function testParseResult($string, $print, array $itemCount = [], array $queryItems = [])
     {
-        /** @var Node\AbstractQueryItem $query */
-        $query = $this->wrapper->parse($string);
-
-        // check print output
-        $output =  $this->getPrintContent($query);
-        $output = preg_replace("/[\r\n]+/", '', $output);
-        $output = preg_replace('/\s+/', '', $output);
-
-        $this->assertEquals($print, $output);
-
         // get array of tokens
-        $tokens = $query->getQueryItemsByTokenType();
+        $tokens = $this->result->parse($string);
 
         // check total items per token type
         $this->assertEquals(count($itemCount), count($tokens));
@@ -52,7 +42,7 @@ class QueryWrapperTest extends \PHPUnit_Framework_TestCase
         foreach ($tokens as $key => $token) {
             $method = 'get'.ucfirst(strtolower($key)).'s';
 
-            $this->assertEquals(count($this->wrapper->$method()), count($token));
+            $this->assertEquals(count($this->result->$method()), count($token));
         }
 
         // validate each token type item values
@@ -61,7 +51,7 @@ class QueryWrapperTest extends \PHPUnit_Framework_TestCase
 
         foreach ($tokenTypes as $tokenType) {
             $method = 'get'.ucfirst(strtolower($tokenType)).'s';
-            $items = $this->wrapper->$method();
+            $items = $this->result->$method();
 
             foreach ($items as $item) {
                 $tokenArray = [];

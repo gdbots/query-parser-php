@@ -5,9 +5,9 @@ require dirname(__DIR__) . '/../vendor/autoload.php';
 use Gdbots\QueryParser\QueryWrapper;
 use Gdbots\QueryParser\Visitor\QueryItemPrinter;
 
-$wrapper = new QueryWrapper();
+$parser = new QueryParser();
 
-if ($query = $wrapper->parse('a+b -c +d (f:v^1.5+6)', false)) {
+if ($query = $parser->parse('a+b -c +d (f:v^1.5+6)', false)) {
     echo "Print output:\n\n";
     $query->accept(new QueryItemPrinter());
 
@@ -24,7 +24,7 @@ if ($query = $wrapper->parse('a+b -c +d (f:v^1.5+6)', false)) {
 */
 
     echo "\n\nCompiled query:\n\n";
-    echo $wrapper->getCompiledString();
+    echo $parser->getLexer()->getProcessedData();
 
 /*
 a OR +b OR -c OR +d OR ( f:v^1.5 OR +6 )

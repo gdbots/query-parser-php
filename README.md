@@ -22,19 +22,6 @@ It supports the following features:
 
 ``` php
 <?php
-use Gdbots\QueryParser\QueryWrapper;
-
-$wrapper = new QueryWrapper();
-$query = $wrapper->parse('+mandatoryWord AND -excludedWord fieldName:"value"');
-```
-
-> **Note:** You can also enable operator by using pasing **false** to `$wrapper->parse()`.
-
-
-**OR**
-
-``` php
-<?php
 
 use Gdbots\QueryParser\QueryParser;
 use Gdbots\QueryParser\Visitor\QueryItemPrinter;
@@ -80,6 +67,22 @@ $query = $parser->parse('#hashtag1 AND #hashtag2');
 $hashtags = $query->getQueryItemsByTokenType(QueryLexer::T_HASHTAG);
 var_dump($hashtags);
 ```
+
+**OR:**
+
+``` php
+<?php
+
+use Gdbots\QueryParser\QueryWrapper;
+
+$wrapper = new QueryWrapper();
+$allTokens = $wrapper->parse('#hashtag1 AND #hashtag2');
+
+$hashtags = $wrapper->getHashtags();
+var_dump($hashtags);
+```
+
+> **Note:** You can also enable operator by using pasing **false** to `$wrapper->parse()`.
 
 **Result:**
 

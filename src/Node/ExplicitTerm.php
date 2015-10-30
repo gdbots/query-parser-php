@@ -28,9 +28,9 @@ class ExplicitTerm extends AbstractQueryItem
     protected $term;
 
     /**
-     * @param string|QueryItem $nominator
-     * @param int              $tokenType
-     * @param string           $tokenTypeText
+     * @param string|AbstractQueryItem $nominator
+     * @param int                      $tokenType
+     * @param string                   $tokenTypeText
      * @param AbstractSimpleTerm       $term
      */
     public function __construct($nominator, $tokenType, $tokenTypeText, AbstractSimpleTerm $term)

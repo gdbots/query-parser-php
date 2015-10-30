@@ -7,7 +7,7 @@ namespace Gdbots\QueryParser;
  * The type can be : Filter, Hashtag, Mention, Phrase, Word, Url.
  * Each token can have one or more attributes:  boost, include, exclude
  */
-class QueryWrapper
+class QueryResult
 {
     /**
      * The string to parse
@@ -86,11 +86,11 @@ class QueryWrapper
 
         if ($this->queryItem = $parser->parse($inputString, $ignoreOperator)) {
             $items = $this->queryItem->getQueryItemsByTokenType();
-            foreach ($items as $tokenType => $items) {
+            foreach ($items as $tokenType => $values) {
                 $property = strtolower($tokenType).'s';
 
                 if (property_exists($this, $property)) {
-                    $this->$property = $items;
+                    $this->$property = $values;
                 }
             }
         }
@@ -98,7 +98,7 @@ class QueryWrapper
         $this->inputString = $inputString;
         $this->compiledString = $parser->getLexer()->getProcessedData();
 
-        return $this->getParseResultQueryItem();
+        return $items;
     }
 
     /**
@@ -120,7 +120,7 @@ class QueryWrapper
     /**
      * @return \Gdbots\QueryParser\Node\AbstractQueryItem
      */
-    public function getParseResultQueryItem()
+    public function getQueryItem()
     {
         return $this->queryItem;
     }
