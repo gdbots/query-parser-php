@@ -22,23 +22,27 @@ namespace Gdbots\QueryParser;
 class QueryLexer
 {
     const T_EOI                 = 0; // end of input
-    const T_WORD                = 1; // word
-    const T_URL                 = 2; // url
-    const T_OPEN_PARENTHESIS    = 3; // "("
-    const T_CLOSE_PARENTHESIS   = 4; // ")"
-    const T_EXCLUDE             = 5; // "-"
-    const T_INCLUDE             = 6; // "+"
-    const T_HASHTAG             = 7; // "#"
-    const T_MENTION             = 8; // "@"
-    const T_FILTER              = 9; // ":", ":>", ":<", ":>=", or ":<="
-    const T_RANGE               = 10; // ":"+".."
-    const T_BOOST               = 20; // "^"
-    const T_OR_OPERATOR         = 31; // "OR"
-    const T_AND_OPERATOR        = 32; // "AND"
-    const T_WSPC                = 33; // white-space
-    const T_PHRASE              = 34; // text between two quotes (parentheses)
-    const T_QUOTE               = 35; // double parentheses
-    const T_ILLEGAL             = 36; // illegal character
+    const T_WSPC                = 1; // white-space
+
+    const T_WORD                = 2; // word
+    const T_PHRASE              = 3; // text between two quotes (parentheses)
+    const T_URL                 = 4; // url
+
+    const T_EXCLUDE             = 10; // "-"
+    const T_INCLUDE             = 11; // "+"
+    const T_HASHTAG             = 12; // "#"
+    const T_MENTION             = 13; // "@"
+
+    const T_FILTER              = 20; // ":", ":>", ":<", ":>=", or ":<="
+    const T_RANGE               = 21; // ":"+".."
+    const T_BOOST               = 22; // "^"
+
+    const T_OR_OPERATOR         = 30; // "OR"
+    const T_AND_OPERATOR        = 31; // "AND"
+    const T_OPEN_PARENTHESIS    = 32; // "("
+    const T_CLOSE_PARENTHESIS   = 33; // ")"
+    const T_QUOTE               = 34; // double parentheses
+    const T_ILLEGAL             = 35; // illegal character
 
     // Match basic emoticons
     const REGEX_EMOTICONS_BASIC = '/(?<=^|\s)(?:>:\-?\(|:\-?\)|:\'\(|:\-?\|:\-?\/|:\-?\(|:\-?\*|:\-?\||:o\)|:\-?o|=\-?\)|:\-?D|:\-?p|:\-?P|:\-?b|;\-?p|;\-?P|;\-?b|;\-?\))/';
@@ -96,21 +100,25 @@ class QueryLexer
      */
     public static $typeStrings = array (
         self::T_EOI               => 'EOI',
+        self::T_WSPC              => 'WHITESPACE',
+
         self::T_WORD              => 'WORD',
+        self::T_PHRASE            => 'PHRASE',
         self::T_URL               => 'URL',
-        self::T_OPEN_PARENTHESIS  => 'OPEN_PARENTHESIS',
-        self::T_CLOSE_PARENTHESIS => 'CLOSE_PARENTHESIS',
+
         self::T_EXCLUDE           => 'EXCLUDE',
         self::T_INCLUDE           => 'INCLUDE',
         self::T_HASHTAG           => 'HASHTAG',
         self::T_MENTION           => 'MENTION',
+
         self::T_FILTER            => 'FILTER',
         self::T_RANGE             => 'RANGE',
         self::T_BOOST             => 'BOOST',
+
         self::T_OR_OPERATOR       => 'OR_OPERATOR',
         self::T_AND_OPERATOR      => 'AND_OPERATOR',
-        self::T_WSPC              => 'WHITESPACE',
-        self::T_PHRASE            => 'PHRASE',
+        self::T_OPEN_PARENTHESIS  => 'OPEN_PARENTHESIS',
+        self::T_CLOSE_PARENTHESIS => 'CLOSE_PARENTHESIS',
         self::T_QUOTE             => 'QUOTE',
         self::T_ILLEGAL           => 'ILLEGAL'
     );
@@ -175,7 +183,11 @@ class QueryLexer
         // truncation characters and accents, which should be
         // encapsulated in quotes.
         self::T_WORD => [
+
+            // float (fllow by space, boost, or range filter)
             '/^([-+]?\d*\.?\d+)([\s|\^|\.\.|\)].*)/',
+
+            // other
             '/^([\S][^\s\:\^]*)(.*)/',
         ],
 
