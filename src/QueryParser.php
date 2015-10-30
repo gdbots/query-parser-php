@@ -104,7 +104,7 @@ class QueryParser
             return $term;
         }
 
-        if ($tokenType == QueryLexer::T_FILTER && $term->getTokenType() != QueryLexer::T_WORD) {
+        if (in_array($tokenType, [QueryLexer::T_FILTER]) && $term->getTokenType() != QueryLexer::T_WORD) {
             $this->addError(sprintf(
                 'Error: FILTER only support Word. Found: "%s"',
                 $this->scanner->getTokenTypeText()
@@ -117,7 +117,6 @@ class QueryParser
         $tokenTypeText = $this->scanner->getToken();
 
         switch ($this->scanner->next()) {
-
             case QueryLexer::T_WORD:
                 $value = new Node\Word($this->scanner->getToken());
 
@@ -143,6 +142,17 @@ class QueryParser
         }
 
         $this->scanner->next();
+
+        switch ($this->scanner->getTokenType()) {
+            case QueryLexer::T_RANGE:
+                $this->scanner->next();
+
+                $value = new Node\Range($value->getToken(), $this->scanner->getToken());
+
+                $this->scanner->next();
+
+                break;
+        }
 
         return new Node\ExplicitTerm($term, $tokenType, $tokenTypeText, $value);
     }
@@ -295,6 +305,14 @@ class QueryParser
                 /** @var \Gdbots\QueryParser\Node\AbstractQueryItem|null $expression */
                 if ($expression = $this->readExpression($this->scanner->next())) {
                     $lastExpression->setBoostBy($expression->getToken());
+                }
+            }
+
+            if ($this->scanner->getTokenType() == QueryLexer::T_RANGE) {
+
+                /** @var \Gdbots\QueryParser\Node\AbstractQueryItem|null $expression */
+                if ($expression = $this->readExpression($this->scanner->next())) {
+                    $lastExpression->setToken(sprintf('%s..%s', $lastExpression->getToken(), $expression->getToken()));
                 }
             }
 

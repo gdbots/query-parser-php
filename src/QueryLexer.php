@@ -31,13 +31,14 @@ class QueryLexer
     const T_HASHTAG             = 7; // "#"
     const T_MENTION             = 8; // "@"
     const T_FILTER              = 9; // ":", ":>", ":<", ":>=", or ":<="
-    const T_BOOST               = 10; // "^"
-    const T_OR_OPERATOR         = 11; // "OR"
-    const T_AND_OPERATOR        = 12; // "AND"
-    const T_WSPC                = 13; // white-space
-    const T_PHRASE              = 14; // text between two quotes (parentheses)
-    const T_QUOTE               = 15; // double parentheses
-    const T_ILLEGAL             = 16; // illegal character
+    const T_RANGE               = 10; // ":"+".."
+    const T_BOOST               = 20; // "^"
+    const T_OR_OPERATOR         = 31; // "OR"
+    const T_AND_OPERATOR        = 32; // "AND"
+    const T_WSPC                = 33; // white-space
+    const T_PHRASE              = 34; // text between two quotes (parentheses)
+    const T_QUOTE               = 35; // double parentheses
+    const T_ILLEGAL             = 36; // illegal character
 
     // Match basic emoticons
     const REGEX_EMOTICONS_BASIC = '/(?<=^|\s)(?:>:\-?\(|:\-?\)|:\'\(|:\-?\|:\-?\/|:\-?\(|:\-?\*|:\-?\||:o\)|:\-?o|=\-?\)|:\-?D|:\-?p|:\-?P|:\-?b|;\-?p|;\-?P|;\-?b|;\-?\))/';
@@ -51,7 +52,7 @@ class QueryLexer
     // Match filter
     const REGEX_FILTER_KEY = '/^([_\p{L}][\d_.\p{L}]*)/';
     const REGEX_FILTER_VALUE = '/^([\"\'\d_.\-\p{L}]*)/';
-    const REGEX_FILTER_OPERATOR = '/(\:[\>|\<]?[\=]?)/';
+    const REGEX_FILTER_OPERATOR = '/^(\:[\>|\<]?[\=]?)(.*)/';
 
     /**
      * The input string which has already been processed and data back into tokens.
@@ -104,6 +105,7 @@ class QueryLexer
         self::T_HASHTAG           => 'HASHTAG',
         self::T_MENTION           => 'MENTION',
         self::T_FILTER            => 'FILTER',
+        self::T_RANGE             => 'RANGE',
         self::T_BOOST             => 'BOOST',
         self::T_OR_OPERATOR       => 'OR_OPERATOR',
         self::T_AND_OPERATOR      => 'AND_OPERATOR',
@@ -164,6 +166,7 @@ class QueryLexer
         self::T_HASHTAG => '/^(\#)(.*)/',
         self::T_MENTION => '/^(\@)(.*)/',
         self::T_FILTER  => '/^(\:[\>|\<]?[\=]?)(.*)/',
+        self::T_RANGE   => '/^(\.\.)(.*)/',
         self::T_BOOST   => '/^(\^)(.*)/',
         self::T_QUOTE   => '/^(\")([^\"]*)$/',
 
@@ -171,7 +174,10 @@ class QueryLexer
         // points (think eg. To hello_world.101) Can not match up
         // truncation characters and accents, which should be
         // encapsulated in quotes.
-        self::T_WORD => '/^([\S][^\s\:\^]*)(.*)/',
+        self::T_WORD => [
+            '/^([-+]?\d*\.?\d+)([\s|\^|\.\.|\)].*)/',
+            '/^([\S][^\s\:\^]*)(.*)/',
+        ],
 
         // this should match with each character that is left over.
         self::T_ILLEGAL => '/^(.)(.*)/'
@@ -328,7 +334,7 @@ class QueryLexer
                     // ignore bad filters (ex: #abc:1 -> #abc)
                     (
                         isset($matches[$prevKey]) &&
-                        preg_match($this->regEx[self::T_FILTER], $value, $m) &&
+                        preg_match(self::REGEX_FILTER_OPERATOR, $value, $m) &&
                         preg_match(self::REGEX_FILTER_VALUE, $m[2]) &&
                         !preg_match(self::REGEX_FILTER_KEY, $matches[$prevKey])
                     ) ||
@@ -535,7 +541,7 @@ class QueryLexer
                     }
 
                     // ignore non-filters (ex: "http://")
-                    if (preg_match($this->regEx[self::T_FILTER], $matches[2], $m)) {
+                    if (preg_match(self::REGEX_FILTER_OPERATOR, $matches[2], $m)) {
                         if (preg_match(self::REGEX_FILTER_VALUE, $m[2], $t) && !$t[0]) {
                             $tmp = explode(' ', $m[2], 2);
                             $matches[1] = $matches[1].$m[1].$tmp[0];

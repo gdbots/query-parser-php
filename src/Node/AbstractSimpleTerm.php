@@ -27,11 +27,35 @@ abstract class AbstractSimpleTerm extends AbstractQueryItem
     }
 
     /**
+     * @param int $tokenType
+     *
+     * @return self
+     */
+    public function setTokenType($tokenType)
+    {
+        $this->tokenType = $tokenType;
+
+        return $this;
+    }
+
+    /**
      * @return int
      */
     public function getTokenType()
     {
         return $this->tokenType;
+    }
+
+    /**
+     * @param string $token
+     *
+     * @return self
+     */
+    public function setToken($token)
+    {
+        $this->token = $token;
+
+        return $this;
     }
 
     /**
