@@ -73,9 +73,9 @@ var_dump($hashtags);
 ``` php
 <?php
 
-use Gdbots\QueryParser\QueryWrapper;
+use Gdbots\QueryParser\QueryResult;
 
-$wrapper = new QueryWrapper();
+$wrapper = new QueryResult();
 $allTokens = $wrapper->parse('#hashtag1 AND #hashtag2');
 
 $hashtags = $wrapper->getHashtags();
