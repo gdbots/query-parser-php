@@ -7,6 +7,7 @@ use Elastica\Query\BoolQuery;
 use Elastica\Query\Filtered;
 use Elastica\Query\QueryString;
 use Elastica\Query\Term;
+use Elastica\Query\Range;
 use Gdbots\QueryParser\Node;
 use Gdbots\QueryParser\QueryLexer;
 
@@ -124,6 +125,12 @@ class QueryItemElastica implements QueryItemVisitorInterface
             }
 
             $query = new Term([$term->getNominator()->getToken() => [$operator => $term->getTerm()->getToken()]]);
+
+            if ($term->getTerm() instanceof Node\Range) {
+                $range = json_decode($term->getTerm()->getToken(), true);
+
+                $query = new Range($term->getNominator()->getToken(), ['gte' => $range[0], 'lte' => $range[1]]);
+            }
 
             if ($term->isBoosted()) {
                 $query->addParam('boost', $term->getBoostBy());
