@@ -520,7 +520,7 @@
   ],
   [
     "+(a:>b)-c:>d -e:<f",
-    "Or>Term:a:>b>Term:+c:>d>Term:+e:<f",
+    "Or>Term:a:>b>Term:-c:>d>Term:-e:<f",
     {
       "FILTER":3
     },
