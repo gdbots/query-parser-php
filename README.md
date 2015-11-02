@@ -37,9 +37,9 @@ $query->accept($printer);
 
 ```
  And
-> Word: -mandatoryWord
+> Word (WORD): +mandatoryWord
 > Or
->> Word: +excludedWord
+>> Word (WORD): -excludedWord
 >> Term: fieldName : value
 ```
 
@@ -48,8 +48,8 @@ For the above example the result would be:
 
 ```
  Or
-> Word: -mandatoryWord
-> Word: +excludedWord
+> Word (WORD): +mandatoryWord
+> Word (WORD): -excludedWord
 > Term: fieldName : value
 ```
 
@@ -91,7 +91,7 @@ array(2) {
   [0]=>
   object(Gdbots\QueryParser\Node\Hashtag)#589 (5) {
     ["tokenType":protected]=>
-    int(7)
+    int(12)
     ["token":protected]=>
     string(8) "hashtag1"
     ["excluded":protected]=>
@@ -104,7 +104,7 @@ array(2) {
   [1]=>
   object(Gdbots\QueryParser\Node\Hashtag)#588 (5) {
     ["tokenType":protected]=>
-    int(7)
+    int(12)
     ["token":protected]=>
     string(8) "hashtag2"
     ["excluded":protected]=>

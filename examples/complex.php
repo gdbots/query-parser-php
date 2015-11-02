@@ -13,36 +13,35 @@ if ($query = $parser->parse('a+b -c +d (f:v^1.5+6)', false)) {
 
 /*
  Or
-> Word: a
-> Word: -b
-> Word: +c
-> Word: -d
+> Word (WORD): a+b
+> Word (WORD): -c
+> Word (WORD): +d
 > Subexpression
 >> Or
 >>> Term: f : v ^ 1.50
->>> Word: -6
+>>> Word (NUMBER): +6
 */
 
     echo "\n\nCompiled query:\n\n";
     echo $parser->getLexer()->getProcessedData();
 
 /*
-a OR +b OR -c OR +d OR ( f:v^1.5 OR +6 )
+a+b OR -c OR +d OR ( f:v^1.5 OR +6 )
 */
 
     echo "\n\nQuery object:\n\n";
     var_dump($query);
 
 /*
-object(Gdbots\QueryParser\Node\OrExpressionList)#597 (4) {
+object(Gdbots\QueryParser\Node\OrExpressionList)#596 (4) {
   ["expressions":protected]=>
-  array(5) {
+  array(4) {
     [0]=>
     object(Gdbots\QueryParser\Node\Word)#586 (5) {
       ["tokenType":protected]=>
-      int(1)
+      int(2)
       ["token":protected]=>
-      string(1) "a"
+      string(3) "a+b"
       ["excluded":protected]=>
       bool(false)
       ["included":protected]=>
@@ -53,20 +52,7 @@ object(Gdbots\QueryParser\Node\OrExpressionList)#597 (4) {
     [1]=>
     object(Gdbots\QueryParser\Node\Word)#588 (5) {
       ["tokenType":protected]=>
-      int(1)
-      ["token":protected]=>
-      string(1) "b"
-      ["excluded":protected]=>
-      bool(false)
-      ["included":protected]=>
-      bool(true)
-      ["boostBy":protected]=>
-      NULL
-    }
-    [2]=>
-    object(Gdbots\QueryParser\Node\Word)#589 (5) {
-      ["tokenType":protected]=>
-      int(1)
+      int(2)
       ["token":protected]=>
       string(1) "c"
       ["excluded":protected]=>
@@ -76,10 +62,10 @@ object(Gdbots\QueryParser\Node\OrExpressionList)#597 (4) {
       ["boostBy":protected]=>
       NULL
     }
-    [3]=>
-    object(Gdbots\QueryParser\Node\Word)#590 (5) {
+    [2]=>
+    object(Gdbots\QueryParser\Node\Word)#589 (5) {
       ["tokenType":protected]=>
-      int(1)
+      int(2)
       ["token":protected]=>
       string(1) "d"
       ["excluded":protected]=>
@@ -89,18 +75,18 @@ object(Gdbots\QueryParser\Node\OrExpressionList)#597 (4) {
       ["boostBy":protected]=>
       NULL
     }
-    [4]=>
-    object(Gdbots\QueryParser\Node\SubExpression)#593 (4) {
+    [3]=>
+    object(Gdbots\QueryParser\Node\SubExpression)#592 (4) {
       ["expression":protected]=>
-      object(Gdbots\QueryParser\Node\OrExpressionList)#596 (4) {
+      object(Gdbots\QueryParser\Node\OrExpressionList)#595 (4) {
         ["expressions":protected]=>
         array(2) {
           [0]=>
-          object(Gdbots\QueryParser\Node\ExplicitTerm)#594 (7) {
+          object(Gdbots\QueryParser\Node\ExplicitTerm)#593 (7) {
             ["nominator":protected]=>
-            object(Gdbots\QueryParser\Node\Word)#591 (5) {
+            object(Gdbots\QueryParser\Node\Word)#590 (5) {
               ["tokenType":protected]=>
-              int(1)
+              int(2)
               ["token":protected]=>
               string(1) "f"
               ["excluded":protected]=>
@@ -111,13 +97,13 @@ object(Gdbots\QueryParser\Node\OrExpressionList)#597 (4) {
               NULL
             }
             ["tokenType":protected]=>
-            int(9)
+            int(20)
             ["tokenTypeText":protected]=>
             string(1) ":"
             ["term":protected]=>
-            object(Gdbots\QueryParser\Node\Word)#592 (5) {
+            object(Gdbots\QueryParser\Node\Word)#591 (5) {
               ["tokenType":protected]=>
-              int(1)
+              int(2)
               ["token":protected]=>
               string(1) "v"
               ["excluded":protected]=>
@@ -135,15 +121,15 @@ object(Gdbots\QueryParser\Node\OrExpressionList)#597 (4) {
             string(3) "1.5"
           }
           [1]=>
-          object(Gdbots\QueryParser\Node\Word)#595 (5) {
+          object(Gdbots\QueryParser\Node\Word)#594 (5) {
             ["tokenType":protected]=>
-            int(1)
+            int(6)
             ["token":protected]=>
-            string(1) "6"
+            string(2) "+6"
             ["excluded":protected]=>
             bool(false)
             ["included":protected]=>
-            bool(true)
+            bool(false)
             ["boostBy":protected]=>
             NULL
           }
@@ -176,15 +162,15 @@ object(Gdbots\QueryParser\Node\OrExpressionList)#597 (4) {
     var_dump($query->getQueryItemsByTokenType());
 
 /*
-array(2) {
+array(3) {
   ["WORD"]=>
-  array(5) {
+  array(3) {
     [0]=>
     object(Gdbots\QueryParser\Node\Word)#586 (5) {
       ["tokenType":protected]=>
-      int(1)
+      int(2)
       ["token":protected]=>
-      string(1) "a"
+      string(3) "a+b"
       ["excluded":protected]=>
       bool(false)
       ["included":protected]=>
@@ -195,20 +181,7 @@ array(2) {
     [1]=>
     object(Gdbots\QueryParser\Node\Word)#588 (5) {
       ["tokenType":protected]=>
-      int(1)
-      ["token":protected]=>
-      string(1) "b"
-      ["excluded":protected]=>
-      bool(false)
-      ["included":protected]=>
-      bool(true)
-      ["boostBy":protected]=>
-      NULL
-    }
-    [2]=>
-    object(Gdbots\QueryParser\Node\Word)#589 (5) {
-      ["tokenType":protected]=>
-      int(1)
+      int(2)
       ["token":protected]=>
       string(1) "c"
       ["excluded":protected]=>
@@ -218,25 +191,12 @@ array(2) {
       ["boostBy":protected]=>
       NULL
     }
-    [3]=>
-    object(Gdbots\QueryParser\Node\Word)#590 (5) {
+    [2]=>
+    object(Gdbots\QueryParser\Node\Word)#589 (5) {
       ["tokenType":protected]=>
-      int(1)
+      int(2)
       ["token":protected]=>
       string(1) "d"
-      ["excluded":protected]=>
-      bool(false)
-      ["included":protected]=>
-      bool(true)
-      ["boostBy":protected]=>
-      NULL
-    }
-    [4]=>
-    object(Gdbots\QueryParser\Node\Word)#595 (5) {
-      ["tokenType":protected]=>
-      int(1)
-      ["token":protected]=>
-      string(1) "6"
       ["excluded":protected]=>
       bool(false)
       ["included":protected]=>
@@ -248,11 +208,11 @@ array(2) {
   ["FILTER"]=>
   array(1) {
     [0]=>
-    object(Gdbots\QueryParser\Node\ExplicitTerm)#594 (7) {
+    object(Gdbots\QueryParser\Node\ExplicitTerm)#593 (7) {
       ["nominator":protected]=>
-      object(Gdbots\QueryParser\Node\Word)#591 (5) {
+      object(Gdbots\QueryParser\Node\Word)#590 (5) {
         ["tokenType":protected]=>
-        int(1)
+        int(2)
         ["token":protected]=>
         string(1) "f"
         ["excluded":protected]=>
@@ -263,13 +223,13 @@ array(2) {
         NULL
       }
       ["tokenType":protected]=>
-      int(9)
+      int(20)
       ["tokenTypeText":protected]=>
       string(1) ":"
       ["term":protected]=>
-      object(Gdbots\QueryParser\Node\Word)#592 (5) {
+      object(Gdbots\QueryParser\Node\Word)#591 (5) {
         ["tokenType":protected]=>
-        int(1)
+        int(2)
         ["token":protected]=>
         string(1) "v"
         ["excluded":protected]=>
@@ -285,6 +245,22 @@ array(2) {
       bool(false)
       ["boostBy":protected]=>
       string(3) "1.5"
+    }
+  }
+  ["NUMBER"]=>
+  array(1) {
+    [0]=>
+    object(Gdbots\QueryParser\Node\Word)#594 (5) {
+      ["tokenType":protected]=>
+      int(6)
+      ["token":protected]=>
+      string(2) "+6"
+      ["excluded":protected]=>
+      bool(false)
+      ["included":protected]=>
+      bool(false)
+      ["boostBy":protected]=>
+      NULL
     }
   }
 }
