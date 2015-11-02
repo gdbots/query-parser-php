@@ -362,7 +362,7 @@ class QueryLexer
                 }
 
                 // use last filter value when filter-on-a-filter is used (ex: a:1:2 -> a:2)
-                if (preg_match(self::REGEX_FILTER_OPERATOR, $value)) {
+                if (strpos($value, '"') === false && strpos($value, ':') !== false) {
                     $tmp = explode(':', $value);
                     $value = $tmp[0].':'.end($tmp);
                 }
