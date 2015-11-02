@@ -183,6 +183,9 @@ class QueryLexer
         // encapsulated in quotes.
         self::T_WORD => [
 
+            // date (fllow by space, boost, or range filter)
+            '/^(\d{4}[-\.\/]\d{2}[-\.\/]\d{2}+)([\s|\^|\.\.|\)].*)/',
+
             // float (fllow by space, boost, or range filter)
             '/^([-+]?\d*\.?\d+)([\s|\^|\.\.|\)].*)/',
 
