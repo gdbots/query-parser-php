@@ -235,7 +235,7 @@ class QueryLexer
         $openParenthesis = 0;
 
         // find all strings and rebuild input string with "OR"
-        if (preg_match_all('/[^\s\(\)\-\+\#\@\^\"]+'.
+        if (preg_match_all('/[^\s\(\)\#\^\"]+'.
 
                 // parentheses
                 '|'.'(\()'.
