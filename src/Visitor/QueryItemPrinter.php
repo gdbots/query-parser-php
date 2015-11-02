@@ -3,6 +3,7 @@
 namespace Gdbots\QueryParser\Visitor;
 
 use Gdbots\QueryParser\Node;
+use Gdbots\QueryParser\QueryLexer;
 
 class QueryItemPrinter implements QueryItemVisitorInterface
 {
@@ -73,9 +74,9 @@ class QueryItemPrinter implements QueryItemVisitorInterface
      */
     public function visitWord(Node\Word $word)
     {
-
         $this->printIndentedLine(sprintf(
-            'Word: %s%s%s',
+            'Word (%s): %s%s%s',
+            QueryLexer::$typeStrings[$word->getTokenType()],
             $this->printPrefix($word),
             $word->getToken(),
             $this->printPostfix($word)
@@ -92,19 +93,6 @@ class QueryItemPrinter implements QueryItemVisitorInterface
             $this->printPrefix($phrase),
             $phrase->getToken(),
             $this->printPostfix($phrase)
-        ));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function visitUrl(Node\Url $url)
-    {
-        $this->printIndentedLine(sprintf(
-            'Url: %s%s%s',
-            $this->printPrefix($url),
-            $url->getToken(),
-            $this->printPostfix($url)
         ));
     }
 

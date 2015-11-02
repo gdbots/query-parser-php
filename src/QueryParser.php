@@ -118,17 +118,15 @@ class QueryParser
 
         switch ($this->scanner->next()) {
             case QueryLexer::T_WORD:
-                $value = new Node\Word($this->scanner->getToken());
+            case QueryLexer::T_DATE:
+            case QueryLexer::T_NUMBER:
+            case QueryLexer::T_URL:
+                $value = new Node\Word($this->scanner->getToken(), $this->scanner->getTokenType());
 
                 break;
 
             case QueryLexer::T_PHRASE:
                 $value = new Node\Phrase($this->scanner->getToken());
-
-                break;
-
-            case QueryLexer::T_URL:
-                $value = new Node\Url($this->scanner->getToken());
 
                 break;
 
@@ -184,12 +182,11 @@ class QueryParser
                 return $this->readTerm($this->scanner->next(), $text);
 
             case QueryLexer::T_WORD:
-                $word = new Node\Word($this->scanner->getToken());
-                return $this->readTerm($this->scanner->next(), $word);
-
+            case QueryLexer::T_DATE:
+            case QueryLexer::T_NUMBER:
             case QueryLexer::T_URL:
-                $url = new Node\Url($this->scanner->getToken());
-                return $this->readTerm($this->scanner->next(), $url);
+                $word = new Node\Word($this->scanner->getToken(), $this->scanner->getTokenType());
+                return $this->readTerm($this->scanner->next(), $word);
 
             case QueryLexer::T_HASHTAG:
                 $expression = $this->readExpression($this->scanner->next());

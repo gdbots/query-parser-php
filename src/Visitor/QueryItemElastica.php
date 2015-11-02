@@ -62,29 +62,6 @@ class QueryItemElastica implements QueryItemVisitorInterface
     /**
      * {@inheritDoc}
      */
-    public function visitUrl(Node\Url $url)
-    {
-        $query = new QueryString($url->getToken());
-
-        if ($url->isBoosted()) {
-            $query->setBoost($url->getBoostBy());
-        }
-        if ($url->isExcluded()) {
-            $boolQuery = new BoolQuery();
-            $boolQuery->addMustNot($query);
-            $query = $boolQuery;
-        } elseif ($url->isIncluded()) {
-            $boolQuery = new BoolQuery();
-            $boolQuery->addMust($query);
-            $query = $boolQuery;
-        }
-
-        return $query;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public function visitHashtag(Node\Hashtag $hashtag)
     {
         // todo:

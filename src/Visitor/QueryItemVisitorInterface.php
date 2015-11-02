@@ -17,11 +17,6 @@ interface QueryItemVisitorInterface
     public function visitPhrase(Node\Phrase $phrase);
 
     /**
-     * @param Node\Url $url
-     */
-    public function visitUrl(Node\Url $url);
-
-    /**
      * @param Node\Hashtag $hashtag
      */
     public function visitHashtag(Node\Hashtag $hashtag);

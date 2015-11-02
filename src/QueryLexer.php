@@ -27,6 +27,8 @@ class QueryLexer
     const T_WORD                = 2; // word
     const T_PHRASE              = 3; // text between two quotes
     const T_URL                 = 4; // url
+    const T_DATE                = 5; // date
+    const T_NUMBER              = 6; // number
 
     const T_EXCLUDE             = 10; // "-"
     const T_INCLUDE             = 11; // "+"
@@ -105,6 +107,8 @@ class QueryLexer
         self::T_WORD              => 'WORD',
         self::T_PHRASE            => 'PHRASE',
         self::T_URL               => 'URL',
+        self::T_DATE              => 'DATE',
+        self::T_NUMBER            => 'NUMBER',
 
         self::T_EXCLUDE           => 'EXCLUDE',
         self::T_INCLUDE           => 'INCLUDE',
@@ -155,6 +159,12 @@ class QueryLexer
         // URL matches all url patterns
         self::T_URL => '/^([\w-]+:\/\/[^\s\/$.?#].[^\s]*)(.*)/',
 
+        // DATE (fllow by space, boost, or range filter)
+        self::T_DATE => '/^(\d{4}[-\.\/]\d{2}[-\.\/]\d{2}+)([\s|\^|\.\.|\)]?.*)/',
+
+        // NUMBER (fllow by space, boost, or range filter)
+        self::T_NUMBER => '/^([-+]?\d*\.?\d+)([\s|\^|\.\.|\)]?.*)/',
+
         // OR matches by keyword "OR" (case sensitive)
         // when no text follows after "OR".
         self::T_OR_OPERATOR => '/^(OR)(\b.*)/',
@@ -181,17 +191,7 @@ class QueryLexer
         // points (think eg. To hello_world.101) Can not match up
         // truncation characters and accents, which should be
         // encapsulated in quotes.
-        self::T_WORD => [
-
-            // date (fllow by space, boost, or range filter)
-            '/^(\d{4}[-\.\/]\d{2}[-\.\/]\d{2}+)([\s|\^|\.\.|\)].*)/',
-
-            // float (fllow by space, boost, or range filter)
-            '/^([-+]?\d*\.?\d+)([\s|\^|\.\.|\)].*)/',
-
-            // other
-            '/^([\S][^\s\:\^]*)(.*)/',
-        ],
+        self::T_WORD => '/^([\S][^\s\:\^]*)(.*)/',
 
         // this should match with each character that is left over.
         self::T_ILLEGAL => '/^(.)(.*)/'
