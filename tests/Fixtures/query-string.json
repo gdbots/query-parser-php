@@ -616,6 +616,54 @@
         }
       ]
     }
+  ],
+  [
+  "10,000 5000",
+  "Or>Word(WORD):10,000>Word(NUMBER):5000",
+  {
+    "NUMBER":1,
+    "WORD":1
+  },
+  {
+    "NUMBER":[
+      {
+        "value":"5000"
+      }
+    ],
+    "WORD":[
+      {
+        "value":"10,000"
+      }
+    ]
+  }
+],
+  [
+    "\"10,000 5000\"",
+    "Phrase:10,000 5000",
+    {
+      "PHRASE":1
+    },
+    {
+      "PHRASE":[
+        {
+          "value":"10,000 5000"
+        }
+      ]
+    }
+  ],
+  [
+    "Dear,Santa",
+    "Word(WORD):Dear,Santa",
+    {
+      "WORD":1
+    },
+    {
+      "WORD":[
+        {
+          "value":"Dear,Santa"
+        }
+      ]
+    }
   ]
 
 ]
