@@ -160,10 +160,10 @@ class QueryLexer
         self::T_URL => '/^([\w-]+:\/\/[^\s\/$.?#].[^\s]*)(.*)/',
 
         // DATE (fllow by space, boost, or range filter)
-        self::T_DATE => '/^(\d{4}[-\.\/]\d{2}[-\.\/]\d{2}+)([\s|\^|\.\.|\)]?.*)/',
+        self::T_DATE => '/^(\d{4}[-\.\/]\d{2}[-\.\/]\d{2}+)([\s|\^|\.\.|\)].*)/',
 
         // NUMBER (fllow by space, boost, or range filter)
-        self::T_NUMBER => '/^([-+]?\d*\.?\d+)([\s|\^|\.\.|\)]?.*)/',
+        self::T_NUMBER => '/^([-+]?\d*\.?\d+)([\s|\^|\.\.|\)].*)/',
 
         // OR matches by keyword "OR" (case sensitive)
         // when no text follows after "OR".
@@ -458,7 +458,7 @@ class QueryLexer
         $input = preg_replace('/(\()/', '$1 ', $input);
         $input = preg_replace('/(\))/', ' $1', $input);
 
-        $this->input = $input;
+        $this->input = $input.' '; // hack: to solve last element type
         $this->processed = '';
         $this->position = 0;
     }
