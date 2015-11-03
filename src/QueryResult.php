@@ -31,6 +31,13 @@ class QueryResult
     protected $queryItem = null;
 
     /**
+     * An array containing dates that was parsed
+     *
+     * @var array
+     */
+    protected $dates = [];
+
+    /**
      * An array containing filters that was parsed
      *
      * @var array
@@ -50,6 +57,13 @@ class QueryResult
      * @var array
      */
     protected $mentions = [];
+
+    /**
+     * An array containing numbers that was parsed
+     *
+     * @var array
+     */
+    protected $numbers = [];
 
     /**
      * An array containing phrases that was parsed
@@ -126,6 +140,14 @@ class QueryResult
     }
 
     /**
+     * @return \Gdbots\QueryParser\Node\Word[]
+     */
+    public function getDates()
+    {
+        return $this->dates;
+    }
+
+    /**
      * @return \Gdbots\QueryParser\Node\ExplicitTerm[]
      */
     public function getFilters()
@@ -145,6 +167,14 @@ class QueryResult
      * @return \Gdbots\QueryParser\Node\Mention[]
      */
     public function getMentions()
+    {
+        return $this->mentions;
+    }
+
+    /**
+     * @return \Gdbots\QueryParser\Node\Word[]
+     */
+    public function getNumbers()
     {
         return $this->mentions;
     }
