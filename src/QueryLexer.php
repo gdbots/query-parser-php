@@ -458,7 +458,7 @@ class QueryLexer
         $input = preg_replace('/(\()/', '$1 ', $input);
         $input = preg_replace('/(\))/', ' $1', $input);
 
-        $this->input = $input;
+        $this->input = $input.' '; // hack: to solve last element type
         $this->processed = '';
         $this->position = 0;
     }
