@@ -568,6 +568,10 @@ class QueryLexer
                     }
                 }
 
+                if ($tokenType == self::T_NUMBER && $this->tokenType != self::T_FILTER) {
+                    return false;
+                }
+
                 $this->token = $matches[1];
                 $this->processed .= $matches[1];
                 $this->input = $matches[2];
