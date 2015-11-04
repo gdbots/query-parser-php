@@ -13,6 +13,10 @@ class Word extends AbstractSimpleTerm
      */
     public function __construct($word, $tokenType = QueryLexer::T_WORD)
     {
+        if ((string)floatval($word) == $word) {
+            $tokenType = QueryLexer::T_NUMBER;
+        }
+
         parent::__construct($tokenType, $word);
     }
 
