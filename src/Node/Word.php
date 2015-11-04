@@ -13,8 +13,12 @@ class Word extends AbstractSimpleTerm
      */
     public function __construct($word, $tokenType = QueryLexer::T_WORD)
     {
-        if ((string)floatval($word) == $word) {
+        if (preg_match(QueryLexer::REGEX_NUMBER, $word)) {
             $tokenType = QueryLexer::T_NUMBER;
+        }
+
+        if (preg_match(QueryLexer::REGEX_DATE, $word)) {
+            $tokenType = QueryLexer::T_DATE;
         }
 
         parent::__construct($tokenType, $word);
