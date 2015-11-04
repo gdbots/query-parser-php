@@ -60,6 +60,12 @@ class QueryLexer
     const REGEX_FILTER_VALUE = '/^([\"\'\d_.\-\p{L}]*)/';
     const REGEX_FILTER_OPERATOR = '/^(\:[\>|\<]?[\=]?)(.*)/';
 
+    // Match date
+    const REGEX_DATE = '/^(\d{4}[-\.\/]\d{2}[-\.\/]\d{2}+)/';
+
+    // Match numbers
+    const REGEX_NUMBER = '/^([-+]?\d*\.?\d+)/';
+
     /**
      * The input string which has already been processed and data back into tokens.
      *
@@ -566,6 +572,10 @@ class QueryLexer
                             $matches[2] = isset($tmp[1]) ? $tmp[1] : '';
                         }
                     }
+                }
+
+                if ($tokenType == self::T_NUMBER && $this->tokenType != self::T_FILTER) {
+                    return false;
                 }
 
                 $this->token = $matches[1];
