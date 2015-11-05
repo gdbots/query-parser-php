@@ -176,7 +176,7 @@ class QueryResult
      */
     public function getNumbers()
     {
-        return $this->mentions;
+        return $this->numbers;
     }
 
     /**
@@ -196,7 +196,7 @@ class QueryResult
     }
 
     /**
-     * @return \Gdbots\QueryParser\Node\Url[]
+     * @return \Gdbots\QueryParser\Node\Word[]
      */
     public function getUrls()
     {

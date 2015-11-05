@@ -34,7 +34,6 @@ class QueryResultTest extends \PHPUnit_Framework_TestCase
     {
         // get array of tokens
         $tokens = $this->result->parse($string);
-print_r($tokens);
         // check total items per token type
         $this->assertEquals(count($itemCount), count($tokens));
 
@@ -47,7 +46,7 @@ print_r($tokens);
 
         // validate each token type item values
         $allTokenArray = [];
-        $tokenTypes = ['DATE', 'FILTER', 'HASHTAG', 'MENTION', 'PHRASE', 'URL', 'WORD'];
+        $tokenTypes = ['DATE', 'FILTER', 'HASHTAG', 'MENTION', 'NUMBER', 'PHRASE', 'URL', 'WORD'];
 
         foreach ($tokenTypes as $tokenType) {
             $method = 'get'.ucfirst(strtolower($tokenType)).'s';
@@ -90,7 +89,6 @@ print_r($tokens);
                 $allTokenArray[$tokenType][] = $tokenArray;
             }
         }
-
         $this->assertEquals($queryItems, $allTokenArray);
     }
 
