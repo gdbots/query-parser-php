@@ -1,0 +1,14 @@
+---
+engines:
+  fixme:
+    enabled: true
+  phpcodesniffer:
+    enabled: true
+  phpmd:
+    enabled: true
+ratings:
+  paths:
+  - "**.php"
+  - "**.module"
+  - "**.inc"
+exclude_paths: []
