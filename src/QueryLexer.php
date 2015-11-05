@@ -62,9 +62,11 @@ class QueryLexer
 
     // Match date
     const REGEX_DATE = '/^(\d{4}[-\.\/]\d{2}[-\.\/]\d{2}+)(.*)/';
+    const REGEX_DATE_FILTER = '/^(\d{4}[-\.\/]\d{2}[-\.\/]\d{2})(\.\.)(\d{4}[-\.\/]\d{2}[-\.\/]\d{2}+)(.*)/';
 
     // Match numbers
     const REGEX_NUMBER = '/^([-+]?\d*\.?\d+)(.*)/';
+    const REGEX_NUMBER_FILTER = '/^([-+]?\d*\.?\d)(\.\.)([-+]?\d*\.?\d+)(.*)/';
 
     /**
      * The input string which has already been processed and data back into tokens.
@@ -524,7 +526,7 @@ class QueryLexer
         // if no token matches, we are probably at the end. The control is
         // still entered, the "preg_match" expression failure for illegal
         // characters.
-        if (!empty($this->input)) {
+        if ($this->input != '') {
             $this->tokenType = self::T_ILLEGAL;
             $this->token = $this->input;
             $this->input = '';
@@ -547,7 +549,11 @@ class QueryLexer
      */
     private function testToken($regEx, $tokenType)
     {
-        if (empty($this->input)) {
+        static $isFilter = false;
+
+        if ($this->input == '') {
+            $isFilter = false;
+
             return  false;
         }
 
@@ -574,7 +580,34 @@ class QueryLexer
                     }
                 }
 
-                if (in_array($tokenType, [self::T_NUMBER, self::T_DATE]) && $this->tokenType != self::T_FILTER) {
+                // ignore range not in filter
+                if (!$isFilter && $tokenType == self::T_RANGE) {
+                    return false;
+                }
+
+                // ignore range+range
+                if ($isFilter && $this->tokenType == self::T_RANGE && $tokenType == self::T_RANGE) {
+                    return false;
+                }
+
+                // ignore range+ non numeric or date
+                if ($isFilter && $this->tokenType == self::T_RANGE && !in_array($tokenType, [self::T_DATE, self::T_NUMBER])) {
+                    return false;
+                }
+
+                // ignore invalid filter values
+                if ((
+                    $tokenType == self::T_DATE && !(
+                        (preg_match(self::REGEX_DATE, $this->input, $m) && (!$m[2] || in_array(substr($m[2], 0, 1), [' ', '^']))) ||
+                        ($isFilter && preg_match(self::REGEX_DATE_FILTER, $this->input, $m) && (!$m[4] || in_array(substr($m[4], 0, 1), [' ', '^'])))
+                    )
+                ) ||
+                (
+                    $tokenType == self::T_NUMBER && !(
+                        (preg_match(self::REGEX_NUMBER, $this->input, $m) && (!$m[2] || in_array(substr($m[2], 0, 1), [' ', '^']))) ||
+                        ($isFilter && preg_match(self::REGEX_NUMBER_FILTER, $this->input, $m) && (!$m[4] || in_array(substr($m[4], 0, 1), [' ', '^'])))
+                    )
+                )) {
                     return false;
                 }
 
@@ -583,6 +616,13 @@ class QueryLexer
                 $this->input = $matches[2];
                 $this->tokenType = $tokenType;
                 $this->position = $this->position + strlen($this->token);
+
+                if ($tokenType == self::T_FILTER) {
+                    $isFilter = true;
+                }
+                if ($tokenType == self::T_WSPC) {
+                    $isFilter = false;
+                }
 
                 return true;
             }
