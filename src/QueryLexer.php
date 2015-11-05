@@ -61,10 +61,10 @@ class QueryLexer
     const REGEX_FILTER_OPERATOR = '/^(\:[\>|\<]?[\=]?)(.*)/';
 
     // Match date
-    const REGEX_DATE = '/^(\d{4}[-\.\/]\d{2}[-\.\/]\d{2}+)/';
+    const REGEX_DATE = '/^(\d{4}[-\.\/]\d{2}[-\.\/]\d{2}+)(.*)/';
 
     // Match numbers
-    const REGEX_NUMBER = '/^([-+]?\d*\.?\d+)/';
+    const REGEX_NUMBER = '/^([-+]?\d*\.?\d+)(.*)/';
 
     /**
      * The input string which has already been processed and data back into tokens.
@@ -574,7 +574,7 @@ class QueryLexer
                     }
                 }
 
-                if ($tokenType == self::T_NUMBER && $this->tokenType != self::T_FILTER) {
+                if (in_array($tokenType, [self::T_NUMBER, self::T_DATE]) && $this->tokenType != self::T_FILTER) {
                     return false;
                 }
 
