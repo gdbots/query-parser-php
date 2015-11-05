@@ -1,5 +1,4 @@
 [
-
   [
     "##one",
     "Hashtag:one",
@@ -209,17 +208,16 @@
       "HASHTAG":1
     },
     {
-      "HASHTAG":[
-        {
-          "value":"b"
-        }
-      ],
       "WORD":[
         {
           "value":"a"
         }
+      ],
+      "HASHTAG":[
+        {
+          "value":"b"
+        }
       ]
-
     }
   ],
   [
@@ -311,12 +309,12 @@
       "MENTION":2
     },
     {
-      "MENTION":[
+      "WORD":[
         {
-          "value":"j"
+          "value":"abc"
         },
         {
-          "value":"k"
+          "value":"l"
         }
       ],
       "PHRASE":[
@@ -324,12 +322,12 @@
           "value":"def ghi"
         }
       ],
-      "WORD":[
+      "MENTION":[
         {
-          "value":"abc"
+          "value":"j"
         },
         {
-          "value":"l"
+          "value":"k"
         }
       ]
     }
@@ -436,16 +434,16 @@
       "FILTER":1
     },
     {
+      "URL":[
+        {
+          "value":"http:\/\/a.com"
+        }
+      ],
       "FILTER":[
         {
           "field":"a",
           "operator":":>",
           "value":"500"
-        }
-      ],
-      "URL":[
-        {
-          "value":"http:\/\/a.com"
         }
       ]
     }
@@ -619,21 +617,21 @@
     }
   ],
   [
-  "10,000 5000",
-  "Or>Word(NUMBER):10,000>Word(NUMBER):5000",
-  {
-    "NUMBER":2
-  },
-  {
-    "NUMBER":[
-      {
-        "value":"10,000"
-      },
-      {
-        "value":"5000"
-      }
-    ]
-  }
+    "10,000 5000",
+    "Or>Word(NUMBER):10,000>Word(NUMBER):5000",
+    {
+      "NUMBER":2
+    },
+    {
+      "NUMBER":[
+        {
+          "value":"10,000"
+        },
+        {
+          "value":"5000"
+        }
+      ]
+    }
   ],
   [
     "5000",
@@ -651,7 +649,7 @@
   ],
   [
     "\"10,000 5000\"",
-    "Phrase:10,000 5000",
+    "Phrase:10,0005000",
     {
       "PHRASE":1
     },
@@ -673,7 +671,7 @@
     {
       "DATE":[
         {
-        "value":"2015-10-31"
+          "value":"2015-10-31"
         }
       ],
       "WORD":[
@@ -713,12 +711,12 @@
   ],
   [
     "1..5",
-    "Word(WORD):1..5",
+    "Word(NUMBER):1..5",
     {
-      "WORD":1
+      "NUMBER":1
     },
     {
-      "WORD":[
+      "NUMBER":[
         {
           "value":"1..5"
         }
@@ -727,31 +725,16 @@
   ],
   [
     "1....5",
-    "Word(WORD):1....5",
+    "Word(NUMBER):1....5",
     {
-      "WORD":1
+      "NUMBER":1
     },
     {
-      "WORD":[
+      "NUMBER":[
         {
           "value":"1....5"
         }
       ]
     }
-  ],
-  [
-    "a:1....5",
-    "Word(WORD):a:1....5",
-    {
-      "WORD":1
-    },
-    {
-      "WORD":[
-        {
-          "value":"a:1....5"
-        }
-      ]
-    }
   ]
-
 ]

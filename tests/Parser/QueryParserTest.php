@@ -93,7 +93,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
 
         // validate each token type item values
         $allTokenArray = [];
-        $tokenTypes = ['FILTER', 'HASHTAG', 'MENTION', 'PHRASE', 'URL', 'WORD'];
+        $tokenTypes = ['WORD', 'PHRASE', 'URL', 'NUMBER', 'DATE', 'HASHTAG', 'MENTION', 'FILTER'];
 
         foreach ($tokenTypes as $tokenType) {
             $items = $query->getQueryItemsByTokenType(constant('Gdbots\QueryParser\QueryLexer::T_'.$tokenType));

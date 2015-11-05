@@ -31,6 +31,27 @@ class QueryResult
     protected $queryItem = null;
 
     /**
+     * An array containing words that was parsed
+     *
+     * @var array
+     */
+    protected $words = [];
+
+    /**
+     * An array containing phrases that was parsed
+     *
+     * @var array
+     */
+    protected $phrases = [];
+
+    /**
+     * An array containing words that was parsed
+     *
+     * @var array
+     */
+    protected $urls = [];
+
+    /**
      * An array containing dates that was parsed
      *
      * @var array
@@ -38,11 +59,11 @@ class QueryResult
     protected $dates = [];
 
     /**
-     * An array containing filters that was parsed
+     * An array containing numbers that was parsed
      *
      * @var array
      */
-    protected $filters = [];
+    protected $numbers = [];
 
     /**
      * An array containing hashtags that was parsed
@@ -59,32 +80,11 @@ class QueryResult
     protected $mentions = [];
 
     /**
-     * An array containing numbers that was parsed
+     * An array containing filters that was parsed
      *
      * @var array
      */
-    protected $numbers = [];
-
-    /**
-     * An array containing phrases that was parsed
-     *
-     * @var array
-     */
-    protected $phrases = [];
-
-    /**
-     * An array containing words that was parsed
-     *
-     * @var array
-     */
-    protected $words = [];
-
-    /**
-     * An array containing words that was parsed
-     *
-     * @var array
-     */
-    protected $urls = [];
+    protected $filters = [];
 
     /**
      * Parses a given query string and assign all tokenized buckets.
@@ -142,17 +142,41 @@ class QueryResult
     /**
      * @return \Gdbots\QueryParser\Node\Word[]
      */
+    public function getWords()
+    {
+        return $this->words;
+    }
+
+    /**
+     * @return \Gdbots\QueryParser\Node\Phrase[]
+     */
+    public function getPhrases()
+    {
+        return $this->phrases;
+    }
+
+    /**
+     * @return \Gdbots\QueryParser\Node\Word[]
+     */
+    public function getUrls()
+    {
+        return $this->urls;
+    }
+
+    /**
+     * @return \Gdbots\QueryParser\Node\Word[]
+     */
     public function getDates()
     {
         return $this->dates;
     }
 
     /**
-     * @return \Gdbots\QueryParser\Node\ExplicitTerm[]
+     * @return \Gdbots\QueryParser\Node\Word[]
      */
-    public function getFilters()
+    public function getNumbers()
     {
-        return $this->filters;
+        return $this->numbers;
     }
 
     /**
@@ -172,34 +196,10 @@ class QueryResult
     }
 
     /**
-     * @return \Gdbots\QueryParser\Node\Word[]
+     * @return \Gdbots\QueryParser\Node\ExplicitTerm[]
      */
-    public function getNumbers()
+    public function getFilters()
     {
-        return $this->numbers;
-    }
-
-    /**
-     * @return \Gdbots\QueryParser\Node\Phrase[]
-     */
-    public function getPhrases()
-    {
-        return $this->phrases;
-    }
-
-    /**
-     * @return \Gdbots\QueryParser\Node\Word[]
-     */
-    public function getWords()
-    {
-        return $this->words;
-    }
-
-    /**
-     * @return \Gdbots\QueryParser\Node\Word[]
-     */
-    public function getUrls()
-    {
-        return $this->urls;
+        return $this->filters;
     }
 }
