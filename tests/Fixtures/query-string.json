@@ -685,15 +685,33 @@
     }
   ],
   [
-    "2015-10-31",
-    "Word(DATE):2015-10-31",
+    "2015-10-31 2015-10-3a 2015.10.31 2015/10/31 \"2015-10-31 1000 @3pm\"",
+    "Or>Word(DATE):2015-10-31>Word(WORD):2015-10-3a>Phrase:2015-10-31 1000 @3pm",
     {
-      "DATE":1
+      "DATE":3,
+      "PHRASE":1,
+      "WORD":1
     },
     {
       "DATE":[
         {
           "value":"2015-10-31"
+        },
+        {
+          "value":"2015.10.31"
+        },
+        {
+          "value":"2015/10/31"
+        }
+      ],
+      "PHRASE":[
+        {
+          "value":"2015-10-31 1000 @3pm"
+        }
+      ],
+      "WORD":[
+        {
+          "value":"2015-10-3a"
         }
       ]
     }
@@ -736,6 +754,64 @@
       "WORD":[
         {
           "value":"1....5"
+        }
+      ]
+    }
+  ],
+  [
+    "a:1....5 b:1..a c:1..5",
+    "Or>Term:a:1....5>Term:b:1..a>Term:c:1..5",
+    {
+      "FILTER":3
+    },
+    {
+      "FILTER":[
+        {
+          "field":"a",
+          "operator":":",
+          "value":"1....5"
+        },
+        {
+          "field":"b",
+          "operator":":",
+          "value":"1..a"
+        },
+        {
+          "field":"c",
+          "operator":":",
+          "value":"[\"1\",\"5\"]"
+        }
+      ]
+    }
+  ],
+  [
+    "re:>     appt b:  one @3pm a:>1..5",
+    "Or>Word(WORD):re:>Word(WORD):appt>Mention:3pm",
+    {
+      "FILTER": 3,
+      "MENTION":1
+    },
+    {
+      "FILTER":[
+        {
+          "field":"re",
+          "operator":":>",
+          "value":"appt"
+        },
+        {
+          "field":"b",
+          "operator":":",
+          "value":"one"
+        },
+        {
+          "field":"a",
+          "operator":":>",
+          "value":"1..5"
+        }
+      ],
+      "MENTION":[
+        {
+          "value":"3pm"
         }
       ]
     }

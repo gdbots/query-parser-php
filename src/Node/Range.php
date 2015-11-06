@@ -8,12 +8,12 @@ use Gdbots\QueryParser\Visitor\QueryItemVisitorInterface;
 class Range extends AbstractSimpleTerm
 {
     /**
-     * @param float $from
-     * @param float $to
+     * @param float $start
+     * @param float $end
      */
-    public function __construct($from, $to)
+    public function __construct($start, $end)
     {
-        parent::__construct(QueryLexer::T_RANGE, json_encode([$from, $to]));
+        parent::__construct(QueryLexer::T_RANGE, json_encode([$start, $end]));
     }
 
     /**

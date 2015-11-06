@@ -298,7 +298,6 @@ class QueryParser
             $lastExpression = $this->readExpression($this->scanner->getTokenType());
 
             if ($this->scanner->getTokenType() == QueryLexer::T_BOOST) {
-
                 /** @var \Gdbots\QueryParser\Node\AbstractQueryItem|null $expression */
                 if ($expression = $this->readExpression($this->scanner->next())) {
                     $lastExpression->setBoostBy($expression->getToken());
@@ -306,7 +305,6 @@ class QueryParser
             }
 
             if ($this->scanner->getTokenType() == QueryLexer::T_RANGE) {
-
                 /** @var \Gdbots\QueryParser\Node\AbstractQueryItem|null $expression */
                 if ($expression = $this->readExpression($this->scanner->next())) {
                     $lastExpression->setToken(sprintf('%s..%s', $lastExpression->getToken(), $expression->getToken()));

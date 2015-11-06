@@ -639,23 +639,44 @@ class QueryLexer
                 }
 
                 // ignore range+ non numeric or date
-                if ($isFilter && $this->tokenType == self::T_RANGE && !in_array($tokenType, [self::T_DATE, self::T_NUMBER])) {
+                if ($isFilter &&
+                    $this->tokenType == self::T_RANGE &&
+                    !in_array($tokenType, [self::T_DATE, self::T_NUMBER])
+                ) {
                     return false;
                 }
 
                 // ignore invalid filter values
-                if ((
-                    $tokenType == self::T_DATE && !(
-                        (preg_match(self::REGEX_DATE, $this->input, $m) && (!$m[2] || in_array(substr($m[2], 0, 1), [' ', '^']))) ||
-                        ($isFilter && preg_match(self::REGEX_DATE_FILTER, $this->input, $m) && (!$m[4] || in_array(substr($m[4], 0, 1), [' ', '^'])))
+                if (
+                    (
+                    $tokenType == self::T_DATE &&
+                    !(
+                        (
+                            preg_match(self::REGEX_DATE, $this->input, $m) &&
+                            (!$m[2] || in_array(substr($m[2], 0, 1), [' ', '^']))
+                        ) ||
+                        (
+                            $isFilter &&
+                            preg_match(self::REGEX_DATE_FILTER, $this->input, $m) &&
+                            (!$m[4] || in_array(substr($m[4], 0, 1), [' ', '^']))
+                        )
                     )
-                ) ||
-                (
-                    $tokenType == self::T_NUMBER && !(
-                        (preg_match(self::REGEX_NUMBER, $this->input, $m) && (!$m[2] || in_array(substr($m[2], 0, 1), [' ', '^']))) ||
-                        ($isFilter && preg_match(self::REGEX_NUMBER_FILTER, $this->input, $m) && (!$m[4] || in_array(substr($m[4], 0, 1), [' ', '^'])))
+                    ) ||
+                    (
+                    $tokenType == self::T_NUMBER &&
+                    !(
+                        (
+                            preg_match(self::REGEX_NUMBER, $this->input, $m) &&
+                            (!$m[2] || in_array(substr($m[2], 0, 1), [' ', '^']))
+                        ) ||
+                        (
+                            $isFilter &&
+                            preg_match(self::REGEX_NUMBER_FILTER, $this->input, $m) &&
+                            (!$m[4] || in_array(substr($m[4], 0, 1), [' ', '^']))
+                        )
                     )
-                )) {
+                    )
+                ) {
                     return false;
                 }
 
