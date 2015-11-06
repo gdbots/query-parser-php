@@ -613,6 +613,18 @@ class QueryLexer
                     return false;
                 }
 
+                // ignore range when filter operator is not equal
+                if ($isFilter &&
+                    !in_array($this->token, [':', ':=']) &&
+                    (
+                        ($tokenType == self::T_DATE && preg_match(self::REGEX_DATE_FILTER, $this->input, $m))||
+                        ($tokenType == self::T_NUMBER && preg_match(self::REGEX_NUMBER_FILTER, $this->input, $m))
+                    )
+                ) {
+                    return false;
+                }
+
+
                 $this->token = $matches[1];
                 $this->processed .= $matches[1];
                 $this->input = $matches[2];
