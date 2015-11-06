@@ -298,11 +298,11 @@ class QueryLexer
                 }
 
                 // remove duplicate special characters
-                $found = false;
+                $isPhase = false;
                 if (preg_match('/\"([^\"]*)\"/', $value)) {
-                    $found = true;
+                    $isPhase = true;
                 }
-                if (!$found) {
+                if (!$isPhase) {
                     $value = preg_replace('/(?>\-)\K\-*/', '', $value);
                     $value = preg_replace('/(?>\+)\K\+*/', '', $value);
                     $value = preg_replace('/(?>\#)\K\#*/', '', $value);
