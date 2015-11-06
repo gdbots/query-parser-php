@@ -98,20 +98,4 @@ class QueryResultTest extends \PHPUnit_Framework_TestCase
     {
         return json_decode(file_get_contents(__DIR__.'/../Fixtures/query-string.json'), true);
     }
-
-    /**
-     * @return string
-     */
-    private function getPrintContent(Node\AbstractQueryItem $query)
-    {
-        ob_start();
-
-        $query->accept($this->printer);
-
-        $output = ob_get_contents();
-
-        ob_end_clean();
-
-        return $output;
-    }
 }
