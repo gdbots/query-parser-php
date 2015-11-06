@@ -424,7 +424,8 @@ class QueryLexer
                 if (
                     isset($matches[$key+1]) &&
                     (
-                        !in_array(substr($matches[$key+1], 0, 1), [':', '^', ')']) ||
+                        !in_array(substr($matches[$key+1], 0, 1), [':', ')']) ||
+                        preg_match(self::REGEX_FILTER_OPERATOR, $matches[$key+1]) ||
                         preg_match(self::REGEX_EMOTICONS_BASIC, $matches[$key+1]) ||
                         (
                             preg_match(self::REGEX_TOKENS, $matches[$key+1], $m) &&
@@ -432,7 +433,8 @@ class QueryLexer
                         )
                     ) &&
                     (
-                        !in_array(substr($value, -1), [':', '^']) ||
+                        !in_array(substr($value, -1), ['^']) ||
+                        preg_match(self::REGEX_FILTER_OPERATOR, $value) ||
                         preg_match(self::REGEX_EMOTICONS_BASIC, $value)
                     )
                 ) {
