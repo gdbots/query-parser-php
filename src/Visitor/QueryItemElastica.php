@@ -64,7 +64,8 @@ class QueryItemElastica implements QueryItemVisitorInterface
      */
     public function visitHashtag(Node\Hashtag $hashtag)
     {
-        // todo:
+        // not yet implemented
+        return null;
     }
 
     /**
@@ -72,7 +73,8 @@ class QueryItemElastica implements QueryItemVisitorInterface
      */
     public function visitMention(Node\Mention $mention)
     {
-        // todo:
+        // not yet implemented
+        return null;
     }
 
     /**
