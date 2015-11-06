@@ -243,8 +243,6 @@ class QueryLexer
      */
     public function readString($input, $ignoreOperator = false)
     {
-        $openParenthesis = 0;
-
         // find all strings and rebuild input string with "OR"
         if (preg_match_all('/[^\s\(\)\#\^\"]+'.
 
@@ -277,179 +275,225 @@ class QueryLexer
         ) {
             $matches = $matches[0];
 
-            // phase 1: cleanup characters
-            for ($key = 0, $m = count($matches); $key < $m; $key++) {
-                $value = $matches[$key];
-                $value = trim($value);
+            $matches = $this->cleanCharacters($matches, $input, $ignoreOperator);
+            $matches = $this->modifyCharacters($matches);
 
-                if ($ignoreOperator) {
-                    if ($value == 'AND') {
-                        $value = 'OR';
-                    }
+            $input = $this->generateInput($matches);
+        }
 
-                    $value = str_replace('(', '', $value);
-                    $value = str_replace(')', '', $value);
+        $this->input = $input;
+        $this->processed = '';
+        $this->position = 0;
+    }
+
+    /**
+     * Phase 1: cleanup characters.
+     *
+     * @param array  $matches
+     * @param string $input
+     * @param bool   $ignoreOperator
+     *
+     * @return array
+     */
+    private function cleanCharacters(array $matches, $input, $ignoreOperator = false)
+    {
+        for ($key = 0, $m = count($matches); $key < $m; $key++) {
+            $value = $matches[$key];
+            $value = trim($value);
+
+            if ($ignoreOperator) {
+                if ($value == 'AND') {
+                    $value = 'OR';
                 }
 
-                if (empty($value)) {
-                    unset($matches[$key]);
-
-                    continue;
-                }
-
-                // remove duplicate special characters
-                $isPhase = false;
-                if (preg_match('/\"([^\"]*)\"/', $value)) {
-                    $isPhase = true;
-                }
-                if (!$isPhase) {
-                    $value = preg_replace('/(?>\-)\K\-*/', '', $value);
-                    $value = preg_replace('/(?>\+)\K\+*/', '', $value);
-                    $value = preg_replace('/(?>\#)\K\#*/', '', $value);
-                    $value = preg_replace('/(?>\@)\K\@*/', '', $value);
-                    $value = preg_replace('/(?>\^)\K\^*/', '', $value);
-                    $value = preg_replace('/(?>\:)\K\:*/', '', $value);
-                    $value = preg_replace('/\:(?>\>)\K\>*/', '', $value);
-                    $value = preg_replace('/\:(?>\<)\K\<*/', '', $value);
-                }
-
-                // merge url string
-                if (preg_match($this->regEx[self::T_URL], $value)) {
-                    $orgKey = $key;
-
-                    for ($key++; $key < $m; $key++) {
-                        if (strpos($input, $value.$matches[$key]) !== false) {
-                            $value .= $matches[$key];
-
-                            unset($matches[$key]);
-                        }
-
-                        if (isset($matches[$key+1]) && strpos($input, $value.$matches[$key+1]) === false) {
-                            break;
-                        }
-                    }
-
-                    $matches[$orgKey] = $value;
-                } else {
-                    $matches[$key] = $value;
-                }
+                $value = str_replace('(', '', $value);
+                $value = str_replace(')', '', $value);
             }
 
-            // phase 2: modify special characters
-            $prevKey = -1;
-            foreach ($matches as $key => $value) {
-                // delete value that is a special characters
-                if (preg_match(self::REGEX_TOKENS, $value, $m) && $m[0] == $value) {
-                    unset($matches[$key]);
+            if (empty($value)) {
+                unset($matches[$key]);
 
-                    continue;
-                }
+                continue;
+            }
 
-                if (
-                    // use last boost value when boost-on-a-boost is used (ex: a^1^2 -> a^2)
-                    (
-                        isset($matches[$key+1]) &&
-                        preg_match($this->regEx[self::T_BOOST], $value) &&
-                        preg_match($this->regEx[self::T_BOOST], $matches[$key+1])
-                    ) ||
+            // remove duplicate special characters
+            $isPhase = false;
+            if (preg_match('/\"([^\"]*)\"/', $value)) {
+                $isPhase = true;
+            }
+            if (!$isPhase) {
+                $value = preg_replace('/(?>\-)\K\-*/', '', $value);
+                $value = preg_replace('/(?>\+)\K\+*/', '', $value);
+                $value = preg_replace('/(?>\#)\K\#*/', '', $value);
+                $value = preg_replace('/(?>\@)\K\@*/', '', $value);
+                $value = preg_replace('/(?>\^)\K\^*/', '', $value);
+                $value = preg_replace('/(?>\:)\K\:*/', '', $value);
+                $value = preg_replace('/\:(?>\>)\K\>*/', '', $value);
+                $value = preg_replace('/\:(?>\<)\K\<*/', '', $value);
+            }
 
-                    // ignore bad filters (ex: #abc:1 -> #abc)
-                    (
-                        isset($matches[$prevKey]) &&
-                        preg_match(self::REGEX_FILTER_OPERATOR, $value, $m) &&
-                        preg_match(self::REGEX_FILTER_VALUE, $m[2]) &&
-                        !preg_match(self::REGEX_FILTER_KEY, $matches[$prevKey])
-                    ) ||
+            // merge url string
+            if (preg_match($this->regEx[self::T_URL], $value)) {
+                $orgKey = $key;
 
-                    // boost a parentheses (ex: (a b)^2 -> (a b))
-                    (
-                        isset($matches[$prevKey]) && $matches[$prevKey] == ')' &&
-                        preg_match($this->regEx[self::T_BOOST], $value)
-                    )
-                ) {
-                    unset($matches[$key]);
+                for ($key++; $key < $m; $key++) {
+                    if (strpos($input, $value.$matches[$key]) !== false) {
+                        $value .= $matches[$key];
 
-                    continue;
-                }
+                        unset($matches[$key]);
+                    }
 
-                // use last filter value when filter-on-a-filter is used (ex: a:1:2 -> a:2)
-                if (strpos($value, '"') === false && strpos($value, ':') !== false) {
-                    $tmp = explode(':', $value, 2);
-
-                    if (!preg_match($this->regEx[self::T_URL], $tmp[1])) {
-                        $tmp = explode(':', $value);
-                        $value = $tmp[0].':'.end($tmp);
+                    if (isset($matches[$key+1]) && strpos($input, $value.$matches[$key+1]) === false) {
+                        break;
                     }
                 }
 
-                // add quotes to emoticons
-                foreach ([self::REGEX_EMOTICONS_BASIC, self::REGEX_EMOTICONS_UTF8] as $regEx) {
-                    if (preg_match($regEx, $value, $m) && $m[0] == $value) {
-                        $value = str_replace($m[0], sprintf('"%s"', $m[0]), $value);
-                    }
-                }
-
+                $matches[$orgKey] = $value;
+            } else {
                 $matches[$key] = $value;
+            }
+        }
 
-                $prevKey = $key;
+        // reindex array
+        $matches = array_values($matches);
+
+        return $matches;
+    }
+
+    /**
+     * Phase 2: modify special characters.
+     *
+     * @param array $matches
+     *
+     * @return array
+     */
+    private function modifyCharacters(array $matches)
+    {
+        $prevKey = -1;
+        foreach ($matches as $key => $value) {
+            // delete value that is a special characters
+            if (preg_match(self::REGEX_TOKENS, $value, $m) && $m[0] == $value) {
+                unset($matches[$key]);
+
+                continue;
             }
 
-            // reindex array
-            $matches = array_values($matches);
-
-            // reset
-            $input = '';
-
-            // phase 3: handle parentheses and add OR/AND expression
-            foreach ($matches as $key => $value) {
-                if (empty($value)) {
-                    continue;
-                }
-
-                $input .= $value;
-
-                if (preg_match_all('/(\()/', $value, $m)) {
-                    $openParenthesis += count($m[0]);
-                }
-                if (preg_match_all('/(\))/', $value, $m)) {
-                    if (preg_match($this->regEx[self::T_PHRASE], $value, $m1)) {
-                        if (preg_match_all('/(\))/', str_replace($m1[1], '', $value), $m2)) {
-                            $openParenthesis -= count($m2[0]);
-                        }
-                    } else {
-                        $openParenthesis -= count($m[0]);
-                    }
-                }
-
-                if (
+            if (
+                // use last boost value when boost-on-a-boost is used (ex: a^1^2 -> a^2)
+                (
                     isset($matches[$key+1]) &&
-                    (
-                        (
-                            !in_array(substr($matches[$key+1], 0, 1), [':', '^', ')']) &&
-                            !preg_match(self::REGEX_FILTER_OPERATOR, $matches[$key+1])
-                        ) ||
-                        preg_match(self::REGEX_EMOTICONS_BASIC, $matches[$key+1]) ||
-                        (
-                            preg_match(self::REGEX_TOKENS, $matches[$key+1], $m) &&
-                            $m[0] == $matches[$key+1]
-                        )
-                    ) &&
-                    (
-                        (
-                            !in_array(substr($value, -1), [':', '^']) &&
-                            !preg_match(self::REGEX_FILTER_OPERATOR, substr($value, -2))
-                        ) ||
-                        preg_match(self::REGEX_EMOTICONS_BASIC, $value)
-                    )
-                ) {
-                    if (
-                        !in_array($matches[$key+1], ['AND', 'OR']) &&
-                        !in_array($value, ['AND', 'OR', '('])
-                    ) {
-                        $input .= ' OR ';
-                    } else {
-                        $input .= ' ';
+                    preg_match($this->regEx[self::T_BOOST], $value) &&
+                    preg_match($this->regEx[self::T_BOOST], $matches[$key+1])
+                ) ||
+
+                // ignore bad filters (ex: #abc:1 -> #abc)
+                (
+                    isset($matches[$prevKey]) &&
+                    preg_match(self::REGEX_FILTER_OPERATOR, $value, $m) &&
+                    preg_match(self::REGEX_FILTER_VALUE, $m[2]) &&
+                    !preg_match(self::REGEX_FILTER_KEY, $matches[$prevKey])
+                ) ||
+
+                // boost a parentheses (ex: (a b)^2 -> (a b))
+                (
+                    isset($matches[$prevKey]) && $matches[$prevKey] == ')' &&
+                    preg_match($this->regEx[self::T_BOOST], $value)
+                )
+            ) {
+                unset($matches[$key]);
+
+                continue;
+            }
+
+            // use last filter value when filter-on-a-filter is used (ex: a:1:2 -> a:2)
+            if (strpos($value, '"') === false && strpos($value, ':') !== false) {
+                $tmp = explode(':', $value, 2);
+
+                if (!preg_match($this->regEx[self::T_URL], $tmp[1])) {
+                    $tmp = explode(':', $value);
+                    $value = $tmp[0].':'.end($tmp);
+                }
+            }
+
+            // add quotes to emoticons
+            foreach ([self::REGEX_EMOTICONS_BASIC, self::REGEX_EMOTICONS_UTF8] as $regEx) {
+                if (preg_match($regEx, $value, $m) && $m[0] == $value) {
+                    $value = str_replace($m[0], sprintf('"%s"', $m[0]), $value);
+                }
+            }
+
+            $matches[$key] = $value;
+
+            $prevKey = $key;
+        }
+
+        // reindex array
+        $matches = array_values($matches);
+
+        return $matches;
+    }
+
+    /**
+     * Phase 3: handle parentheses and add OR/AND expression.
+     *
+     * @param array $matches
+     *
+     * @return string
+     */
+    private function generateInput(array $matches)
+    {
+        $input = '';
+
+        $openParenthesis = 0;
+
+        foreach ($matches as $key => $value) {
+            if (empty($value)) {
+                continue;
+            }
+
+            $input .= $value;
+
+            if (preg_match_all('/(\()/', $value, $m)) {
+                $openParenthesis += count($m[0]);
+            }
+            if (preg_match_all('/(\))/', $value, $m)) {
+                if (preg_match($this->regEx[self::T_PHRASE], $value, $m1)) {
+                    if (preg_match_all('/(\))/', str_replace($m1[1], '', $value), $m2)) {
+                        $openParenthesis -= count($m2[0]);
                     }
+                } else {
+                    $openParenthesis -= count($m[0]);
+                }
+            }
+
+            if (
+                isset($matches[$key+1]) &&
+                (
+                    (
+                        !in_array(substr($matches[$key+1], 0, 1), [':', '^', ')']) &&
+                        !preg_match(self::REGEX_FILTER_OPERATOR, $matches[$key+1])
+                    ) ||
+                    preg_match(self::REGEX_EMOTICONS_BASIC, $matches[$key+1]) ||
+                    (
+                        preg_match(self::REGEX_TOKENS, $matches[$key+1], $m) &&
+                        $m[0] == $matches[$key+1]
+                    )
+                ) &&
+                (
+                    (
+                        !in_array(substr($value, -1), [':', '^']) &&
+                        !preg_match(self::REGEX_FILTER_OPERATOR, substr($value, -2))
+                    ) ||
+                    preg_match(self::REGEX_EMOTICONS_BASIC, $value)
+                )
+            ) {
+                if (
+                    !in_array($matches[$key+1], ['AND', 'OR']) &&
+                    !in_array($value, ['AND', 'OR', '('])
+                ) {
+                    $input .= ' OR ';
+                } else {
+                    $input .= ' ';
                 }
             }
         }
@@ -472,9 +516,7 @@ class QueryLexer
         $input = preg_replace('/(\()/', '$1 ', $input);
         $input = preg_replace('/(\))/', ' $1', $input);
 
-        $this->input = $input;
-        $this->processed = '';
-        $this->position = 0;
+        return $input;
     }
 
     /**
