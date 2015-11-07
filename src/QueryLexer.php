@@ -378,9 +378,8 @@ class QueryLexer
                 continue;
             }
 
-            if (
+            if ((
                 // use last boost value when boost-on-a-boost is used (ex: a^1^2 -> a^2)
-                (
                     isset($matches[$key+1]) &&
                     preg_match($this->regEx[self::T_BOOST], $value) &&
                     preg_match($this->regEx[self::T_BOOST], $matches[$key+1])
@@ -466,8 +465,7 @@ class QueryLexer
                 }
             }
 
-            if (
-                isset($matches[$key+1]) &&
+            if (isset($matches[$key+1]) &&
                 (
                     (
                         !in_array(substr($matches[$key+1], 0, 1), [':', '^', ')']) &&
@@ -487,8 +485,7 @@ class QueryLexer
                     preg_match(self::REGEX_EMOTICONS_BASIC, $value)
                 )
             ) {
-                if (
-                    !in_array($matches[$key+1], ['AND', 'OR']) &&
+                if (!in_array($matches[$key+1], ['AND', 'OR']) &&
                     !in_array($value, ['AND', 'OR', '('])
                 ) {
                     $input .= ' OR ';
@@ -647,8 +644,7 @@ class QueryLexer
                 }
 
                 // ignore invalid filter values
-                if (
-                    (
+                if ((
                     $tokenType == self::T_DATE &&
                     !(
                         (
