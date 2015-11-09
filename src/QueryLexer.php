@@ -606,57 +606,48 @@ class QueryLexer
         }
 
         foreach ($regEx as $re) {
-            if (preg_match($re, $this->input, $matches)) {
-                if ($tokenType == self::T_WORD) {
-                    $matches = $this->testWorkToken($matches);
-                }
+            if (!preg_match($re, $this->input, $matches)) {
+                continue;
+            }
 
-                // ignore range not in filter
-                if (!$isFilter && $tokenType == self::T_RANGE) {
-                    return false;
-                }
+            if ($tokenType == self::T_WORD) {
+                $matches = $this->testWorkToken($matches);
+            }
+
+            // ignore range not in filter
+            if ((!$isFilter && $tokenType == self::T_RANGE) ||
 
                 // ignore range+range
-                if ($isFilter && $this->tokenType == self::T_RANGE && $tokenType == self::T_RANGE) {
-                    return false;
-                }
+                ($isFilter && $this->tokenType == self::T_RANGE && $tokenType == self::T_RANGE) ||
 
                 // ignore range+ non numeric or date
-                if ($isFilter &&
-                    $this->tokenType == self::T_RANGE &&
-                    !in_array($tokenType, [self::T_DATE, self::T_NUMBER])
-                ) {
-                    return false;
-                }
+                ($isFilter && $this->tokenType == self::T_RANGE && !in_array($tokenType, [self::T_DATE, self::T_NUMBER])) ||
 
                 // ignore invalid filter values
-                if ($tokenType == self::T_DATE && !$this->validateDateFilter($this->input, $isFilter)) {
-                    return false;
-                }
-                if ($tokenType == self::T_NUMBER && !$this->validateNumberFilter($this->input, $isFilter)) {
-                    return false;
-                }
+                ($tokenType == self::T_DATE && !$this->validateDateFilter($this->input, $isFilter)) ||
+
+                ($tokenType == self::T_NUMBER && !$this->validateNumberFilter($this->input, $isFilter)) ||
 
                 // ignore range when filter operator is not equal
-                if ($isFilter && !$this->validateRangeFilter($this->token, $tokenType, $this->input)) {
-                    return false;
-                }
-
-                $this->token = $matches[1];
-                $this->processed .= $matches[1];
-                $this->input = $matches[2];
-                $this->tokenType = $tokenType;
-                $this->position = $this->position + strlen($this->token);
-
-                if ($tokenType == self::T_FILTER) {
-                    $isFilter = true;
-                }
-                if ($tokenType == self::T_WSPC) {
-                    $isFilter = false;
-                }
-
-                return true;
+                ($isFilter && !$this->validateRangeFilter($this->token, $tokenType, $this->input))
+            ) {
+                return false;
             }
+
+            $this->token = $matches[1];
+            $this->processed .= $matches[1];
+            $this->input = $matches[2];
+            $this->tokenType = $tokenType;
+            $this->position = $this->position + strlen($this->token);
+
+            if ($tokenType == self::T_FILTER) {
+                $isFilter = true;
+            }
+            if ($tokenType == self::T_WSPC) {
+                $isFilter = false;
+            }
+
+            return true;
         }
 
         return false;
