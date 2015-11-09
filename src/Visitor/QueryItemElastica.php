@@ -2,7 +2,11 @@
 
 namespace Gdbots\QueryParser\Visitor;
 
-use Elastica\Query;
+use Elastica\Query\AbstractQuery;
+use Elastica\Query\BoolQuery;
+use Elastica\Query\QueryString;
+use Elastica\Query\Range;
+use Elastica\Query\Term;
 use Gdbots\QueryParser\Node;
 
 class QueryItemElastica implements QueryItemVisitorInterface
@@ -12,7 +16,7 @@ class QueryItemElastica implements QueryItemVisitorInterface
      */
     public function visitWord(Node\Word $word)
     {
-        $query = new Query\QueryString($word->getToken());
+        $query = new QueryString($word->getToken());
 
         if ($word->isBoosted()) {
             $query->setBoost($word->getBoostBy());
@@ -26,7 +30,7 @@ class QueryItemElastica implements QueryItemVisitorInterface
      */
     public function visitPhrase(Node\Phrase $phrase)
     {
-        $query = new Query\QueryString($phrase->getToken());
+        $query = new QueryString($phrase->getToken());
 
         if ($phrase->isBoosted()) {
             $query->setBoost($phrase->getBoostBy());
@@ -40,7 +44,7 @@ class QueryItemElastica implements QueryItemVisitorInterface
      */
     public function visitHashtag(Node\Hashtag $hashtag)
     {
-        $query = new Query\Term(['hashtag' => $hashtag->getToken()]);
+        $query = new Term(['hashtag' => $hashtag->getToken()]);
 
         if ($hashtag->isBoosted()) {
             $query->setBoost($hashtag->getBoostBy());
@@ -54,7 +58,7 @@ class QueryItemElastica implements QueryItemVisitorInterface
      */
     public function visitMention(Node\Mention $mention)
     {
-        $query = new Query\Term(['mention' => $mention->getToken()]);
+        $query = new Term(['mention' => $mention->getToken()]);
 
         if ($mention->isBoosted()) {
             $query->setBoost($mention->getBoostBy());
@@ -89,12 +93,12 @@ class QueryItemElastica implements QueryItemVisitorInterface
                     break;
             }
 
-            $query = new Query\Term([$term->getNominator()->getToken() => [$operator => $term->getTerm()->getToken()]]);
+            $query = new Term([$term->getNominator()->getToken() => [$operator => $term->getTerm()->getToken()]]);
 
             if ($term->getTerm() instanceof Node\Range) {
                 $range = json_decode($term->getTerm()->getToken(), true);
 
-                $query = new Query\Range($term->getNominator()->getToken(), ['gte' => $range[0], 'lte' => $range[1]]);
+                $query = new Range($term->getNominator()->getToken(), ['gte' => $range[0], 'lte' => $range[1]]);
             }
 
             if ($term->isBoosted()) {
@@ -125,7 +129,7 @@ class QueryItemElastica implements QueryItemVisitorInterface
      */
     public function visitOrExpressionList(Node\OrExpressionList $list)
     {
-        $query = new Query\BoolQuery();
+        $query = new BoolQuery();
 
         foreach ($list->getExpressions() as $expression) {
             if ($q = $expression->accept($this)) {
@@ -141,7 +145,7 @@ class QueryItemElastica implements QueryItemVisitorInterface
      */
     public function visitAndExpressionList(Node\AndExpressionList $list)
     {
-        $query = new Query\BoolQuery();
+        $query = new BoolQuery();
 
         foreach ($list->getExpressions() as $expression) {
             if ($q = $expression->accept($this)) {
@@ -156,20 +160,20 @@ class QueryItemElastica implements QueryItemVisitorInterface
      * Convert query object into BoolQuery if needed
      *
      * @param Node\AbstractQueryItem $term
-     * @param Query\AbstractQuery    $query
+     * @param AbstractQuery    $query
      *
-     * @return Query\AbstractQuery
+     * @return AbstractQuery
      */
-    protected function convertToBoolQuery(Node\AbstractQueryItem $term, Query\AbstractQuery $query)
+    protected function convertToBoolQuery(Node\AbstractQueryItem $term, AbstractQuery $query)
     {
         if ($term->isExcluded()) {
-            $boolQuery = new Query\BoolQuery();
+            $boolQuery = new BoolQuery();
             $boolQuery->addMustNot($query);
             return $boolQuery;
         }
 
         if ($term->isIncluded()) {
-            $boolQuery = new Query\BoolQuery();
+            $boolQuery = new BoolQuery();
             $boolQuery->addMust($query);
             return $boolQuery;
         }
