@@ -2,10 +2,8 @@
 
 namespace Gdbots\QueryParser\Visitor;
 
-use Elastica\Filter\Query as FilterQuery;
 use Elastica\Query;
 use Gdbots\QueryParser\Node;
-use Gdbots\QueryParser\QueryLexer;
 
 class QueryItemElastica implements QueryItemVisitorInterface
 {
