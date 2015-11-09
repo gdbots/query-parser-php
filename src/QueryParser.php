@@ -128,40 +128,41 @@ class QueryParser
         $value = null;
         $tokenTypeText = $this->scanner->getToken();
 
-        switch ($this->scanner->next()) {
-            case QueryLexer::T_WORD:
-            case QueryLexer::T_DATE:
-            case QueryLexer::T_NUMBER:
-            case QueryLexer::T_URL:
-                $value = new Node\Word($this->scanner->getToken(), $this->scanner->getTokenType());
+        $this->scanner->next();
 
-                break;
+        if (in_array(
+            $this->scanner->getTokenType(),
+            [
+                QueryLexer::T_WORD,
+                QueryLexer::T_DATE,
+                QueryLexer::T_NUMBER,
+                QueryLexer::T_URL
+            ]
+        )) {
+            $value = new Node\Word($this->scanner->getToken(), $this->scanner->getTokenType());
+        }
 
-            case QueryLexer::T_PHRASE:
-                $value = new Node\Phrase($this->scanner->getToken());
+        if ($this->scanner->getTokenType() == QueryLexer::T_PHRASE) {
+            $value = new Node\Phrase($this->scanner->getToken());
+        }
 
-                break;
+        if (!$value) {
+            $this->addError(sprintf(
+                'Error: Expected Word, Phrase, or Url. Found: "%s"',
+                $this->scanner->getTokenTypeText()
+            ));
 
-            default:
-                $this->addError(sprintf(
-                    'Error: Expected Word, Phrase, or Url. Found: "%s"',
-                    $this->scanner->getTokenTypeText()
-                ));
-
-                return null;
+            return null;
         }
 
         $this->scanner->next();
 
-        switch ($this->scanner->getTokenType()) {
-            case QueryLexer::T_RANGE:
-                $this->scanner->next();
+        if ($this->scanner->getTokenType() == QueryLexer::T_RANGE) {
+            $this->scanner->next();
 
-                $value = new Node\Range($value->getToken(), $this->scanner->getToken());
+            $value = new Node\Range($value->getToken(), $this->scanner->getToken());
 
-                $this->scanner->next();
-
-                break;
+            $this->scanner->next();
         }
 
         return new Node\ExplicitTerm($term, $tokenType, $tokenTypeText, $value);
