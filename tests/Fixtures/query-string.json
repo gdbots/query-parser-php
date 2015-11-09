@@ -685,12 +685,12 @@
     }
   ],
   [
-    "2015-10-31 2015-10-3a 2015.10.31 2015/10/31 \"2015-10-31 1000 @3pm\"",
-    "Or>Word(DATE):2015-10-31>Word(WORD):2015-10-3a>Phrase:2015-10-31 1000 @3pm",
+    "2015-10-31 2015-10-3a 2015.10.31 2015\/10\/31 \"2015-10-31 1000 @3pm\"",
+    "Or>Word(DATE):2015-10-31>Word(WORD):2015-10-3a>Word(DATE):2015.10.31>Word(DATE):2015\/10\/31>Phrase:2015-10-311000@3pm",
     {
       "DATE":3,
-      "PHRASE":1,
-      "WORD":1
+      "WORD":1,
+      "PHRASE":1
     },
     {
       "DATE":[
@@ -701,17 +701,17 @@
           "value":"2015.10.31"
         },
         {
-          "value":"2015/10/31"
-        }
-      ],
-      "PHRASE":[
-        {
-          "value":"2015-10-31 1000 @3pm"
+          "value":"2015\/10\/31"
         }
       ],
       "WORD":[
         {
           "value":"2015-10-3a"
+        }
+      ],
+      "PHRASE":[
+        {
+          "value":"2015-10-31 1000 @3pm"
         }
       ]
     }
@@ -760,7 +760,7 @@
   ],
   [
     "a:1....5 b:1..a c:1..5",
-    "Or>Term:a:1....5>Term:b:1..a>Term:c:1..5",
+    "Or>Term:a:1....5>Term:b:1..a>Term:c:[\"1\",\"5\"]",
     {
       "FILTER":3
     },
@@ -785,10 +785,10 @@
     }
   ],
   [
-    "re:>     appt b:  one @3pm a:>1..5",
-    "Or>Word(WORD):re:>Word(WORD):appt>Mention:3pm",
+    "re:> appt b: one @3pm a:>1..5",
+    "Or>Term:re:>appt>Term:b:one>Mention:3pm>Term:a:>1..5",
     {
-      "FILTER": 3,
+      "FILTER":3,
       "MENTION":1
     },
     {

@@ -378,8 +378,9 @@ class QueryLexer
                 continue;
             }
 
-            if ((
+            if (
                 // use last boost value when boost-on-a-boost is used (ex: a^1^2 -> a^2)
+                (
                     isset($matches[$key+1]) &&
                     preg_match($this->regEx[self::T_BOOST], $value) &&
                     preg_match($this->regEx[self::T_BOOST], $matches[$key+1])
@@ -657,8 +658,8 @@ class QueryLexer
                             (!$m[4] || in_array(substr($m[4], 0, 1), [' ', '^']))
                         )
                     )
-                    ) ||
-                    (
+                ) ||
+                (
                     $tokenType == self::T_NUMBER &&
                     !(
                         (
@@ -671,8 +672,7 @@ class QueryLexer
                             (!$m[4] || in_array(substr($m[4], 0, 1), [' ', '^']))
                         )
                     )
-                    )
-                ) {
+                )) {
                     return false;
                 }
 
