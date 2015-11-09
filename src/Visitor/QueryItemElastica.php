@@ -32,7 +32,7 @@ class QueryItemElastica implements QueryItemVisitorInterface
             $query->setBoost($phrase->getBoostBy());
         }
 
-        return $this->convertToBoolQuery($word, $query);
+        return $this->convertToBoolQuery($phrase, $query);
     }
 
     /**
