@@ -89,7 +89,10 @@ class QueryItemElastica implements QueryItemVisitorInterface
                     break;
             }
 
-            $query = new Query\Term([$term->getNominator()->getToken() => [$operator => $term->getTerm()->getToken()]]);
+            $query = $operator == 'value'
+                 ? new Query\Term([$term->getNominator()->getToken() => $term->getTerm()->getToken()])
+                 : new Query\Range($term->getNominator()->getToken(), [$operator => $term->getTerm()->getToken()])
+            ;
 
             if ($term->getTerm() instanceof Node\Range) {
                 $range = json_decode($term->getTerm()->getToken(), true);
