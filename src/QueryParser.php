@@ -168,86 +168,6 @@ class QueryParser
     }
 
     /**
-     * @param int $tokenType
-     *
-     * @return \Gdbots\QueryParser\Node\AbstractQueryItem|null
-     */
-    protected function readHashtag($tokenType)
-    {
-        if ($expression = $this->readExpression($tokenType)) {
-            if ($expression->getTokenType() == QueryLexer::T_BOOST) {
-                $hashtag = new Node\Hashtag($expression->getNominator()->getToken());
-                $hashtag->setBoostBy($expression->getTerm()->getToken());
-                return $hashtag;
-            }
-
-            return new Node\Hashtag($expression->getToken());
-        }
-
-        $this->addError('Error: HASHTAG not followed by a valid expression.');
-
-        return null;
-    }
-
-    /**
-     * @param int $tokenType
-     *
-     * @return \Gdbots\QueryParser\Node\AbstractQueryItem|null
-     */
-    protected function readMention($tokenType)
-    {
-        if ($expression = $this->readExpression($tokenType)) {
-            if ($expression->getTokenType() == QueryLexer::T_BOOST) {
-                $mention = new Node\Mention($expression->getNominator()->getToken());
-                $mention->setBoostBy($expression->getTerm()->getToken());
-                return $hashtag;
-            }
-
-            return new Node\Mention($expression->getToken());
-        }
-
-        $this->addError('Error: MENTION not followed by a valid expression.');
-
-        return null;
-    }
-
-    /**
-     * @param int $tokenType
-     *
-     * @return \Gdbots\QueryParser\Node\AbstractQueryItem|null
-     */
-    protected function readExclude($tokenType)
-    {
-        $expression = $this->readExpression($tokenType);
-        if ($expression) {
-            $expression->setExcluded(true);
-            return $expression;
-        }
-
-        $this->addError('Error: EXCLUDE not followed by a valid expression.');
-
-        return null;
-    }
-
-    /**
-     * @param int $tokenType
-     *
-     * @return \Gdbots\QueryParser\Node\AbstractQueryItem|null
-     */
-    protected function readInclude($tokenType)
-    {
-        $expression = $this->readExpression($tokenType);
-        if ($expression) {
-            $expression->setIncluded(true);
-            return $expression;
-        }
-
-        $this->addError('Error: INCLUDE not followed by a valid expression.');
-
-        return null;
-    }
-
-    /**
      * Makes the parser read an expression. This can be:
      * - '(' Subexpression ')'
      * - '"' text '"'
@@ -281,16 +201,58 @@ class QueryParser
                 return $this->readTerm($this->scanner->next(), $word);
 
             case QueryLexer::T_HASHTAG:
-                return $this->readHashtag($this->scanner->next());
+                $expression = $this->readExpression($this->scanner->next());
+                if ($expression) {
+                    if ($expression->getTokenType() == QueryLexer::T_BOOST) {
+                        $hashtag = new Node\Hashtag($expression->getNominator()->getToken());
+                        $hashtag->setBoostBy($expression->getTerm()->getToken());
+                        return $hashtag;
+                    }
+
+                    return new Node\Hashtag($expression->getToken());
+                }
+
+                $this->addError('Error: HASHTAG not followed by a valid expression.');
+
+                break;
 
             case QueryLexer::T_MENTION:
-                return $this->readMention($this->scanner->next());
+                $expression = $this->readExpression($this->scanner->next());
+                if ($expression) {
+                    if ($expression->getTokenType() == QueryLexer::T_BOOST) {
+                        $mention = new Node\Mention($expression->getNominator()->getToken());
+                        $mention->setBoostBy($expression->getTerm()->getToken());
+                        return $mention;
+                    }
+
+                    return new Node\Mention($expression->getToken());
+                }
+
+                $this->addError('Error: MENTION not followed by a valid expression.');
+
+                break;
 
             case QueryLexer::T_EXCLUDE:
-                return $this->readExclude($this->scanner->next());
+                $expression = $this->readExpression($this->scanner->next());
+                if ($expression) {
+                    $expression->setExcluded(true);
+                    return $expression;
+                }
+
+                $this->addError('Error: EXCLUDE not followed by a valid expression.');
+
+                break;
 
             case QueryLexer::T_INCLUDE:
-                return $this->readInclude($this->scanner->next());
+                $expression = $this->readExpression($this->scanner->next());
+                if ($expression) {
+                    $expression->setIncluded(true);
+                    return $expression;
+                }
+
+                $this->addError('Error: INCLUDE not followed by a valid expression.');
+
+                break;
 
             case QueryLexer::T_ILLEGAL:
                 $this->addError(sprintf(
