@@ -117,10 +117,10 @@ abstract class AbstractSimpleTerm extends AbstractQueryItem
             if ($tokenType == $this->getTokenType()) {
                 return [$this];
             }
-        } else {
-            return [QueryLexer::$typeStrings[$this->getTokenType()] => [$this]];
+
+            return [];
         }
 
-        return [];
+        return [QueryLexer::$typeStrings[$this->getTokenType()] => [$this]];
     }
 }

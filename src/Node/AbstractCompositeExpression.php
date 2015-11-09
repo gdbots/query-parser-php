@@ -44,16 +44,14 @@ abstract class AbstractCompositeExpression extends AbstractQueryItem
             return [];
         }
 
-        $items = [];
-
         if ($tokenType) {
             if ($tokenType == $this->getTokenType()) {
-                $items[] = $this;
+                return [$this];
             }
-        } else {
-            $items[QueryLexer::$typeStrings[$this->getTokenType()]][] = $this;
+
+            return [];
         }
 
-        return $items;
+        return [QueryLexer::$typeStrings[$this->getTokenType()] => [$this]];
     }
 }
