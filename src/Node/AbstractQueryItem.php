@@ -93,20 +93,14 @@ abstract class AbstractQueryItem
     /**
      * @return array
      */
-    public function toArray()
-    {
-        return [];
-    }
+    abstract public function toArray();
 
     /**
      * @param int $tokenType
      *
      * @return array
      */
-    public function getQueryItemsByTokenType($tokenType = null)
-    {
-        return [];
-    }
+    abstract public function getQueryItemsByTokenType($tokenType = null);
 
     /**
      * @param QueryItemVisitorInterface $visitor
