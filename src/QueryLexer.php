@@ -476,7 +476,7 @@ class QueryLexer
             if (preg_match_all('/(\))/', $value, $matches)) {
                 if (preg_match($this->regEx[self::T_PHRASE], $value, $phaseMatches)) {
                     if (preg_match_all('/(\))/', str_replace($phaseMatches[1], '', $value), $parenthesisMatches)) {
-                        $openParenthesis -= count($closeParenthesisMatches[0]);
+                        $openParenthesis -= count($parenthesisMatches[0]);
                     }
                 } else {
                     $openParenthesis -= count($matches[0]);
