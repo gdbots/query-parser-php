@@ -351,6 +351,9 @@ class QueryLexer
                 $value = preg_replace('/\:(?>\<)\K\<*/', '', $value);
             }
 
+            // update with clean value
+            $matches[$key] = $value;
+
             // merge url string
             if (preg_match($this->regEx[self::T_URL], $value)) {
                 $orgKey = $key;
@@ -368,8 +371,6 @@ class QueryLexer
                 }
 
                 $matches[$orgKey] = $value;
-            } else {
-                $matches[$key] = $value;
             }
         }
 
@@ -474,12 +475,14 @@ class QueryLexer
                 $openParenthesis += count($matches[0]);
             }
             if (preg_match_all('/(\))/', $value, $matches)) {
+                $openParenthesis -= count($matches[0]);
+
                 if (preg_match($this->regEx[self::T_PHRASE], $value, $phaseMatches)) {
+                    $openParenthesis += count($matches[0]);
+
                     if (preg_match_all('/(\))/', str_replace($phaseMatches[1], '', $value), $parenthesisMatches)) {
                         $openParenthesis -= count($parenthesisMatches[0]);
                     }
-                } else {
-                    $openParenthesis -= count($matches[0]);
                 }
             }
 
@@ -503,13 +506,10 @@ class QueryLexer
                     preg_match(self::REGEX_EMOTICONS_BASIC, $value)
                 )
             ) {
-                if (!in_array($values[$key+1], ['AND', 'OR']) &&
+                $input .= (
+                    !in_array($values[$key+1], ['AND', 'OR']) &&
                     !in_array($value, ['AND', 'OR', '('])
-                ) {
-                    $input .= ' OR ';
-                } else {
-                    $input .= ' ';
-                }
+                ) ? ' OR ' : ' ';
             }
         }
 
