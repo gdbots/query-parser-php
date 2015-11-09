@@ -111,26 +111,15 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
                     $tokenTypeText = $item->getTokenTypeText();
                 }
 
-                $boosted = $item->getBoostBy();
-                $excluded = $item->isExcluded();
-                $included = $item->isIncluded();
-
                 if ($item->getTokenType() === QueryLexer::T_FILTER) {
                     $tokenArray['field'] = $tokenField;
                     $tokenArray['operator'] = $tokenTypeText;
-
                 }
+
                 $tokenArray['value'] = $tokenValue;
-
-                if ($boosted) {
-                    $tokenArray['boost'] = $boosted;
-                }
-                if ($excluded) {
-                    $tokenArray['exclude'] = true;
-                }
-                if ($included) {
-                    $tokenArray['include'] = true;
-                }
+                $tokenArray['boost'] = $item->getBoostBy();
+                $tokenArray['exclude'] = $item->isExcluded();
+                $tokenArray['include'] = $item->isIncluded();
 
                 $allTokenArray[$tokenType][] = $tokenArray;
             }
@@ -142,48 +131,6 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
     public function getTestParseQueriesDataprovider()
     {
         return json_decode(file_get_contents(__DIR__.'/../Fixtures/query-string.json'), true);
-    }
-
-    public function testParseTextWithUnclosedQuotes()
-    {
-        $query = $this->parser->parse('"phrase');
-
-        $this->assertInstanceOf('Gdbots\QueryParser\Node\Word', $query);
-        $this->assertEquals('phrase', $query->getToken());
-        $this->assertEquals(QueryLexer::T_WORD, $query->getTokenType());
-    }
-
-    public function testParseMultiHashtags()
-    {
-        $query = $this->parser->parse('#one #two #three');
-
-        $output = " Or
-> Hashtag: one
-> Hashtag: two
-> Hashtag: three
-";
-
-        $this->assertEquals($output, $this->getPrintContent($query));
-    }
-
-    public function testParseDuplicateHashtags()
-    {
-        $query = $this->parser->parse('##phrase');
-
-        $output = " Hashtag: phrase
-";
-
-        $this->assertEquals($output, $this->getPrintContent($query));
-    }
-
-    public function testParseFilterWithBoost()
-    {
-        $query = $this->parser->parse('table.fieldName:value^123');
-
-        $output = " Term: table.fieldName : value ^ 123.00
-";
-
-        $this->assertEquals($output, $this->getPrintContent($query));
     }
 
     public function testParseComplexQuery()

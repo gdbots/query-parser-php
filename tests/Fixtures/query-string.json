@@ -8,7 +8,10 @@
     {
       "HASHTAG":[
         {
-          "value":"one"
+          "value":"one",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ]
     }
@@ -22,13 +25,22 @@
     {
       "HASHTAG":[
         {
-          "value":"one"
+          "value":"one",
+          "boost":null,
+          "exclude":false,
+          "include":false
         },
         {
-          "value":"two"
+          "value":"two",
+          "boost":null,
+          "exclude":false,
+          "include":false
         },
         {
-          "value":"three"
+          "value":"three",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ]
     }
@@ -42,13 +54,22 @@
     {
       "HASHTAG":[
         {
-          "value":"one"
+          "value":"one",
+          "boost":null,
+          "exclude":false,
+          "include":false
         },
         {
-          "value":"two"
+          "value":"two",
+          "boost":null,
+          "exclude":false,
+          "include":false
         },
         {
-          "value":"three"
+          "value":"three",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ]
     }
@@ -63,12 +84,18 @@
     {
       "HASHTAG":[
         {
-          "value":"one"
+          "value":"one",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ],
       "WORD":[
         {
-          "value":"!"
+          "value":"!",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ]
     }
@@ -82,7 +109,10 @@
     {
       "PHRASE":[
         {
-          "value":"#one^7 #two#three ##four!"
+          "value":"#one^7 #two#three ##four!",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ]
     }
@@ -96,10 +126,16 @@
     {
       "WORD":[
         {
-          "value":"a"
+          "value":"a",
+          "boost":null,
+          "exclude":false,
+          "include":false
         },
         {
-          "value":"b"
+          "value":"b",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ]
     }
@@ -114,7 +150,9 @@
       "WORD":[
         {
           "value":"a",
-          "boost":"2"
+          "boost":"2",
+          "exclude":false,
+          "include":false
         }
       ]
     }
@@ -129,12 +167,18 @@
     {
       "PHRASE":[
         {
-          "value":"abc"
+          "value":"abc",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ],
       "WORD":[
         {
-          "value":"def"
+          "value":"def",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ]
     }
@@ -150,19 +194,29 @@
       "PHRASE":[
         {
           "value":"abc",
-          "boost":"2"
+          "boost":"2",
+          "exclude":false,
+          "include":false
         },
         {
-          "value":"def ^ghi"
+          "value":"def ^ghi",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ],
       "WORD":[
         {
-          "value":"jkl"
+          "value":"jkl",
+          "boost":null,
+          "exclude":false,
+          "include":false
         },
         {
           "value":"mno",
-          "boost":"8"
+          "boost":"8",
+          "exclude":false,
+          "include":false
         }
       ]
     }
@@ -177,10 +231,15 @@
       "WORD":[
         {
           "value":"abc",
-          "boost":"2"
+          "boost":"2",
+          "exclude":false,
+          "include":false
         },
         {
-          "value":"def"
+          "value":"def",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ]
     }
@@ -195,7 +254,9 @@
       "HASHTAG":[
         {
           "value":"a",
-          "boost":"2"
+          "boost":"2",
+          "exclude":false,
+          "include":false
         }
       ]
     }
@@ -210,12 +271,18 @@
     {
       "WORD":[
         {
-          "value":"a"
+          "value":"a",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ],
       "HASHTAG":[
         {
-          "value":"b"
+          "value":"b",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ]
     }
@@ -230,15 +297,24 @@
     {
       "PHRASE":[
         {
-          "value":"abc"
+          "value":"abc",
+          "boost":null,
+          "exclude":false,
+          "include":false
         },
         {
-          "value":"def"
+          "value":"def",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ],
       "WORD":[
         {
-          "value":"ghi"
+          "value":"ghi",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ]
     }
@@ -253,12 +329,18 @@
     {
       "PHRASE":[
         {
-          "value":"abc"
+          "value":"abc",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ],
       "WORD":[
         {
-          "value":"def"
+          "value":"def",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ]
     }
@@ -273,12 +355,18 @@
     {
       "PHRASE":[
         {
-          "value":"abc"
+          "value":"abc",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ],
       "WORD":[
         {
-          "value":"def"
+          "value":"def",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ]
     }
@@ -292,10 +380,16 @@
     {
       "WORD":[
         {
-          "value":"abc"
+          "value":"abc",
+          "boost":null,
+          "exclude":false,
+          "include":false
         },
         {
-          "value":"def"
+          "value":"def",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ]
     }
@@ -311,23 +405,38 @@
     {
       "WORD":[
         {
-          "value":"abc"
+          "value":"abc",
+          "boost":null,
+          "exclude":false,
+          "include":false
         },
         {
-          "value":"l"
+          "value":"l",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ],
       "PHRASE":[
         {
-          "value":"def ghi"
+          "value":"def ghi",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ],
       "MENTION":[
         {
-          "value":"j"
+          "value":"j",
+          "boost":null,
+          "exclude":false,
+          "include":false
         },
         {
-          "value":"k"
+          "value":"k",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ]
     }
@@ -342,21 +451,36 @@
     {
       "HASHTAG":[
         {
-          "value":"a"
+          "value":"a",
+          "boost":null,
+          "exclude":false,
+          "include":false
         },
         {
-          "value":"b"
+          "value":"b",
+          "boost":null,
+          "exclude":false,
+          "include":false
         },
         {
-          "value":"e"
+          "value":"e",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ],
       "MENTION":[
         {
-          "value":"c"
+          "value":"c",
+          "boost":null,
+          "exclude":false,
+          "include":false
         },
         {
-          "value":"d"
+          "value":"d",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ]
     }
@@ -370,11 +494,16 @@
     {
       "WORD":[
         {
-          "value":"a"
+          "value":"a",
+          "boost":null,
+          "exclude":false,
+          "include":false
         },
         {
           "value":"b",
-          "boost":"2"
+          "boost":"2",
+          "exclude":false,
+          "include":false
         }
       ]
     }
@@ -388,23 +517,40 @@
     {
       "WORD":[
         {
-          "value":"a"
+          "value":"a",
+          "boost":null,
+          "exclude":false,
+          "include":false
         },
         {
-          "value":"b"
+          "value":"b",
+          "boost":null,
+          "exclude":false,
+          "include":false
         },
         {
-          "value":"c"
+          "value":"c",
+          "boost":null,
+          "exclude":false,
+          "include":false
         },
         {
-          "value":"d"
+          "value":"d",
+          "boost":null,
+          "exclude":false,
+          "include":false
         },
         {
-          "value":"e"
+          "value":"e",
+          "boost":null,
+          "exclude":false,
+          "include":false
         },
         {
           "value":"f",
-          "boost":"2"
+          "boost":"2",
+          "exclude":false,
+          "include":false
         }
       ]
     }
@@ -418,10 +564,16 @@
     {
       "WORD":[
         {
-          "value":"a"
+          "value":"a",
+          "boost":null,
+          "exclude":false,
+          "include":false
         },
         {
-          "value":"b:"
+          "value":"b:",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ]
     }
@@ -436,14 +588,20 @@
     {
       "URL":[
         {
-          "value":"http:\/\/a.com"
+          "value":"http:\/\/a.com",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ],
       "FILTER":[
         {
           "field":"a",
           "operator":":>",
-          "value":"500"
+          "value":"500",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ]
     }
@@ -457,23 +615,40 @@
     {
       "WORD":[
         {
-          "value":"a"
+          "value":"a",
+          "boost":null,
+          "exclude":false,
+          "include":false
         },
         {
-          "value":"b\/c"
+          "value":"b\/c",
+          "boost":null,
+          "exclude":false,
+          "include":false
         },
         {
           "value":"d",
-          "boost":"2"
+          "boost":"2",
+          "exclude":false,
+          "include":false
         },
         {
-          "value":"Father"
+          "value":"Father",
+          "boost":null,
+          "exclude":false,
+          "include":false
         },
         {
-          "value":"and"
+          "value":"and",
+          "boost":null,
+          "exclude":false,
+          "include":false
         },
         {
-          "value":"Daughter"
+          "value":"Daughter",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ]
     }
@@ -491,12 +666,17 @@
           "field":"a",
           "operator":":>",
           "value":"b",
-          "boost":"2"
+          "boost":"2",
+          "exclude":false,
+          "include":false
         }
       ],
       "WORD":[
         {
-          "value":"abc"
+          "value":"abc",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ]
     }
@@ -510,10 +690,16 @@
     {
       "WORD":[
         {
-          "value":"a"
+          "value":"a",
+          "boost":null,
+          "exclude":false,
+          "include":false
         },
         {
-          "value":"b"
+          "value":"b",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ]
     }
@@ -529,19 +715,26 @@
         {
           "field":"a",
           "operator":":>",
-          "value":"b"
+          "value":"b",
+          "boost":null,
+          "exclude":false,
+          "include":false
         },
         {
           "field":"c",
           "operator":":>",
           "value":"d",
-          "exclude":true
+          "boost":null,
+          "exclude":true,
+          "include":false
         },
         {
           "field":"e",
           "operator":":<",
           "value":"f",
-          "exclude":true
+          "boost":null,
+          "exclude":true,
+          "include":false
         }
       ]
     }
@@ -555,7 +748,10 @@
     {
       "HASHTAG":[
         {
-          "value":"cats"
+          "value":"cats",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ]
     }
@@ -569,7 +765,10 @@
     {
       "URL":[
         {
-          "value":"http:\/\/www.google.com\/#lol"
+          "value":"http:\/\/www.google.com\/#lol",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ]
     }
@@ -583,7 +782,10 @@
     {
       "URL":[
         {
-          "value":"http:\/\/www.google.com\/?q=a+b+c+#lol"
+          "value":"http:\/\/www.google.com\/?q=a+b+c+#lol",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ]
     }
@@ -597,7 +799,10 @@
     {
       "URL":[
         {
-          "value":"http:\/\/www.google.com\/?q=a-c&s=a+@mention"
+          "value":"http:\/\/www.google.com\/?q=a-c&s=a+@mention",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ]
     }
@@ -611,7 +816,10 @@
     {
       "URL":[
         {
-          "value":"http:\/\/warnerbros.112.2o7.net\/b\/ss\/wbrostoofab\/1\/JS-1.5.1\/s72034063232131?AQB=1&ndh=1&pf=1&t=22%2F9%2F2015%2016%3A1%3A39%204%20420&fid=64F69D01980887BB-1E04C009EEE2A59C&ce=UTF-8&ns=warnerbros&cdp=3&pageName=home%3Acollection%3A%3Ahome&g=http%3A%2F%2Ftoofab.com%2F&cc=USD&events=event6&c1=Toofab.us&v1=Toofab.us&c2=collection&v2=collection&c3=home&v3=home&c15=4%3A01PM&v15=4%3A01PM&c16=Thursday&v16=Thursday&c17=Weekday&v17=Weekday&c18=%2F&v18=%2F&c19=home%3Acollection%3A%3Ahome&v19=home%3Acollection%3A%3Ahome&c27=Repeat&v27=Repeat&c59=home&v59=home&s=1920x1080&c=24&j=1.6&v=Y&k=Y&bw=1552&bh=517&AQE=1"
+          "value":"http:\/\/warnerbros.112.2o7.net\/b\/ss\/wbrostoofab\/1\/JS-1.5.1\/s72034063232131?AQB=1&ndh=1&pf=1&t=22%2F9%2F2015%2016%3A1%3A39%204%20420&fid=64F69D01980887BB-1E04C009EEE2A59C&ce=UTF-8&ns=warnerbros&cdp=3&pageName=home%3Acollection%3A%3Ahome&g=http%3A%2F%2Ftoofab.com%2F&cc=USD&events=event6&c1=Toofab.us&v1=Toofab.us&c2=collection&v2=collection&c3=home&v3=home&c15=4%3A01PM&v15=4%3A01PM&c16=Thursday&v16=Thursday&c17=Weekday&v17=Weekday&c18=%2F&v18=%2F&c19=home%3Acollection%3A%3Ahome&v19=home%3Acollection%3A%3Ahome&c27=Repeat&v27=Repeat&c59=home&v59=home&s=1920x1080&c=24&j=1.6&v=Y&k=Y&bw=1552&bh=517&AQE=1",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ]
     }
@@ -626,12 +834,18 @@
     {
       "WORD":[
         {
-          "value":"10,000"
+          "value":"10,000",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ],
       "NUMBER":[
         {
-          "value":"5000"
+          "value":"5000",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ]
     }
@@ -645,7 +859,10 @@
     {
       "NUMBER":[
         {
-          "value":"5000"
+          "value":"5000",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ]
     }
@@ -659,7 +876,10 @@
     {
       "PHRASE":[
         {
-          "value":"10,000 5000"
+          "value":"10,000 5000",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ]
     }
@@ -674,12 +894,18 @@
     {
       "DATE":[
         {
-          "value":"2015-10-31"
+          "value":"2015-10-31",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ],
       "WORD":[
         {
-          "value":"a"
+          "value":"a",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ]
     }
@@ -695,23 +921,38 @@
     {
       "DATE":[
         {
-          "value":"2015-10-31"
+          "value":"2015-10-31",
+          "boost":null,
+          "exclude":false,
+          "include":false
         },
         {
-          "value":"2015.10.31"
+          "value":"2015.10.31",
+          "boost":null,
+          "exclude":false,
+          "include":false
         },
         {
-          "value":"2015\/10\/31"
+          "value":"2015\/10\/31",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ],
       "WORD":[
         {
-          "value":"2015-10-3a"
+          "value":"2015-10-3a",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ],
       "PHRASE":[
         {
-          "value":"2015-10-31 1000 @3pm"
+          "value":"2015-10-31 1000 @3pm",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ]
     }
@@ -725,7 +966,10 @@
     {
       "WORD":[
         {
-          "value":"Dear,Santa"
+          "value":"Dear,Santa",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ]
     }
@@ -739,7 +983,10 @@
     {
       "WORD":[
         {
-          "value":"1..5"
+          "value":"1..5",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ]
     }
@@ -753,7 +1000,10 @@
     {
       "WORD":[
         {
-          "value":"1....5"
+          "value":"1....5",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ]
     }
@@ -769,17 +1019,26 @@
         {
           "field":"a",
           "operator":":",
-          "value":"1....5"
+          "value":"1....5",
+          "boost":null,
+          "exclude":false,
+          "include":false
         },
         {
           "field":"b",
           "operator":":",
-          "value":"1..a"
+          "value":"1..a",
+          "boost":null,
+          "exclude":false,
+          "include":false
         },
         {
           "field":"c",
           "operator":":",
-          "value":"[\"1\",\"5\"]"
+          "value":"[\"1\",\"5\"]",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ]
     }
@@ -796,22 +1055,34 @@
         {
           "field":"re",
           "operator":":>",
-          "value":"appt"
+          "value":"appt",
+          "boost":null,
+          "exclude":false,
+          "include":false
         },
         {
           "field":"b",
           "operator":":",
-          "value":"one"
+          "value":"one",
+          "boost":null,
+          "exclude":false,
+          "include":false
         },
         {
           "field":"a",
           "operator":":>",
-          "value":"1..5"
+          "value":"1..5",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ],
       "MENTION":[
         {
-          "value":"3pm"
+          "value":"3pm",
+          "boost":null,
+          "exclude":false,
+          "include":false
         }
       ]
     }

@@ -73,26 +73,15 @@ class QueryResultTest extends \PHPUnit_Framework_TestCase
                     $tokenTypeText = $item->getTokenTypeText();
                 }
 
-                $boosted = $item->getBoostBy();
-                $excluded = $item->isExcluded();
-                $included = $item->isIncluded();
-
                 if ($item->getTokenType() === QueryLexer::T_FILTER) {
                     $tokenArray['field'] = $tokenField;
                     $tokenArray['operator'] = $tokenTypeText;
-
                 }
+
                 $tokenArray['value'] = $tokenValue;
-
-                if ($boosted) {
-                    $tokenArray['boost'] = $boosted;
-                }
-                if ($excluded) {
-                    $tokenArray['exclude'] = true;
-                }
-                if ($included) {
-                    $tokenArray['include'] = true;
-                }
+                $tokenArray['boost'] = $item->getBoostBy();
+                $tokenArray['exclude'] = $item->isExcluded();
+                $tokenArray['include'] = $item->isIncluded();
 
                 $allTokenArray[$tokenType][] = $tokenArray;
             }
