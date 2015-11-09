@@ -67,7 +67,7 @@ class QueryParser
      */
     public function parseWithOperator($input)
     {
-        $this->scanner->setIgnoreOperator(false);
+        $this->scanner->setIgnoreOperators(false);
 
         return $this->parse($input);
     }

@@ -12,7 +12,7 @@ class QueryLexerTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->scanner = new QueryLexer();
-        $this->scanner->setIgnoreOperator(false);
+        $this->scanner->setIgnoreOperators(false);
     }
 
     public function tearDown()

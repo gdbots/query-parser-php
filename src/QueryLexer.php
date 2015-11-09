@@ -111,6 +111,13 @@ class QueryLexer
     private $ignoreOperators = true;
 
     /**
+     * The default operator to use.
+     *
+     * @var string
+     */
+    private $defaultOperator = 'OR';
+
+    /**
      * The textual representation of the token types.
      *
      * @var array
@@ -249,9 +256,23 @@ class QueryLexer
      *
      * @return self
      */
-    public function setIgnoreOperator($bool)
+    public function setIgnoreOperators($bool)
     {
         $this->ignoreOperators = $bool;
+
+        return $this;
+    }
+
+    /**
+     * Sets the defaut operator.
+     *
+     * @param string
+     *
+     * @return self
+     */
+    public function setDefautOperator($val)
+    {
+        $this->defaultOperator = $val == 'OR' ? 'OR' : 'AND';
 
         return $this;
     }
@@ -321,8 +342,10 @@ class QueryLexer
             $value = trim($value);
 
             if ($this->ignoreOperators) {
-                if ($value == 'AND') {
-                    $value = 'OR';
+                if (($this->defaultOperator == 'OR' && $value == 'AND') ||
+                    ($this->defaultOperator == 'AND' && $value == 'OR')
+                ) {
+                    $value = $this->defaultOperator;
                 }
 
                 $value = str_replace('(', '', $value);
@@ -509,7 +532,7 @@ class QueryLexer
                 $input .= (
                     !in_array($values[$key+1], ['AND', 'OR']) &&
                     !in_array($value, ['AND', 'OR', '('])
-                ) ? ' OR ' : ' ';
+                ) ? sprintf(' %s ', $this->defaultOperator) : ' ';
             }
         }
 
