@@ -23,14 +23,17 @@ class QueryItemElastica implements QueryItemVisitorInterface
         if ($word->isBoosted()) {
             $query->setBoost($word->getBoostBy());
         }
+
         if ($word->isExcluded()) {
             $boolQuery = new BoolQuery();
             $boolQuery->addMustNot($query);
-            $query = $boolQuery;
-        } elseif ($word->isIncluded()) {
+            return $boolQuery;
+        }
+
+        if ($word->isIncluded()) {
             $boolQuery = new BoolQuery();
             $boolQuery->addMust($query);
-            $query = $boolQuery;
+            return $boolQuery;
         }
 
         return $query;
@@ -46,14 +49,17 @@ class QueryItemElastica implements QueryItemVisitorInterface
         if ($phrase->isBoosted()) {
             $query->setBoost($phrase->getBoostBy());
         }
+
         if ($phrase->isExcluded()) {
             $boolQuery = new BoolQuery();
             $boolQuery->addMustNot($query);
-            $query = $boolQuery;
-        } elseif ($phrase->isIncluded()) {
+            return $boolQuery;
+        }
+
+        if ($phrase->isIncluded()) {
             $boolQuery = new BoolQuery();
             $boolQuery->addMust($query);
-            $query = $boolQuery;
+            return $boolQuery;
         }
 
         return $query;
@@ -114,14 +120,17 @@ class QueryItemElastica implements QueryItemVisitorInterface
             if ($term->isBoosted()) {
                 $query->addParam('boost', $term->getBoostBy());
             }
+
             if ($term->isExcluded()) {
                 $boolQuery = new BoolQuery();
                 $boolQuery->addMustNot($query);
-                $query = $boolQuery;
-            } elseif ($term->isIncluded()) {
+                return $boolQuery;
+            }
+
+            if ($term->isIncluded()) {
                 $boolQuery = new BoolQuery();
                 $boolQuery->addMust($query);
-                $query = $boolQuery;
+                return $boolQuery;
             }
 
             return $query;

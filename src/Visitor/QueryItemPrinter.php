@@ -44,6 +44,8 @@ class QueryItemPrinter implements QueryItemVisitorInterface
     private function printIndentedLine($line)
     {
         echo sprintf("%s%s\n", $this->indent(), $line);
+
+        return null;
     }
 
     /**
@@ -57,6 +59,8 @@ class QueryItemPrinter implements QueryItemVisitorInterface
         if ($item->isIncluded()) {
             return '+';
         }
+
+        return null;
     }
 
     /**
@@ -67,6 +71,8 @@ class QueryItemPrinter implements QueryItemVisitorInterface
         if ($item->isBoosted()) {
             return sprintf(' ^ %.2f', $item->getBoostBy());
         }
+
+        return null;
     }
 
     /**
@@ -74,7 +80,7 @@ class QueryItemPrinter implements QueryItemVisitorInterface
      */
     public function visitWord(Node\Word $word)
     {
-        $this->printIndentedLine(sprintf(
+        return $this->printIndentedLine(sprintf(
             'Word (%s): %s%s%s',
             QueryLexer::$typeStrings[$word->getTokenType()],
             $this->printPrefix($word),
@@ -88,7 +94,7 @@ class QueryItemPrinter implements QueryItemVisitorInterface
      */
     public function visitPhrase(Node\Phrase $phrase)
     {
-        $this->printIndentedLine(sprintf(
+        return $this->printIndentedLine(sprintf(
             'Phrase: %s%s%s',
             $this->printPrefix($phrase),
             $phrase->getToken(),
@@ -101,7 +107,7 @@ class QueryItemPrinter implements QueryItemVisitorInterface
      */
     public function visitHashtag(Node\Hashtag $hashtag)
     {
-        $this->printIndentedLine(sprintf(
+        return $this->printIndentedLine(sprintf(
             'Hashtag: %s%s%s',
             $this->printPrefix($hashtag),
             $hashtag->getToken(),
@@ -114,7 +120,7 @@ class QueryItemPrinter implements QueryItemVisitorInterface
      */
     public function visitMention(Node\Mention $mention)
     {
-        $this->printIndentedLine(sprintf(
+        return $this->printIndentedLine(sprintf(
             'Mention: %s%s%s',
             $this->printPrefix($mention),
             $mention->getToken(),
@@ -128,7 +134,7 @@ class QueryItemPrinter implements QueryItemVisitorInterface
     public function visitExplicitTerm(Node\ExplicitTerm $term)
     {
         if ($term->getNominator() instanceof Node\AbstractSimpleTerm) {
-            $this->printIndentedLine(sprintf(
+            return $this->printIndentedLine(sprintf(
                 'Term: %s%s %s %s%s',
                 $this->printPrefix($term),
                 $term->getNominator()->getToken(),
@@ -136,23 +142,25 @@ class QueryItemPrinter implements QueryItemVisitorInterface
                 $term->getTerm()->getToken(),
                 $this->printPostfix($term)
             ));
-        } else {
-            $this->printIndentedLine(sprintf(
-                'Term: %s%s %s%s',
-                $this->printPrefix($term),
-                $term->getTokenTypeText(),
-                $term->getTerm()->getToken(),
-                $this->printPostfix($term)
-            ));
-            $this->increaseIndent();
-
-            $method = sprintf('visit%s', ucfirst(substr(get_class($term->getNominator()), 24)));
-            if (method_exists($this, $method)) {
-                $this->$method($term->getNominator());
-            }
-
-            $this->decreaseIndent();
         }
+
+        $this->printIndentedLine(sprintf(
+            'Term: %s%s %s%s',
+            $this->printPrefix($term),
+            $term->getTokenTypeText(),
+            $term->getTerm()->getToken(),
+            $this->printPostfix($term)
+        ));
+        $this->increaseIndent();
+
+        $method = sprintf('visit%s', ucfirst(substr(get_class($term->getNominator()), 24)));
+        if (method_exists($this, $method)) {
+            $this->$method($term->getNominator());
+        }
+
+        $this->decreaseIndent();
+
+        return null;
     }
 
     /**
@@ -164,6 +172,8 @@ class QueryItemPrinter implements QueryItemVisitorInterface
         $this->increaseIndent();
         $sub->getExpression()->accept($this);
         $this->decreaseIndent();
+
+        return null;
     }
 
     /**
@@ -177,6 +187,8 @@ class QueryItemPrinter implements QueryItemVisitorInterface
             $expression->accept($this);
         }
         $this->decreaseIndent();
+
+        return null;
     }
 
     /**
@@ -190,5 +202,7 @@ class QueryItemPrinter implements QueryItemVisitorInterface
             $expression->accept($this);
         }
         $this->decreaseIndent();
+
+        return null;
     }
 }
