@@ -378,28 +378,26 @@ class QueryLexer
                 continue;
             }
 
-            if (
-                // use last boost value when boost-on-a-boost is used (ex: a^1^2 -> a^2)
-                (
-                    isset($matches[$key+1]) &&
-                    preg_match($this->regEx[self::T_BOOST], $value) &&
-                    preg_match($this->regEx[self::T_BOOST], $matches[$key+1])
-                ) ||
+            // use last boost value when boost-on-a-boost is used (ex: a^1^2 -> a^2)
+            if ((
+                isset($matches[$key+1]) &&
+                preg_match($this->regEx[self::T_BOOST], $value) &&
+                preg_match($this->regEx[self::T_BOOST], $matches[$key+1])
+            ) ||
 
-                // ignore bad filters (ex: #abc:1 -> #abc)
-                (
-                    isset($matches[$prevKey]) &&
-                    preg_match(self::REGEX_FILTER_OPERATOR, $value, $m) &&
-                    preg_match(self::REGEX_FILTER_VALUE, $m[2]) &&
-                    !preg_match(self::REGEX_FILTER_KEY, $matches[$prevKey])
-                ) ||
+            // ignore bad filters (ex: #abc:1 -> #abc)
+            (
+                isset($matches[$prevKey]) &&
+                preg_match(self::REGEX_FILTER_OPERATOR, $value, $m) &&
+                preg_match(self::REGEX_FILTER_VALUE, $m[2]) &&
+                !preg_match(self::REGEX_FILTER_KEY, $matches[$prevKey])
+            ) ||
 
-                // boost a parentheses (ex: (a b)^2 -> (a b))
-                (
-                    isset($matches[$prevKey]) && $matches[$prevKey] == ')' &&
-                    preg_match($this->regEx[self::T_BOOST], $value)
-                )
-            ) {
+            // boost a parentheses (ex: (a b)^2 -> (a b))
+            (
+                isset($matches[$prevKey]) && $matches[$prevKey] == ')' &&
+                preg_match($this->regEx[self::T_BOOST], $value)
+            )) {
                 unset($matches[$key]);
 
                 continue;

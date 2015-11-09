@@ -313,11 +313,7 @@ class QueryParser
 
             $expressions[] = $lastExpression;
 
-        } while (
-            $lastExpression &&
-            $this->scanner->getTokenType() == QueryLexer::T_OR_OPERATOR &&
-            $this->scanner->next()
-        );
+        } while ($lastExpression && $this->scanner->getTokenType() == QueryLexer::T_OR_OPERATOR && $this->scanner->next());
 
         if (count($expressions) === 1) {
             return $expressions[0];
@@ -343,11 +339,7 @@ class QueryParser
             $lastExpression = $this->readOrExpressionList();
             $expressions[] = $lastExpression;
 
-        } while (
-            $lastExpression &&
-            $this->scanner->getTokenType() == QueryLexer::T_AND_OPERATOR &&
-            $this->scanner->next()
-        );
+        } while ($lastExpression && $this->scanner->getTokenType() == QueryLexer::T_AND_OPERATOR && $this->scanner->next());
 
         switch ($this->scanner->getTokenType()) {
             case QueryLexer::T_CLOSE_PARENTHESIS:
