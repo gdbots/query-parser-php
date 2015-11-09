@@ -640,7 +640,8 @@ class QueryLexer
                 ($isFilter && $this->tokenType == self::T_RANGE && $tokenType == self::T_RANGE) ||
 
                 // ignore range+ non numeric or date
-                ($isFilter && $this->tokenType == self::T_RANGE && !in_array($tokenType, [self::T_DATE, self::T_NUMBER])) ||
+                ($isFilter && $this->tokenType == self::T_RANGE &&
+                    !in_array($tokenType, [self::T_DATE, self::T_NUMBER])) ||
 
                 // ignore invalid filter values
                 ($tokenType == self::T_DATE && !$this->validateDateFilter($this->input, $isFilter)) ||
