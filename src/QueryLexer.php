@@ -701,7 +701,7 @@ class QueryLexer
      * @param string input
      * @param bool   $isFilter
      */
-    private function validateDateFilter($input, $isFilter = false)
+    private function validateDateFilter($input, $isFilter)
     {
         return (
             (
@@ -720,7 +720,7 @@ class QueryLexer
      * @param string $input
      * @param bool   $isFilter
      */
-    private function validateNumberFilter($input, $isFilter = false)
+    private function validateNumberFilter($input, $isFilter)
     {
         return (
             (

@@ -27,9 +27,9 @@ abstract class AbstractQueryItem
      *
      * @return self
      */
-    public function setExcluded($bool = false)
+    public function setExcluded($bool)
     {
-        $this->excluded = $bool;
+        $this->excluded = (bool)$bool;
 
         return $this;
     }
@@ -47,9 +47,9 @@ abstract class AbstractQueryItem
      *
      * @return self
      */
-    public function setIncluded($bool = false)
+    public function setIncluded($bool)
     {
-        $this->included = $bool;
+        $this->included = (bool)$bool;
 
         return $this;
     }
