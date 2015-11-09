@@ -32,7 +32,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
      */
     public function testParseNode($string, $class)
     {
-        $query = $this->parser->parse($string);
+        $query = $this->parser->parseWithOperator($string);
 
         $this->assertInstanceOf($class, $query);
     }
@@ -60,7 +60,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
      */
     public function testParseQuery($string, $print, array $itemCount = [], array $queryItems = [])
     {
-        $query = $this->parser->parse($string, true);
+        $query = $this->parser->parse($string);
 
         // check print output
         $output =  $this->getPrintContent($query);
@@ -135,7 +135,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
 
     public function testParseComplexQuery()
     {
-        $query = $this->parser->parse('(("phrase" #phrase) table.fieldName:value)^123');
+        $query = $this->parser->parseWithOperator('(("phrase" #phrase) table.fieldName:value)^123');
 
         $output = " Subexpression
 > Or
@@ -151,7 +151,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
 
     public function testParseComplexQueryUsingOperator()
     {
-        $query = $this->parser->parse('(("phrase" OR #phrase) AND table.fieldName:value)^123');
+        $query = $this->parser->parseWithOperator('(("phrase" OR #phrase) AND table.fieldName:value)^123');
 
         $output = " Subexpression
 > And
@@ -180,7 +180,7 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
 
     public function testParseEmoji()
     {
-        $query = $this->parser->parse('#emoji 💩 AND 🍦 OR 😳');
+        $query = $this->parser->parseWithOperator('#emoji 💩 AND 🍦 OR 😳');
 
         $output = " And
 > Or

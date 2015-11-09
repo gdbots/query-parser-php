@@ -104,6 +104,13 @@ class QueryLexer
     private $tokenType;
 
     /**
+     * Ignore query string operators. Will remove all parentheses and AND operators.
+     *
+     * @var bool
+     */
+    private $ignoreOperators = true;
+
+    /**
      * The textual representation of the token types.
      *
      * @var array
@@ -236,12 +243,25 @@ class QueryLexer
     }
 
     /**
+     * Sets whether or not to ignore query operators.
+     *
+     * @param bool
+     *
+     * @return self
+     */
+    public function setIgnoreOperator($bool)
+    {
+        $this->ignoreOperators = $bool;
+
+        return $this;
+    }
+
+    /**
      * Reads the new input string and set the position to 0.
      *
      * @param string $input
-     * @param bool   $ignoreOperator
      */
-    public function readString($input, $ignoreOperator = false)
+    public function readString($input)
     {
         // find all strings and rebuild input string with "OR"
         if (preg_match_all('/[^\s\(\)\#\^\"]+'.
@@ -275,7 +295,7 @@ class QueryLexer
         ) {
             $matches = $matches[0];
 
-            $matches = $this->cleanCharacters($matches, $input, $ignoreOperator);
+            $matches = $this->cleanCharacters($matches, $input);
             $matches = $this->modifyCharacters($matches);
 
             $input = $this->generateInput($matches);
@@ -291,17 +311,16 @@ class QueryLexer
      *
      * @param array  $matches
      * @param string $input
-     * @param bool   $ignoreOperator
      *
      * @return array
      */
-    private function cleanCharacters(array $matches, $input, $ignoreOperator = false)
+    private function cleanCharacters(array $matches, $input)
     {
         for ($key = 0, $m = count($matches); $key < $m; $key++) {
             $value = $matches[$key];
             $value = trim($value);
 
-            if ($ignoreOperator) {
+            if ($this->ignoreOperators) {
                 if ($value == 'AND') {
                     $value = 'OR';
                 }

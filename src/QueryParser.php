@@ -52,12 +52,24 @@ class QueryParser
      *
      * @return \Gdbots\QueryParser\Node\AbstractQueryItem|null
      */
-    public function parse($input, $ignoreOperator = false)
+    public function parse($input)
     {
-        $this->scanner->readString($input, $ignoreOperator);
+        $this->scanner->readString($input);
         $this->errors = [];
 
         return $this->readAndExpressionList();
+    }
+
+    /**
+     * @param string $input
+     *
+     * @return \Gdbots\QueryParser\Node\AbstractQueryItem|null
+     */
+    public function parseWithOperator($input)
+    {
+        $this->scanner->setIgnoreOperator(false);
+
+        return $this->parse($input);
     }
 
     /**

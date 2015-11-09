@@ -90,15 +90,14 @@ class QueryResult
      * Parses a given query string and assign all tokenized buckets.
      *
      * @param string $queryString
-     * @param bool   $ignoreOperator
      *
      * @return \Gdbots\QueryParser\Node\AbstractQueryItem
      */
-    public function parse($inputString, $ignoreOperator = true)
+    public function parse($inputString)
     {
         $parser = new QueryParser();
 
-        if ($this->queryItem = $parser->parse($inputString, $ignoreOperator)) {
+        if ($this->queryItem = $parser->parse($inputString)) {
             $items = $this->queryItem->getQueryItemsByTokenType();
             foreach ($items as $tokenType => $values) {
                 $property = strtolower($tokenType).'s';
