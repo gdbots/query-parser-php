@@ -18,19 +18,7 @@ class QueryItemElastica implements QueryItemVisitorInterface
             $query->setBoost($word->getBoostBy());
         }
 
-        if ($word->isExcluded()) {
-            $boolQuery = new Query\BoolQuery();
-            $boolQuery->addMustNot($query);
-            return $boolQuery;
-        }
-
-        if ($word->isIncluded()) {
-            $boolQuery = new Query\BoolQuery();
-            $boolQuery->addMust($query);
-            return $boolQuery;
-        }
-
-        return $query;
+        return $this->convertToBoolQuery($word, $query);
     }
 
     /**
@@ -44,19 +32,7 @@ class QueryItemElastica implements QueryItemVisitorInterface
             $query->setBoost($phrase->getBoostBy());
         }
 
-        if ($phrase->isExcluded()) {
-            $boolQuery = new Query\BoolQuery();
-            $boolQuery->addMustNot($query);
-            return $boolQuery;
-        }
-
-        if ($phrase->isIncluded()) {
-            $boolQuery = new Query\BoolQuery();
-            $boolQuery->addMust($query);
-            return $boolQuery;
-        }
-
-        return $query;
+        return $this->convertToBoolQuery($word, $query);
     }
 
     /**
@@ -64,8 +40,13 @@ class QueryItemElastica implements QueryItemVisitorInterface
      */
     public function visitHashtag(Node\Hashtag $hashtag)
     {
-        // not yet implemented
-        return null;
+        $query = new Query\Term(['hashtag' => $hashtag->getToken()]);
+
+        if ($hashtag->isBoosted()) {
+            $query->setBoost($hashtag->getBoostBy());
+        }
+
+        return $this->convertToBoolQuery($hashtag, $query);
     }
 
     /**
@@ -73,8 +54,13 @@ class QueryItemElastica implements QueryItemVisitorInterface
      */
     public function visitMention(Node\Mention $mention)
     {
-        // not yet implemented
-        return null;
+        $query = new Query\Term(['mention' => $mention->getToken()]);
+
+        if ($mention->isBoosted()) {
+            $query->setBoost($mention->getBoostBy());
+        }
+
+        return $this->convertToBoolQuery($mention, $query);
     }
 
     /**
@@ -115,19 +101,7 @@ class QueryItemElastica implements QueryItemVisitorInterface
                 $query->addParam('boost', $term->getBoostBy());
             }
 
-            if ($term->isExcluded()) {
-                $boolQuery = new Query\BoolQuery();
-                $boolQuery->addMustNot($query);
-                return $boolQuery;
-            }
-
-            if ($term->isIncluded()) {
-                $boolQuery = new Query\BoolQuery();
-                $boolQuery->addMust($query);
-                return $boolQuery;
-            }
-
-            return $query;
+            return $this->convertToBoolQuery($term, $query);
         }
 
         $method = sprintf('visit%s', ucfirst(substr(get_class($term->getNominator()), 24)));
@@ -173,6 +147,31 @@ class QueryItemElastica implements QueryItemVisitorInterface
             if ($q = $expression->accept($this)) {
                 $query->addMust($q);
             }
+        }
+
+        return $query;
+    }
+
+    /**
+     * Convert query object into BoolQuery if needed
+     *
+     * @param Node\AbstractQueryItem $term
+     * @param Query\AbstractQuery    $query
+     *
+     * @return Query\AbstractQuery
+     */
+    protected function convertToBoolQuery(Node\AbstractQueryItem $term, Query\AbstractQuery $query)
+    {
+        if ($term->isExcluded()) {
+            $boolQuery = new Query\BoolQuery();
+            $boolQuery->addMustNot($query);
+            return $boolQuery;
+        }
+
+        if ($term->isIncluded()) {
+            $boolQuery = new Query\BoolQuery();
+            $boolQuery->addMust($query);
+            return $boolQuery;
         }
 
         return $query;
