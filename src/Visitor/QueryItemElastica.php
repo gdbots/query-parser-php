@@ -125,15 +125,35 @@ class QueryItemElastica implements QueryItemVisitorInterface
      */
     public function visitOrExpressionList(Node\OrExpressionList $list)
     {
-        $query = new Query\BoolQuery();
+        $boolQuery = new Query\BoolQuery();
 
         foreach ($list->getExpressions() as $expression) {
-            if ($q = $expression->accept($this)) {
-                $query->addShould($q);
+            if ($query = $expression->accept($this)) {
+                if ($query instanceof Query\BoolQuery) {
+                    if ($query->hasParam('should')) {
+                        foreach ($query->getParam('should') as $query) {
+                            $boolQuery->addShould($query);
+                        }
+                    }
+                    if ($query->hasParam('must')) {
+                        foreach ($query->getParam('must') as $query) {
+                            $boolQuery->addMust($query);
+                        }
+                    }
+                    if ($query->hasParam('must_not')) {
+                        foreach ($query->getParam('must_not') as $query) {
+                            $boolQuery->addMustNot($query);
+                        }
+                    }
+
+                    continue;
+                }
+
+                $boolQuery->addShould($query);
             }
         }
 
-        return $query;
+        return $boolQuery;
     }
 
     /**
@@ -141,15 +161,35 @@ class QueryItemElastica implements QueryItemVisitorInterface
      */
     public function visitAndExpressionList(Node\AndExpressionList $list)
     {
-        $query = new Query\BoolQuery();
+        $boolQuery = new Query\BoolQuery();
 
         foreach ($list->getExpressions() as $expression) {
-            if ($q = $expression->accept($this)) {
-                $query->addMust($q);
+            if ($query = $expression->accept($this)) {
+                if ($query instanceof Query\BoolQuery) {
+                    if ($query->hasParam('should')) {
+                        foreach ($query->getParam('should') as $query) {
+                            $boolQuery->addShould($query);
+                        }
+                    }
+                    if ($query->hasParam('must')) {
+                        foreach ($query->getParam('must') as $query) {
+                            $boolQuery->addMust($query);
+                        }
+                    }
+                    if ($query->hasParam('must_not')) {
+                        foreach ($query->getParam('must_not') as $query) {
+                            $boolQuery->addMustNot($query);
+                        }
+                    }
+
+                    continue;
+                }
+
+                $boolQuery->addMust($query);
             }
         }
 
-        return $query;
+        return $boolQuery;
     }
 
     /**
