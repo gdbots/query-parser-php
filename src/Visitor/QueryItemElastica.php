@@ -3,11 +3,7 @@
 namespace Gdbots\QueryParser\Visitor;
 
 use Elastica\Filter\Query as FilterQuery;
-use Elastica\Query\BoolQuery;
-use Elastica\Query\Filtered;
-use Elastica\Query\QueryString;
-use Elastica\Query\Term;
-use Elastica\Query\Range;
+use Elastica\Query;
 use Gdbots\QueryParser\Node;
 use Gdbots\QueryParser\QueryLexer;
 
@@ -18,20 +14,20 @@ class QueryItemElastica implements QueryItemVisitorInterface
      */
     public function visitWord(Node\Word $word)
     {
-        $query = new QueryString($word->getToken());
+        $query = new Query\QueryString($word->getToken());
 
         if ($word->isBoosted()) {
             $query->setBoost($word->getBoostBy());
         }
 
         if ($word->isExcluded()) {
-            $boolQuery = new BoolQuery();
+            $boolQuery = new Query\BoolQuery();
             $boolQuery->addMustNot($query);
             return $boolQuery;
         }
 
         if ($word->isIncluded()) {
-            $boolQuery = new BoolQuery();
+            $boolQuery = new Query\BoolQuery();
             $boolQuery->addMust($query);
             return $boolQuery;
         }
@@ -44,20 +40,20 @@ class QueryItemElastica implements QueryItemVisitorInterface
      */
     public function visitPhrase(Node\Phrase $phrase)
     {
-        $query = new QueryString($phrase->getToken());
+        $query = new Query\QueryString($phrase->getToken());
 
         if ($phrase->isBoosted()) {
             $query->setBoost($phrase->getBoostBy());
         }
 
         if ($phrase->isExcluded()) {
-            $boolQuery = new BoolQuery();
+            $boolQuery = new Query\BoolQuery();
             $boolQuery->addMustNot($query);
             return $boolQuery;
         }
 
         if ($phrase->isIncluded()) {
-            $boolQuery = new BoolQuery();
+            $boolQuery = new Query\BoolQuery();
             $boolQuery->addMust($query);
             return $boolQuery;
         }
@@ -109,12 +105,12 @@ class QueryItemElastica implements QueryItemVisitorInterface
                     break;
             }
 
-            $query = new Term([$term->getNominator()->getToken() => [$operator => $term->getTerm()->getToken()]]);
+            $query = new Query\Term([$term->getNominator()->getToken() => [$operator => $term->getTerm()->getToken()]]);
 
             if ($term->getTerm() instanceof Node\Range) {
                 $range = json_decode($term->getTerm()->getToken(), true);
 
-                $query = new Range($term->getNominator()->getToken(), ['gte' => $range[0], 'lte' => $range[1]]);
+                $query = new Query\Range($term->getNominator()->getToken(), ['gte' => $range[0], 'lte' => $range[1]]);
             }
 
             if ($term->isBoosted()) {
@@ -122,13 +118,13 @@ class QueryItemElastica implements QueryItemVisitorInterface
             }
 
             if ($term->isExcluded()) {
-                $boolQuery = new BoolQuery();
+                $boolQuery = new Query\BoolQuery();
                 $boolQuery->addMustNot($query);
                 return $boolQuery;
             }
 
             if ($term->isIncluded()) {
-                $boolQuery = new BoolQuery();
+                $boolQuery = new Query\BoolQuery();
                 $boolQuery->addMust($query);
                 return $boolQuery;
             }
@@ -157,7 +153,7 @@ class QueryItemElastica implements QueryItemVisitorInterface
      */
     public function visitOrExpressionList(Node\OrExpressionList $list)
     {
-        $query = new BoolQuery();
+        $query = new Query\BoolQuery();
 
         foreach ($list->getExpressions() as $expression) {
             if ($q = $expression->accept($this)) {
@@ -173,7 +169,7 @@ class QueryItemElastica implements QueryItemVisitorInterface
      */
     public function visitAndExpressionList(Node\AndExpressionList $list)
     {
-        $query = new BoolQuery();
+        $query = new Query\BoolQuery();
 
         foreach ($list->getExpressions() as $expression) {
             if ($q = $expression->accept($this)) {
