@@ -382,42 +382,42 @@ class QueryLexer
     /**
      * Phase 2: modify special characters.
      *
-     * @param array $matches
+     * @param array $values
      *
      * @return array
      */
-    private function modifyCharacters(array $matches)
+    private function modifyCharacters(array $values)
     {
         $prevKey = -1;
-        foreach ($matches as $key => $value) {
+        foreach ($values as $key => $value) {
             // delete value that is a special characters
-            if (preg_match(self::REGEX_TOKENS, $value, $m) && $m[0] == $value) {
-                unset($matches[$key]);
+            if (preg_match(self::REGEX_TOKENS, $value, $matches) && $matches[0] == $value) {
+                unset($values[$key]);
 
                 continue;
             }
 
             // use last boost value when boost-on-a-boost is used (ex: a^1^2 -> a^2)
             if ((
-                isset($matches[$key+1]) &&
+                isset($values[$key+1]) &&
                 preg_match($this->regEx[self::T_BOOST], $value) &&
-                preg_match($this->regEx[self::T_BOOST], $matches[$key+1])
+                preg_match($this->regEx[self::T_BOOST], $values[$key+1])
             ) ||
 
             // ignore bad filters (ex: #abc:1 -> #abc)
             (
-                isset($matches[$prevKey]) &&
-                preg_match(self::REGEX_FILTER_OPERATOR, $value, $m) &&
-                preg_match(self::REGEX_FILTER_VALUE, $m[2]) &&
-                !preg_match(self::REGEX_FILTER_KEY, $matches[$prevKey])
+                isset($values[$prevKey]) &&
+                preg_match(self::REGEX_FILTER_OPERATOR, $value, $matches) &&
+                preg_match(self::REGEX_FILTER_VALUE, $matches[2]) &&
+                !preg_match(self::REGEX_FILTER_KEY, $values[$prevKey])
             ) ||
 
             // boost a parentheses (ex: (a b)^2 -> (a b))
             (
-                isset($matches[$prevKey]) && $matches[$prevKey] == ')' &&
+                isset($values[$prevKey]) && $values[$prevKey] == ')' &&
                 preg_match($this->regEx[self::T_BOOST], $value)
             )) {
-                unset($matches[$key]);
+                unset($values[$key]);
 
                 continue;
             }
@@ -434,65 +434,65 @@ class QueryLexer
 
             // add quotes to emoticons
             foreach ([self::REGEX_EMOTICONS_BASIC, self::REGEX_EMOTICONS_UTF8] as $regEx) {
-                if (preg_match($regEx, $value, $m) && $m[0] == $value) {
-                    $value = str_replace($m[0], sprintf('"%s"', $m[0]), $value);
+                if (preg_match($regEx, $value, $matches) && $matches[0] == $value) {
+                    $value = str_replace($matches[0], sprintf('"%s"', $matches[0]), $value);
                 }
             }
 
-            $matches[$key] = $value;
+            $values[$key] = $value;
 
             $prevKey = $key;
         }
 
         // reindex array
-        $matches = array_values($matches);
+        $values = array_values($values);
 
-        return $matches;
+        return $values;
     }
 
     /**
      * Phase 3: handle parentheses and add OR/AND expression.
      *
-     * @param array $matches
+     * @param array $values
      *
      * @return string
      */
-    private function generateInput(array $matches)
+    private function generateInput(array $values)
     {
         $input = '';
 
         $openParenthesis = 0;
 
-        foreach ($matches as $key => $value) {
+        foreach ($values as $key => $value) {
             if (empty($value)) {
                 continue;
             }
 
             $input .= $value;
 
-            if (preg_match_all('/(\()/', $value, $m)) {
-                $openParenthesis += count($m[0]);
+            if (preg_match_all('/(\()/', $value, $matches)) {
+                $openParenthesis += count($matches[0]);
             }
-            if (preg_match_all('/(\))/', $value, $m)) {
-                if (preg_match($this->regEx[self::T_PHRASE], $value, $m1)) {
-                    if (preg_match_all('/(\))/', str_replace($m1[1], '', $value), $m2)) {
-                        $openParenthesis -= count($m2[0]);
+            if (preg_match_all('/(\))/', $value, $matches)) {
+                if (preg_match($this->regEx[self::T_PHRASE], $value, $phaseMatches)) {
+                    if (preg_match_all('/(\))/', str_replace($phaseMatches[1], '', $value), $closeParenthesisMatches)) {
+                        $openParenthesis -= count($closeParenthesisMatches[0]);
                     }
                 } else {
-                    $openParenthesis -= count($m[0]);
+                    $openParenthesis -= count($matches[0]);
                 }
             }
 
-            if (isset($matches[$key+1]) &&
+            if (isset($values[$key+1]) &&
                 (
                     (
-                        !in_array(substr($matches[$key+1], 0, 1), [':', '^', ')']) &&
-                        !preg_match(self::REGEX_FILTER_OPERATOR, $matches[$key+1])
+                        !in_array(substr($values[$key+1], 0, 1), [':', '^', ')']) &&
+                        !preg_match(self::REGEX_FILTER_OPERATOR, $values[$key+1])
                     ) ||
-                    preg_match(self::REGEX_EMOTICONS_BASIC, $matches[$key+1]) ||
+                    preg_match(self::REGEX_EMOTICONS_BASIC, $values[$key+1]) ||
                     (
-                        preg_match(self::REGEX_TOKENS, $matches[$key+1], $m) &&
-                        $m[0] == $matches[$key+1]
+                        preg_match(self::REGEX_TOKENS, $values[$key+1], $matches) &&
+                        $matches[0] == $values[$key+1]
                     )
                 ) &&
                 (
@@ -503,7 +503,7 @@ class QueryLexer
                     preg_match(self::REGEX_EMOTICONS_BASIC, $value)
                 )
             ) {
-                if (!in_array($matches[$key+1], ['AND', 'OR']) &&
+                if (!in_array($values[$key+1], ['AND', 'OR']) &&
                     !in_array($value, ['AND', 'OR', '('])
                 ) {
                     $input .= ' OR ';
@@ -673,28 +673,28 @@ class QueryLexer
     }
 
     /**
-     * @param array $matches
+     * @param array $values
      *
      * @return array
      */
-    private function testWorkToken(array $matches)
+    private function testWorkToken(array $values)
     {
         // word+filter with no value (ex: "a:")
-        if (preg_match(self::REGEX_TOKENS, $matches[2], $m) && $m[0] == $matches[2]) {
-            $matches[1] = $matches[0];
-            $matches[2] = '';
+        if (preg_match(self::REGEX_TOKENS, $values[2], $matches) && $matches[0] == $values[2]) {
+            $values[1] = $values[0];
+            $values[2] = '';
         }
 
         // ignore non-filters (ex: "http://")
-        if (preg_match(self::REGEX_FILTER_OPERATOR, $matches[2], $m)) {
-            if (preg_match(self::REGEX_FILTER_VALUE, $m[2], $t) && !$t[0]) {
-                $tmp = explode(' ', $m[2], 2);
-                $matches[1] = $matches[1].$m[1].$tmp[0];
-                $matches[2] = isset($tmp[1]) ? $tmp[1] : '';
+        if (preg_match(self::REGEX_FILTER_OPERATOR, $values[2], $matches)) {
+            if (preg_match(self::REGEX_FILTER_VALUE, $matches[2], $filterValueMatches) && !$filterValueMatches[0]) {
+                $tmp = explode(' ', $matches[2], 2);
+                $values[1] = $values[1].$matches[1].$tmp[0];
+                $values[2] = isset($tmp[1]) ? $tmp[1] : '';
             }
         }
 
-        return $matches;
+        return $values;
     }
 
     /**
