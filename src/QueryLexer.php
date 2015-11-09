@@ -608,20 +608,7 @@ class QueryLexer
         foreach ($regEx as $re) {
             if (preg_match($re, $this->input, $matches)) {
                 if ($tokenType == self::T_WORD) {
-                    // word+filter with no value (ex: "a:")
-                    if (preg_match(self::REGEX_TOKENS, $matches[2], $m) && $m[0] == $matches[2]) {
-                        $matches[1] = $matches[0];
-                        $matches[2] = '';
-                    }
-
-                    // ignore non-filters (ex: "http://")
-                    if (preg_match(self::REGEX_FILTER_OPERATOR, $matches[2], $m)) {
-                        if (preg_match(self::REGEX_FILTER_VALUE, $m[2], $t) && !$t[0]) {
-                            $tmp = explode(' ', $m[2], 2);
-                            $matches[1] = $matches[1].$m[1].$tmp[0];
-                            $matches[2] = isset($tmp[1]) ? $tmp[1] : '';
-                        }
-                    }
+                    $matches = $this->testWorkToken($matches);
                 }
 
                 // ignore range not in filter
@@ -643,48 +630,17 @@ class QueryLexer
                 }
 
                 // ignore invalid filter values
-                if ((
-                    $tokenType == self::T_DATE &&
-                    !(
-                        (
-                            preg_match(self::REGEX_DATE, $this->input, $m) &&
-                            (!$m[2] || in_array(substr($m[2], 0, 1), [' ', '^']))
-                        ) ||
-                        (
-                            $isFilter &&
-                            preg_match(self::REGEX_DATE_FILTER, $this->input, $m) &&
-                            (!$m[4] || in_array(substr($m[4], 0, 1), [' ', '^']))
-                        )
-                    )
-                ) ||
-                (
-                    $tokenType == self::T_NUMBER &&
-                    !(
-                        (
-                            preg_match(self::REGEX_NUMBER, $this->input, $m) &&
-                            (!$m[2] || in_array(substr($m[2], 0, 1), [' ', '^']))
-                        ) ||
-                        (
-                            $isFilter &&
-                            preg_match(self::REGEX_NUMBER_FILTER, $this->input, $m) &&
-                            (!$m[4] || in_array(substr($m[4], 0, 1), [' ', '^']))
-                        )
-                    )
-                )) {
+                if ($tokenType == self::T_DATE && !$this->validateDateFilter($this->input, $isFilter)) {
+                    return false;
+                }
+                if ($tokenType == self::T_NUMBER && !$this->validateNumberFilter($this->input, $isFilter)) {
                     return false;
                 }
 
                 // ignore range when filter operator is not equal
-                if ($isFilter &&
-                    !in_array($this->token, [':', ':=']) &&
-                    (
-                        ($tokenType == self::T_DATE && preg_match(self::REGEX_DATE_FILTER, $this->input, $m))||
-                        ($tokenType == self::T_NUMBER && preg_match(self::REGEX_NUMBER_FILTER, $this->input, $m))
-                    )
-                ) {
+                if ($isFilter && !$this->validateRangeFilter($this->token, $tokenType, $this->input)) {
                     return false;
                 }
-
 
                 $this->token = $matches[1];
                 $this->processed .= $matches[1];
@@ -704,5 +660,84 @@ class QueryLexer
         }
 
         return false;
+    }
+
+    /**
+     * @param array $matches
+     *
+     * @return array
+     */
+    private function testWorkToken(array $matches)
+    {
+        // word+filter with no value (ex: "a:")
+        if (preg_match(self::REGEX_TOKENS, $matches[2], $m) && $m[0] == $matches[2]) {
+            $matches[1] = $matches[0];
+            $matches[2] = '';
+        }
+
+        // ignore non-filters (ex: "http://")
+        if (preg_match(self::REGEX_FILTER_OPERATOR, $matches[2], $m)) {
+            if (preg_match(self::REGEX_FILTER_VALUE, $m[2], $t) && !$t[0]) {
+                $tmp = explode(' ', $m[2], 2);
+                $matches[1] = $matches[1].$m[1].$tmp[0];
+                $matches[2] = isset($tmp[1]) ? $tmp[1] : '';
+            }
+        }
+
+        return $matches;
+    }
+
+    /**
+     * @param string input
+     * @param bool   $isFilter
+     */
+    private function validateDateFilter($input, $isFilter = false)
+    {
+        return (
+            (
+                preg_match(self::REGEX_DATE, $input, $matches) &&
+                (!$matches[2] || in_array(substr($matches[2], 0, 1), [' ', '^']))
+            ) ||
+            (
+                $isFilter &&
+                preg_match(self::REGEX_DATE_FILTER, $input, $matches) &&
+                (!$matches[4] || in_array(substr($matches[4], 0, 1), [' ', '^']))
+            )
+        );
+    }
+
+    /**
+     * @param string $input
+     * @param bool   $isFilter
+     */
+    private function validateNumberFilter($input, $isFilter = false)
+    {
+        return (
+            (
+                preg_match(self::REGEX_NUMBER, $input, $matches) &&
+                (!$matches[2] || in_array(substr($matches[2], 0, 1), [' ', '^']))
+            ) ||
+            (
+                $isFilter &&
+                preg_match(self::REGEX_NUMBER_FILTER, $input, $matches) &&
+                (!$matches[4] || in_array(substr($matches[4], 0, 1), [' ', '^']))
+            )
+        );
+    }
+
+    /**
+     * @param string $token
+     * @param int    $tokenType
+     * @param string $input
+     */
+    private function validateRangeFilter($token, $tokenType, $input)
+    {
+        return !(
+            !in_array($token, [':', ':=']) &&
+            (
+                ($tokenType == self::T_DATE && preg_match(self::REGEX_DATE_FILTER, $input)) ||
+                ($tokenType == self::T_NUMBER && preg_match(self::REGEX_NUMBER_FILTER, $input))
+            )
+        );
     }
 }
