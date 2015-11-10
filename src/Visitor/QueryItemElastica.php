@@ -29,7 +29,7 @@ class QueryItemElastica implements QueryItemVisitorInterface
      */
     public function visitWord(Node\Word $word)
     {
-        $query = new Query\Match($this->fieldName, $word->getToken());
+        $query = new Query\Term([$this->fieldName => $word->getToken()]);
 
         if ($word->isBoosted()) {
             $query->setBoost($word->getBoostBy());
@@ -43,7 +43,7 @@ class QueryItemElastica implements QueryItemVisitorInterface
      */
     public function visitPhrase(Node\Phrase $phrase)
     {
-        $query = new Query\MatchPhrase($this->fieldName, $phrase->getToken());
+        $query = new Query\Term([$this->fieldName => $phrase->getToken())];
 
         if ($phrase->isBoosted()) {
             $query->setBoost($phrase->getBoostBy());
