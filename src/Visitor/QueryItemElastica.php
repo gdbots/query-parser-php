@@ -8,11 +8,28 @@ use Gdbots\QueryParser\Node;
 class QueryItemElastica implements QueryItemVisitorInterface
 {
     /**
+     * @var string
+     */
+    protected $fieldName = 'title';
+
+    /**
+     * @param string $fieldName
+     *
+     * @return self
+     */
+    public function setFieldName($fieldName)
+    {
+        $this->fieldName = $fieldName;
+
+        return $this;
+    }
+
+    /**
      * {@inheritDoc}
      */
     public function visitWord(Node\Word $word)
     {
-        $query = new Query\QueryString($word->getToken());
+        $query = new Query\Match($this->fieldName, $word->getToken());
 
         if ($word->isBoosted()) {
             $query->setBoost($word->getBoostBy());
@@ -26,7 +43,7 @@ class QueryItemElastica implements QueryItemVisitorInterface
      */
     public function visitPhrase(Node\Phrase $phrase)
     {
-        $query = new Query\QueryString($phrase->getToken());
+        $query = new Query\MatchPhrase($this->fieldName, $word->getToken());
 
         if ($phrase->isBoosted()) {
             $query->setBoost($phrase->getBoostBy());
