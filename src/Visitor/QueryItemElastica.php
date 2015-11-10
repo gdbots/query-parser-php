@@ -43,7 +43,7 @@ class QueryItemElastica implements QueryItemVisitorInterface
      */
     public function visitPhrase(Node\Phrase $phrase)
     {
-        $query = new Query\Term([$this->fieldName => $phrase->getToken())];
+        $query = new Query\Term([$this->fieldName => $phrase->getToken()]);
 
         if ($phrase->isBoosted()) {
             $query->setBoost($phrase->getBoostBy());
