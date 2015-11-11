@@ -8,11 +8,29 @@ use Gdbots\QueryParser\Node;
 class QueryItemElastica implements QueryItemVisitorInterface
 {
     /**
+     * @var string
+     */
+    protected $fieldName = 'title';
+
+    /**
+     * @param string $fieldName
+     *
+     * @return self
+     */
+    public function setFieldName($fieldName)
+    {
+        $this->fieldName = $fieldName;
+
+        return $this;
+    }
+
+    /**
      * {@inheritDoc}
      */
     public function visitWord(Node\Word $word)
     {
-        $query = new Query\QueryString($word->getToken());
+        $query = new Query\Match();
+        $query->setFieldQuery($this->fieldName, $word->getToken());
 
         if ($word->isBoosted()) {
             $query->setBoost($word->getBoostBy());
@@ -26,7 +44,8 @@ class QueryItemElastica implements QueryItemVisitorInterface
      */
     public function visitPhrase(Node\Phrase $phrase)
     {
-        $query = new Query\QueryString($phrase->getToken());
+        $query = new Query\MatchPhrase();
+        $query->setFieldQuery($this->fieldName, $phrase->getToken());
 
         if ($phrase->isBoosted()) {
             $query->setBoost($phrase->getBoostBy());
@@ -128,24 +147,24 @@ class QueryItemElastica implements QueryItemVisitorInterface
      */
     public function visitOrExpressionList(Node\OrExpressionList $list)
     {
-        $boolQuery = new Query\BoolQuery();
+        $boolQuery = new Query\Bool();
 
         foreach ($list->getExpressions() as $expression) {
             if ($query = $expression->accept($this)) {
-                if ($query instanceof Query\BoolQuery) {
+                if ($query instanceof Query\Bool) {
                     if ($query->hasParam('should')) {
-                        foreach ($query->getParam('should') as $query) {
-                            $boolQuery->addShould($query);
+                        foreach ($query->getParam('should') as $q) {
+                            $boolQuery->addShould($q);
                         }
                     }
                     if ($query->hasParam('must')) {
-                        foreach ($query->getParam('must') as $query) {
-                            $boolQuery->addMust($query);
+                        foreach ($query->getParam('must') as $q) {
+                            $boolQuery->addMust($q);
                         }
                     }
                     if ($query->hasParam('must_not')) {
-                        foreach ($query->getParam('must_not') as $query) {
-                            $boolQuery->addMustNot($query);
+                        foreach ($query->getParam('must_not') as $q) {
+                            $boolQuery->addMustNot($q);
                         }
                     }
 
@@ -164,24 +183,24 @@ class QueryItemElastica implements QueryItemVisitorInterface
      */
     public function visitAndExpressionList(Node\AndExpressionList $list)
     {
-        $boolQuery = new Query\BoolQuery();
+        $boolQuery = new Query\Bool();
 
         foreach ($list->getExpressions() as $expression) {
             if ($query = $expression->accept($this)) {
-                if ($query instanceof Query\BoolQuery) {
+                if ($query instanceof Query\Bool) {
                     if ($query->hasParam('should')) {
-                        foreach ($query->getParam('should') as $query) {
-                            $boolQuery->addShould($query);
+                        foreach ($query->getParam('should') as $q) {
+                            $boolQuery->addShould($q);
                         }
                     }
                     if ($query->hasParam('must')) {
-                        foreach ($query->getParam('must') as $query) {
-                            $boolQuery->addMust($query);
+                        foreach ($query->getParam('must') as $q) {
+                            $boolQuery->addMust($q);
                         }
                     }
                     if ($query->hasParam('must_not')) {
-                        foreach ($query->getParam('must_not') as $query) {
-                            $boolQuery->addMustNot($query);
+                        foreach ($query->getParam('must_not') as $q) {
+                            $boolQuery->addMustNot($q);
                         }
                     }
 
@@ -206,13 +225,13 @@ class QueryItemElastica implements QueryItemVisitorInterface
     protected function convertToBoolQuery(Node\AbstractQueryItem $term, Query\AbstractQuery $query)
     {
         if ($term->isExcluded()) {
-            $boolQuery = new Query\BoolQuery();
+            $boolQuery = new Query\Bool();
             $boolQuery->addMustNot($query);
             return $boolQuery;
         }
 
         if ($term->isIncluded()) {
-            $boolQuery = new Query\BoolQuery();
+            $boolQuery = new Query\Bool();
             $boolQuery->addMust($query);
             return $boolQuery;
         }
