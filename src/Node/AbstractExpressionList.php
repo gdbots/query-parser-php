@@ -17,6 +17,10 @@ abstract class AbstractExpressionList extends AbstractQueryItem implements \Coun
         $this->expressions = array_unique($expressions, SORT_REGULAR);
     }
 
+
+    /**
+     * @return AbstractQueryItem[]
+     */
     public function getExpressions()
     {
         return $this->expressions;

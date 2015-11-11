@@ -722,8 +722,10 @@ class QueryLexer
     }
 
     /**
-     * @param string input
+     * @param string $input
      * @param bool   $isFilter
+     *
+     * @return bool
      */
     private function validateDateFilter($input, $isFilter)
     {
@@ -743,6 +745,8 @@ class QueryLexer
     /**
      * @param string $input
      * @param bool   $isFilter
+     *
+     * @return bool
      */
     private function validateNumberFilter($input, $isFilter)
     {
@@ -763,6 +767,8 @@ class QueryLexer
      * @param string $token
      * @param int    $tokenType
      * @param string $input
+     *
+     * @return bool
      */
     private function validateRangeFilter($token, $tokenType, $input)
     {

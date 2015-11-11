@@ -8,7 +8,7 @@ use Gdbots\QueryParser\Visitor\QueryItemVisitorInterface;
 class ExplicitTerm extends AbstractQueryItem
 {
     /**
-     * @var string
+     * @var AbstractSimpleTerm
      */
     protected $nominator;
 
@@ -28,7 +28,7 @@ class ExplicitTerm extends AbstractQueryItem
     protected $term;
 
     /**
-     * @param string|AbstractQueryItem $nominator
+     * @param AbstractSimpleTerm  $nominator
      * @param int                      $tokenType
      * @param string                   $tokenTypeText
      * @param AbstractSimpleTerm       $term
@@ -42,7 +42,8 @@ class ExplicitTerm extends AbstractQueryItem
     }
 
     /**
-     * @return string
+     * @return AbstractSimpleTerm
+     *
      */
     public function getNominator()
     {

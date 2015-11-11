@@ -9,7 +9,7 @@ use Gdbots\QueryParser\Visitor\QueryItemPrinter;
 
 class QueryResultTest extends \PHPUnit_Framework_TestCase
 {
-    /** QueryResult */
+    /** @var QueryResult */
     protected $result;
 
     /** QueryItemPrinter */
@@ -17,7 +17,10 @@ class QueryResultTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
+        /** @var $this->result QueryResult */
         $this->result = new QueryResult();
+
+        /** @var $this->result QueryItemPrinter */
         $this->printer = new QueryItemPrinter();
     }
 

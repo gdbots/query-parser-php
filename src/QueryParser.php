@@ -106,7 +106,7 @@ class QueryParser
      * Makes the parser read a single term. This can be a word, text, or explicit term.
      *
      * @param int    $tokenType
-     * @param string $term
+     * @param Node\AbstractSimpleTerm $term
      *
      * @return \Gdbots\QueryParser\Node\AbstractQueryItem|null
      */
@@ -182,7 +182,7 @@ class QueryParser
      *
      * @param int $tokenType
      *
-     * @return \Gdbots\QueryParser\Node\AbstractQueryItem|null
+     * @return \Gdbots\QueryParser\Node\ExplicitTerm|\Gdbots\QueryParser\Node\AbstractSimpleTerm|null
      */
     protected function readExpression($tokenType)
     {
@@ -311,14 +311,12 @@ class QueryParser
             $lastExpression = $this->readExpression($this->scanner->getTokenType());
 
             if ($this->scanner->getTokenType() == QueryLexer::T_BOOST) {
-                /** @var \Gdbots\QueryParser\Node\AbstractQueryItem|null $expression */
                 if ($expression = $this->readExpression($this->scanner->next())) {
                     $lastExpression->setBoostBy($expression->getToken());
                 }
             }
 
             if ($this->scanner->getTokenType() == QueryLexer::T_RANGE) {
-                /** @var \Gdbots\QueryParser\Node\AbstractQueryItem|null $expression */
                 if ($expression = $this->readExpression($this->scanner->next())) {
                     $lastExpression->setToken(sprintf('%s..%s', $lastExpression->getToken(), $expression->getToken()));
                 }

@@ -26,7 +26,7 @@ class QueryResult
     /**
      * The parsed AbstractQueryItem instance
      *
-     * @var AbstractQueryItem
+     * @var Node\AbstractQueryItem
      */
     protected $queryItem = null;
 
@@ -89,13 +89,14 @@ class QueryResult
     /**
      * Parses a given query string and assign all tokenized buckets.
      *
-     * @param string $queryString
+     * @param string $inputString
      *
      * @return \Gdbots\QueryParser\Node\AbstractQueryItem
      */
     public function parse($inputString)
     {
         $parser = new QueryParser();
+        $items = [];
 
         if ($this->queryItem = $parser->parse($inputString)) {
             $items = $this->queryItem->getQueryItemsByTokenType();

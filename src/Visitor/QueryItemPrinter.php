@@ -40,6 +40,8 @@ class QueryItemPrinter implements QueryItemVisitorInterface
 
     /**
      * @param string $line
+     *
+     * @return null
      */
     private function printIndentedLine($line)
     {
@@ -50,6 +52,8 @@ class QueryItemPrinter implements QueryItemVisitorInterface
 
     /**
      * @param Node\AbstractQueryItem $item
+     *
+     * @return null
      */
     private function printPrefix(Node\AbstractQueryItem $item)
     {
@@ -65,6 +69,8 @@ class QueryItemPrinter implements QueryItemVisitorInterface
 
     /**
      * @param Node\AbstractQueryItem $item
+     *
+     * @return null
      */
     private function printPostfix(Node\AbstractQueryItem $item)
     {

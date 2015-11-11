@@ -958,15 +958,33 @@
     }
   ],
   [
-    "Dear,Santa",
-    "Word(WORD):Dear,Santa",
+    "Dear,Santa ty dolla $ign",
+    "Or>Word(WORD):Dear,Santa>Word(WORD):ty>Word(WORD):dolla>Word(WORD):$ign",
     {
-      "WORD":1
+      "WORD":4
     },
     {
       "WORD":[
         {
           "value":"Dear,Santa",
+          "boost":null,
+          "exclude":false,
+          "include":false
+        },
+        {
+          "value":"ty",
+          "boost":null,
+          "exclude":false,
+          "include":false
+        },
+        {
+          "value":"dolla",
+          "boost":null,
+          "exclude":false,
+          "include":false
+        },
+        {
+          "value":"$ign",
           "boost":null,
           "exclude":false,
           "include":false
