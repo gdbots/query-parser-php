@@ -33,7 +33,7 @@ class QueryItemElastica implements QueryItemVisitorInterface
         $query->setFieldQuery($this->fieldName, $word->getToken());
 
         if ($word->isBoosted()) {
-            $query->setBoost($word->getBoostBy());
+            $query->setFieldBoost($this->fieldName, $word->getBoostBy());
         }
 
         return $this->convertToBoolQuery($word, $query);
@@ -48,7 +48,7 @@ class QueryItemElastica implements QueryItemVisitorInterface
         $query->setFieldQuery($this->fieldName, $phrase->getToken());
 
         if ($phrase->isBoosted()) {
-            $query->setBoost($phrase->getBoostBy());
+            $query->setFieldBoost($this->fieldName, $phrase->getBoostBy());
         }
 
         return $this->convertToBoolQuery($phrase, $query);
@@ -62,7 +62,7 @@ class QueryItemElastica implements QueryItemVisitorInterface
         $query = new Query\Term(['hashtag' => $hashtag->getToken()]);
 
         if ($hashtag->isBoosted()) {
-            $query->setBoost($hashtag->getBoostBy());
+            $query->setTerm($this->fieldName, $hashtag->getToken(), $hashtag->getBoostBy());
         }
 
         return $this->convertToBoolQuery($hashtag, $query);
@@ -76,7 +76,7 @@ class QueryItemElastica implements QueryItemVisitorInterface
         $query = new Query\Term(['mention' => $mention->getToken()]);
 
         if ($mention->isBoosted()) {
-            $query->setBoost($mention->getBoostBy());
+            $query->setTerm($this->fieldName, $mention->getToken(), $mention->getBoostBy());
         }
 
         return $this->convertToBoolQuery($mention, $query);
