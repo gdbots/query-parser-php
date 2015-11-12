@@ -9,7 +9,7 @@ class Word extends AbstractSimpleTerm
 {
     /**
      * @param string $word
-     * @param int $tokenType
+     * @param int    $tokenType
      */
     public function __construct($word, $tokenType = QueryLexer::T_WORD)
     {

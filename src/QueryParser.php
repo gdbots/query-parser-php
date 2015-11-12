@@ -104,12 +104,12 @@ class QueryParser
     /**
      * Makes the parser read a single term. This can be a word, text, or explicit term.
      *
-     * @param int    $tokenType
-     * @param Node\AbstractSimpleTerm $term
+     * @param int                    $tokenType
+     * @param Node\AbstractQueryItem $term
      *
      * @return \Gdbots\QueryParser\Node\AbstractQueryItem|null
      */
-    protected function readTerm($tokenType, $term)
+    protected function readTerm($tokenType, Node\AbstractQueryItem $term)
     {
         if (!in_array($tokenType, [QueryLexer::T_FILTER])) {
             return $term;
@@ -181,7 +181,7 @@ class QueryParser
      *
      * @param int $tokenType
      *
-     * @return \Gdbots\QueryParser\Node\ExplicitTerm|\Gdbots\QueryParser\Node\AbstractSimpleTerm|null
+     * @return \Gdbots\QueryParser\Node\AbstractQueryItem|null
      */
     protected function readExpression($tokenType)
     {

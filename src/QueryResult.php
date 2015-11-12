@@ -26,7 +26,7 @@ class QueryResult
     /**
      * The parsed AbstractQueryItem instance
      *
-     * @var Node\AbstractQueryItem
+     * @var \Gdbots\QueryParser\Node\AbstractQueryItem
      */
     protected $queryItem = null;
 
@@ -91,7 +91,7 @@ class QueryResult
      *
      * @param string $inputString
      *
-     * @return \Gdbots\QueryParser\Node\AbstractQueryItem
+     * @return array
      */
     public function parse($inputString)
     {

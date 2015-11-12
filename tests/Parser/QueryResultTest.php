@@ -12,15 +12,12 @@ class QueryResultTest extends \PHPUnit_Framework_TestCase
     /** @var QueryResult */
     protected $result;
 
-    /** QueryItemPrinter */
+    /** @var QueryItemPrinter */
     protected $printer;
 
     public function setUp()
     {
-        /** @var $this->result QueryResult */
         $this->result = new QueryResult();
-
-        /** @var $this->result QueryItemPrinter */
         $this->printer = new QueryItemPrinter();
     }
 

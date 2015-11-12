@@ -21,7 +21,6 @@ namespace Gdbots\QueryParser;
  */
 class QueryLexer
 {
-
     const T_EOI                 = 0; // end of input
     const T_WSPC                = 1; // white-space
 
