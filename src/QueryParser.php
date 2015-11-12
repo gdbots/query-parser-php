@@ -48,7 +48,6 @@ class QueryParser
      * Makes the parser build an expression tree from the given input.
      *
      * @param string $input
-     * @param bool   $ignoreOperator
      *
      * @return \Gdbots\QueryParser\Node\AbstractQueryItem|null
      */
