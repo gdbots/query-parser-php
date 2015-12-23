@@ -653,7 +653,7 @@ class QueryLexer
             }
 
             if ($tokenType == self::T_WORD) {
-                $matches = $this->testWorkToken($matches);
+                $matches = $this->testWordToken($matches);
             }
 
             // ignore range not in filter
@@ -701,7 +701,7 @@ class QueryLexer
      *
      * @return array
      */
-    private function testWorkToken(array $values)
+    private function testWordToken(array $values)
     {
         // word+filter with no value (ex: "a:")
         if (preg_match(self::REGEX_TOKENS, $values[2], $matches) && $matches[0] == $values[2]) {
