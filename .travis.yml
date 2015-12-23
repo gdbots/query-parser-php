@@ -1,0 +1,11 @@
+language: php
+
+php:
+  - 5.4
+  - 5.5
+  - 5.6
+#  - hhvm # currently failing with: Message was: "DateTimeZone::__construct(): Unknown or bad timezone (+00:00)"
+
+before_script:
+  - composer self-update
+  - composer install

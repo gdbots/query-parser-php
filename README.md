@@ -1,7 +1,12 @@
-QueryParser Handler
-===================
+query-parser-php
+=============
+
+[![Build Status](https://api.travis-ci.org/gdbots/query-parser-php.svg)](https://travis-ci.org/gdbots/query-parser-php)
+[![Code Climate](https://codeclimate.com/github/gdbots/query-parser-php/badges/gpa.svg)](https://codeclimate.com/github/gdbots/query-parser-php)
+[![Test Coverage](https://codeclimate.com/github/gdbots/query-parser-php/badges/coverage.svg)](https://codeclimate.com/github/gdbots/query-parser-php/coverage)
 
 Php library that converts search queries into terms, phrases, hashtags, mentions, etc.
+
 
 ## Query Syntax
 
@@ -17,6 +22,7 @@ It supports the following features:
 * Keywords can be exclude or include using "-" or "+", ex. `-excludedWord +mandatoryWord`.
 * Combinational logic can be specified using parentheses, ex. `word1 OR (word2 AND word3)`.
 * A keyword can be explicitly marked as belonging to a certain domain, ex. `people:Michael`.
+
 
 ## Basic Usage
 

@@ -1,14 +1,18 @@
----
+exclude_paths:
+  - '/vendor/*'
+
 engines:
-  fixme:
-    enabled: true
   phpcodesniffer:
     enabled: true
+    config:
+      file_extensions: 'php'
+      standard: 'PSR1,PSR2'
   phpmd:
     enabled: true
+    config:
+      file_extensions: 'php'
+      rulesets: 'cleancode,codesize,design,naming,unusedcode'
+
 ratings:
   paths:
-  - "**.php"
-  - "**.module"
-  - "**.inc"
-exclude_paths: []
+    - '**.php'
