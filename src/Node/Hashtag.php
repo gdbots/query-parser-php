@@ -5,7 +5,7 @@ namespace Gdbots\QueryParser\Node;
 use Gdbots\QueryParser\QueryLexer;
 use Gdbots\QueryParser\Visitor\QueryItemVisitorInterface;
 
-class Hashtag extends AbstractSimpleTerm
+class Hashtag extends AbstractSimpleTerm implements \JsonSerializable
 {
     /**
      * @param string $word
@@ -24,6 +24,11 @@ class Hashtag extends AbstractSimpleTerm
             'Operator' => 'Hashtag',
             'Term' => $this->getToken()
         ];
+    }
+
+    public function jsonSerialize()
+    {
+        return $this->toArray();
     }
 
     /**
