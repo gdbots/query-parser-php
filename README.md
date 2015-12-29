@@ -5,7 +5,7 @@ query-parser-php
 [![Code Climate](https://codeclimate.com/github/gdbots/query-parser-php/badges/gpa.svg)](https://codeclimate.com/github/gdbots/query-parser-php)
 [![Test Coverage](https://codeclimate.com/github/gdbots/query-parser-php/badges/coverage.svg)](https://codeclimate.com/github/gdbots/query-parser-php/coverage)
 
-Php library that converts search queries into terms, phrases, hashtags, mentions, etc.
+Php library that converts search queries into words, phrases, hashtags, mentions, etc.
 
 
 ## Query Syntax

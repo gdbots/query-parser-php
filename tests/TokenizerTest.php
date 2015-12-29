@@ -1,0 +1,931 @@
+<?php
+
+namespace Gdbots\Tests\QueryParser;
+
+use Gdbots\QueryParser\Tokenizer as T;
+
+class TokenizerTest extends \PHPUnit_Framework_TestCase
+{
+    /** @var T */
+    protected $tokenizer;
+
+    public function setUp()
+    {
+        $this->tokenizer = new T();
+    }
+
+    public function testOnlyWhitespace()
+    {
+        $this->tokenizer->scan('      ');
+        $this->assertSame([], $this->tokenizer->getTokens());
+    }
+
+    /**
+     * @dataProvider samples
+     *
+     * @param string $name
+     * @param string $input
+     * @param array $expected
+     */
+    public function testSamples($name, $input, array $expected)
+    {
+        // convert the sample 'expected' into token format.
+        foreach ($expected as $k => $v) {
+            if (!is_array($v)) {
+                $expected[$k] = ['type' => $v, 'value' => null];
+                continue;
+            }
+
+            $expected[$k] = ['type' => $v[0], 'value' => $v[1]];
+        }
+
+        $this->tokenizer->scan($input);
+
+        if ($expected !== $this->tokenizer->getTokens()) {
+            $this->fail("Sample [{$name}] with input [{$input}] failed.");
+        }
+    }
+
+    /**
+     * @return array
+     */
+    public function samples()
+    {
+        return [
+            /*
+             * START: URLS
+             */
+            [
+                'name' => 'url',
+                'input' => 'http://test.com/1_2.html?a=b%20&c=1+2#test',
+                'expected' => [
+                    [T::T_URL, 'http://test.com/1_2.html?a=b%20&c=1+2#test'],
+                ]
+            ],
+
+            [
+                'name' => 'required url',
+                'input' => '+http://test.com/1_2.html?a=b%20&c=1+2#test',
+                'expected' => [
+                    T::T_REQUIRED,
+                    [T::T_URL, 'http://test.com/1_2.html?a=b%20&c=1+2#test'],
+                ]
+            ],
+
+            [
+                'name' => 'prohibited url',
+                'input' => '-http://test.com/1_2.html?a=b%20&c=1+2#test',
+                'expected' => [
+                    T::T_PROHIBITED,
+                    [T::T_URL, 'http://test.com/1_2.html?a=b%20&c=1+2#test'],
+                ]
+            ],
+
+            [
+                'name' => 'url with boost int',
+                'input' => 'http://test.com/1_2.html?a=b%20&c=1+2#test^5',
+                'expected' => [
+                    [T::T_URL, 'http://test.com/1_2.html?a=b%20&c=1+2#test'],
+                    T::T_BOOST,
+                    [T::T_NUMBER, 5.0],
+                ]
+            ],
+
+            [
+                'name' => 'url with boost float',
+                'input' => 'http://test.com/1_2.html?a=b%20&c=1+2#test^5.5',
+                'expected' => [
+                    [T::T_URL, 'http://test.com/1_2.html?a=b%20&c=1+2#test'],
+                    T::T_BOOST,
+                    [T::T_NUMBER, 5.5],
+                ]
+            ],
+
+            [
+                'name' => 'url with fuzzy int',
+                'input' => 'http://test.com/1_2.html?a=b%20&c=1+2#test~5',
+                'expected' => [
+                    [T::T_URL, 'http://test.com/1_2.html?a=b%20&c=1+2#test'],
+                    T::T_FUZZY,
+                    [T::T_NUMBER, 5.0],
+                ]
+            ],
+
+            [
+                'name' => 'url with fuzzy float',
+                'input' => 'http://test.com/1_2.html?a=b%20&c=1+2#test~5.5',
+                'expected' => [
+                    [T::T_URL, 'http://test.com/1_2.html?a=b%20&c=1+2#test'],
+                    T::T_FUZZY,
+                    [T::T_NUMBER, 5.5],
+                ]
+            ],
+            /*
+             * END: URLS
+             */
+
+
+
+            /*
+             * START: EMOTICONS
+             * todo: need more emoticon tests
+             */
+            [
+                'name' => 'simple emoticons',
+                'input' => ':) :(',
+                'expected' => [
+                    [T::T_EMOTICON, ':)'],
+                    T::T_WHITE_SPACE,
+                    [T::T_EMOTICON, ':('],
+                ]
+            ],
+            /*
+             * END: EMOTICONS
+             */
+
+
+
+            /*
+             * START: EMOJIS
+             */
+            [
+                'name' => 'simple emoji',
+                'input' => 'ice 🍦 poop 💩 doh 😳',
+                'expected' => [
+                    [T::T_WORD, 'ice'],
+                    T::T_WHITE_SPACE,
+                    [T::T_EMOJI, '🍦'],
+                    T::T_WHITE_SPACE,
+                    [T::T_WORD, 'poop'],
+                    T::T_WHITE_SPACE,
+                    [T::T_EMOJI, '💩'],
+                    T::T_WHITE_SPACE,
+                    [T::T_WORD, 'doh'],
+                    T::T_WHITE_SPACE,
+                    [T::T_EMOJI, '😳'],
+                ]
+            ],
+            /*
+             * END: EMOJIS
+             */
+
+
+
+            /*
+             * START: PHRASES
+             */
+            [
+                'name' => 'simple phrase',
+                'input' => 'a "simple phrase"',
+                'expected' => [
+                    [T::T_WORD, 'a'],
+                    T::T_WHITE_SPACE,
+                    [T::T_PHRASE, 'simple phrase'],
+                ]
+            ],
+
+            [
+                'name' => 'required phrase',
+                'input' => 'a +"simple phrase"',
+                'expected' => [
+                    [T::T_WORD, 'a'],
+                    T::T_WHITE_SPACE,
+                    T::T_REQUIRED,
+                    [T::T_PHRASE, 'simple phrase'],
+                ]
+            ],
+
+            [
+                'name' => 'prohibited phrase',
+                'input' => 'a -"simple phrase"',
+                'expected' => [
+                    [T::T_WORD, 'a'],
+                    T::T_WHITE_SPACE,
+                    T::T_PROHIBITED,
+                    [T::T_PHRASE, 'simple phrase'],
+                ]
+            ],
+
+            [
+                'name' => 'boosted phrase int',
+                'input' => 'a "simple phrase"^1',
+                'expected' => [
+                    [T::T_WORD, 'a'],
+                    T::T_WHITE_SPACE,
+                    [T::T_PHRASE, 'simple phrase'],
+                    T::T_BOOST,
+                    [T::T_NUMBER, 1.0],
+                ]
+            ],
+
+            [
+                'name' => 'boosted phrase float',
+                'input' => 'a "simple phrase"^0.1',
+                'expected' => [
+                    [T::T_WORD, 'a'],
+                    T::T_WHITE_SPACE,
+                    [T::T_PHRASE, 'simple phrase'],
+                    T::T_BOOST,
+                    [T::T_NUMBER, 0.1],
+                ]
+            ],
+
+            [
+                'name' => 'fuzzy phrase int',
+                'input' => 'a "simple phrase"~1',
+                'expected' => [
+                    [T::T_WORD, 'a'],
+                    T::T_WHITE_SPACE,
+                    [T::T_PHRASE, 'simple phrase'],
+                    T::T_FUZZY,
+                    [T::T_NUMBER, 1.0],
+                ]
+            ],
+
+            [
+                'name' => 'fuzzy phrase float',
+                'input' => 'a "simple phrase"~0.1',
+                'expected' => [
+                    [T::T_WORD, 'a'],
+                    T::T_WHITE_SPACE,
+                    [T::T_PHRASE, 'simple phrase'],
+                    T::T_FUZZY,
+                    [T::T_NUMBER, 0.1],
+                ]
+            ],
+
+            [
+                'name' => 'phrase with embedded emoticons',
+                'input' => '"a smiley :)"',
+                'expected' => [
+                    [T::T_PHRASE, 'a smiley :)'],
+                ]
+            ],
+
+            [
+                'name' => 'phrase with embedded emojis',
+                'input' => '"ice cream 🍦"',
+                'expected' => [
+                    [T::T_PHRASE, 'ice cream 🍦'],
+                ]
+            ],
+
+            [
+                'name' => 'phrase with embedded punctation, boosting, etc.',
+                'input' => '"boosted^51.50 .. field:test~5"',
+                'expected' => [
+                    [T::T_PHRASE, 'boosted^51.50 .. field:test~5'],
+                ]
+            ],
+            /*
+             * END: PHRASES
+             */
+
+
+
+            /*
+             * START: HASHTAGS
+             */
+            [
+                'name' => 'simple hashtags',
+                'input' => 'a #Cat in a #hat',
+                'expected' => [
+                    [T::T_WORD, 'a'],
+                    T::T_WHITE_SPACE,
+                    [T::T_HASHTAG, 'Cat'],
+                    T::T_WHITE_SPACE,
+                    [T::T_WORD, 'in'],
+                    T::T_WHITE_SPACE,
+                    [T::T_WORD, 'a'],
+                    T::T_WHITE_SPACE,
+                    [T::T_HASHTAG, 'hat'],
+                ]
+            ],
+
+            [
+                'name' => 'required/prohibited hashtags with boost',
+                'input' => '+#Cat -#hat^100',
+                'expected' => [
+                    T::T_REQUIRED,
+                    [T::T_HASHTAG, 'Cat'],
+                    T::T_WHITE_SPACE,
+                    T::T_PROHIBITED,
+                    [T::T_HASHTAG, 'hat'],
+                    T::T_BOOST,
+                    [T::T_NUMBER, 100.0],
+                ]
+            ],
+
+            [
+                'name' => 'required/prohibited hashtags with fuzzy',
+                'input' => '#hat~100 #hat~100.1',
+                'expected' => [
+                    [T::T_HASHTAG, 'hat'],
+                    T::T_FUZZY,
+                    [T::T_NUMBER, 100.0],
+                    T::T_WHITE_SPACE,
+                    [T::T_HASHTAG, 'hat'],
+                    T::T_FUZZY,
+                    [T::T_NUMBER, 100.1],
+                ]
+            ],
+
+            [
+                'name' => 'required/prohibited hashtags with boost',
+                'input' => '+#Cat -#hat^100',
+                'expected' => [
+                    T::T_REQUIRED,
+                    [T::T_HASHTAG, 'Cat'],
+                    T::T_WHITE_SPACE,
+                    T::T_PROHIBITED,
+                    [T::T_HASHTAG, 'hat'],
+                    T::T_BOOST,
+                    [T::T_NUMBER, 100.0],
+                ]
+            ],
+            /*
+             * END: HASHTAGS
+             */
+
+
+
+            /*
+             * START: MENTIONS
+             */
+            [
+                'name' => 'simple mentions',
+                'input' => '@user @user_name @user.name @user-name',
+                'expected' => [
+                    [T::T_MENTION, 'user'],
+                    T::T_WHITE_SPACE,
+                    [T::T_MENTION, 'user_name'],
+                    T::T_WHITE_SPACE,
+                    [T::T_MENTION, 'user.name'],
+                    T::T_WHITE_SPACE,
+                    [T::T_MENTION, 'user-name'],
+                ]
+            ],
+
+            [
+                'name' => 'required mentions',
+                'input' => '+@user +@user_name +@user.name +@user-name',
+                'expected' => [
+                    T::T_REQUIRED,
+                    [T::T_MENTION, 'user'],
+                    T::T_WHITE_SPACE,
+                    T::T_REQUIRED,
+                    [T::T_MENTION, 'user_name'],
+                    T::T_WHITE_SPACE,
+                    T::T_REQUIRED,
+                    [T::T_MENTION, 'user.name'],
+                    T::T_WHITE_SPACE,
+                    T::T_REQUIRED,
+                    [T::T_MENTION, 'user-name'],
+                ]
+            ],
+
+            [
+                'name' => 'prohibited mentions',
+                'input' => '-@user -@user_name -@user.name -@user-name',
+                'expected' => [
+                    T::T_PROHIBITED,
+                    [T::T_MENTION, 'user'],
+                    T::T_WHITE_SPACE,
+                    T::T_PROHIBITED,
+                    [T::T_MENTION, 'user_name'],
+                    T::T_WHITE_SPACE,
+                    T::T_PROHIBITED,
+                    [T::T_MENTION, 'user.name'],
+                    T::T_WHITE_SPACE,
+                    T::T_PROHIBITED,
+                    [T::T_MENTION, 'user-name'],
+                ]
+            ],
+            /*
+             * END: MENTIONS
+             */
+
+
+
+            /*
+             * START: NUMBERS
+             */
+            [
+                'name' => 'integers, decimals and exponential form',
+                'input' => '100 3.1415926535898 2.2E-5',
+                'expected' => [
+                    [T::T_NUMBER, 100.0],
+                    T::T_WHITE_SPACE,
+                    [T::T_NUMBER, 3.1415926535898],
+                    T::T_WHITE_SPACE,
+                    [T::T_NUMBER, 2.2E-5],
+                ]
+            ],
+
+            [
+                'name' => 'negative integers, decimals and exponential form',
+                'input' => '-100 -3.1415926535898 -2.2E-5',
+                'expected' => [
+                    [T::T_NUMBER, -100.0],
+                    T::T_WHITE_SPACE,
+                    [T::T_NUMBER, -3.1415926535898],
+                    T::T_WHITE_SPACE,
+                    [T::T_NUMBER, -2.2E-5],
+                ]
+            ],
+
+            [
+                'name' => 'words with boosted numbers',
+                'input' => 'word^100 word^3.1415926535898 word^2.2E-5',
+                'expected' => [
+                    [T::T_WORD, 'word'],
+                    T::T_BOOST,
+                    [T::T_NUMBER, 100.0],
+                    T::T_WHITE_SPACE,
+                    [T::T_WORD, 'word'],
+                    T::T_BOOST,
+                    [T::T_NUMBER, 3.1415926535898],
+                    T::T_WHITE_SPACE,
+                    [T::T_WORD, 'word'],
+                    T::T_BOOST,
+                    [T::T_NUMBER, 2.2E-5],
+                ]
+            ],
+
+            [
+                'name' => 'words with boosted negative numbers',
+                'input' => 'word^-100 word^-3.1415926535898 word^-2.2E-5',
+                'expected' => [
+                    [T::T_WORD, 'word'],
+                    T::T_BOOST,
+                    [T::T_NUMBER, -100.0],
+                    T::T_WHITE_SPACE,
+                    [T::T_WORD, 'word'],
+                    T::T_BOOST,
+                    [T::T_NUMBER, -3.1415926535898],
+                    T::T_WHITE_SPACE,
+                    [T::T_WORD, 'word'],
+                    T::T_BOOST,
+                    [T::T_NUMBER, -2.2E-5],
+                ]
+            ],
+
+            [
+                'name' => 'words with fuzzy numbers',
+                'input' => 'word~100 word~3.1415926535898 word~2.2E-5',
+                'expected' => [
+                    [T::T_WORD, 'word'],
+                    T::T_FUZZY,
+                    [T::T_NUMBER, 100.0],
+                    T::T_WHITE_SPACE,
+                    [T::T_WORD, 'word'],
+                    T::T_FUZZY,
+                    [T::T_NUMBER, 3.1415926535898],
+                    T::T_WHITE_SPACE,
+                    [T::T_WORD, 'word'],
+                    T::T_FUZZY,
+                    [T::T_NUMBER, 2.2E-5],
+                ]
+            ],
+
+            [
+                'name' => 'words with fuzzy negative numbers',
+                'input' => 'word~-100 word~-3.1415926535898 word~-2.2E-5',
+                'expected' => [
+                    [T::T_WORD, 'word'],
+                    T::T_FUZZY,
+                    [T::T_NUMBER, -100.0],
+                    T::T_WHITE_SPACE,
+                    [T::T_WORD, 'word'],
+                    T::T_FUZZY,
+                    [T::T_NUMBER, -3.1415926535898],
+                    T::T_WHITE_SPACE,
+                    [T::T_WORD, 'word'],
+                    T::T_FUZZY,
+                    [T::T_NUMBER, -2.2E-5],
+                ]
+            ],
+            /*
+             * END: NUMBERS
+             */
+
+
+
+            /*
+             * START: FIELDS
+             * todo: need more field tests (ranges, phrases, etc.)
+             */
+            [
+                'name' => 'fields with hypen, underscore and dot',
+                'input' => '+first-name:homer -last_name:simpson job.performance:poor^5',
+                'expected' => [
+                    T::T_REQUIRED,
+                    [T::T_FIELD, 'first-name'],
+                    [T::T_WORD, 'homer'],
+                    T::T_WHITE_SPACE,
+                    T::T_PROHIBITED,
+                    [T::T_FIELD, 'last_name'],
+                    [T::T_WORD, 'simpson'],
+                    T::T_WHITE_SPACE,
+                    [T::T_FIELD, 'job.performance'],
+                    [T::T_WORD, 'poor'],
+                    T::T_BOOST,
+                    [T::T_NUMBER, 5.0],
+                ]
+            ],
+
+            [
+                'name' => 'field with field in it',
+                'input' => 'field:subfield:what',
+                'expected' => [
+                    [T::T_FIELD, 'field'],
+                    [T::T_WORD, 'subfield:'],
+                    [T::T_WORD, 'what'],
+                ]
+            ],
+
+            [
+                'name' => 'field with no value',
+                'input' => 'field:',
+                'expected' => [
+                    [T::T_FIELD, 'field'],
+                ]
+            ],
+
+            [
+                'name' => 'field with greater/less than',
+                'input' => 'field:>100 field:>=100.1 field:<100 field:<=100.1',
+                'expected' => [
+                    [T::T_FIELD, 'field'],
+                    T::T_GREATER_THAN,
+                    [T::T_NUMBER, 100.0],
+                    T::T_WHITE_SPACE,
+                    [T::T_FIELD, 'field'],
+                    T::T_GREATER_THAN,
+                    T::T_EQUALS,
+                    [T::T_NUMBER, 100.1],
+                    T::T_WHITE_SPACE,
+                    [T::T_FIELD, 'field'],
+                    T::T_LESS_THAN,
+                    [T::T_NUMBER, 100.0],
+                    T::T_WHITE_SPACE,
+                    [T::T_FIELD, 'field'],
+                    T::T_LESS_THAN,
+                    T::T_EQUALS,
+                    [T::T_NUMBER, 100.1],
+                ]
+            ],
+
+            [
+                'name' => 'field with a hashtag or mention',
+                'input' => 'field:#cats field:@user.name',
+                'expected' => [
+                    [T::T_FIELD, 'field'],
+                    [T::T_HASHTAG, 'cats'],
+                    T::T_WHITE_SPACE,
+                    [T::T_FIELD, 'field'],
+                    [T::T_MENTION, 'user.name'],
+                ]
+            ],
+
+            [
+                'name' => 'field with inclusive range',
+                'input' => 'field:[1..5] +field:[1 TO 5]',
+                'expected' => [
+                    [T::T_FIELD, 'field'],
+                    T::T_RANGE_INCL_START,
+                    [T::T_NUMBER, 1.0],
+                    T::T_TO,
+                    [T::T_NUMBER, 5.0],
+                    T::T_RANGE_INCL_END,
+                    T::T_WHITE_SPACE,
+                    T::T_REQUIRED,
+                    [T::T_FIELD, 'field'],
+                    T::T_RANGE_INCL_START,
+                    [T::T_NUMBER, 1.0],
+                    T::T_WHITE_SPACE,
+                    T::T_TO,
+                    T::T_WHITE_SPACE,
+                    [T::T_NUMBER, 5.0],
+                    T::T_RANGE_INCL_END,
+                ]
+            ],
+
+            [
+                'name' => 'field with exclusive range',
+                'input' => 'field:{1.1..5.5} +field:{1.1 TO 5.5}',
+                'expected' => [
+                    [T::T_FIELD, 'field'],
+                    T::T_RANGE_EXCL_START,
+                    [T::T_NUMBER, 1.1],
+                    T::T_TO,
+                    [T::T_NUMBER, 5.5],
+                    T::T_RANGE_EXCL_END,
+                    T::T_WHITE_SPACE,
+                    T::T_REQUIRED,
+                    [T::T_FIELD, 'field'],
+                    T::T_RANGE_EXCL_START,
+                    [T::T_NUMBER, 1.1],
+                    T::T_WHITE_SPACE,
+                    T::T_TO,
+                    T::T_WHITE_SPACE,
+                    [T::T_NUMBER, 5.5],
+                    T::T_RANGE_EXCL_END,
+                ]
+            ],
+            /*
+             * END: FIELDS
+             */
+
+
+
+            /*
+             * START: WORDS
+             */
+            [
+                'name' => 'word with hashtag or mention in it',
+                'input' => 'omg#lol omg@user',
+                'expected' => [
+                    [T::T_WORD, 'omg#lol'],
+                    T::T_WHITE_SPACE,
+                    [T::T_WORD, 'omg@user'],
+                ]
+            ],
+
+            [
+                'name' => 'required/prohibited words',
+                'input' => '+c.h.u.d. -zombieland +ac/dc^5',
+                'expected' => [
+                    T::T_REQUIRED,
+                    [T::T_WORD, 'c.h.u.d'],
+                    T::T_WHITE_SPACE,
+                    T::T_PROHIBITED,
+                    [T::T_WORD, 'zombieland'],
+                    T::T_WHITE_SPACE,
+                    T::T_REQUIRED,
+                    [T::T_WORD, 'ac/dc'],
+                    T::T_BOOST,
+                    [T::T_NUMBER, 5.0],
+                ]
+            ],
+
+            [
+                'name' => 'words that have embedded operators',
+                'input' => 'candy and oreos || dandy && chores^5',
+                'expected' => [
+                    [T::T_WORD, 'candy'],
+                    T::T_WHITE_SPACE,
+                    T::T_AND,
+                    T::T_WHITE_SPACE,
+                    [T::T_WORD, 'oreos'],
+                    T::T_WHITE_SPACE,
+                    T::T_OR,
+                    T::T_WHITE_SPACE,
+                    [T::T_WORD, 'dandy'],
+                    T::T_WHITE_SPACE,
+                    T::T_AND,
+                    T::T_WHITE_SPACE,
+                    [T::T_WORD, 'chores'],
+                    T::T_BOOST,
+                    [T::T_NUMBER, 5.0],
+                ]
+            ],
+            /*
+             * END: WORDS
+             */
+
+
+
+            /*
+             * START: ACCENTED CHARS
+             */
+            [
+                'name' => 'accents and hyphens',
+                'input' => '+Beyoncé Giselle Knowles-Carter',
+                'expected' => [
+                    T::T_REQUIRED,
+                    [T::T_WORD, 'Beyoncé'],
+                    T::T_WHITE_SPACE,
+                    [T::T_WORD, 'Giselle'],
+                    T::T_WHITE_SPACE,
+                    [T::T_WORD, 'Knowles-Carter'],
+                ]
+            ],
+
+            [
+                'name' => 'accents and hyphen spice',
+                'input' => 'J. Lo => Emme Maribel Muñiz',
+                'expected' => [
+                    [T::T_WORD, 'J'],
+                    T::T_WHITE_SPACE,
+                    [T::T_WORD, 'Lo'],
+                    T::T_WHITE_SPACE,
+                    T::T_EQUALS,
+                    T::T_GREATER_THAN,
+                    T::T_WHITE_SPACE,
+                    [T::T_WORD, 'Emme'],
+                    T::T_WHITE_SPACE,
+                    [T::T_WORD, 'Maribel'],
+                    T::T_WHITE_SPACE,
+                    [T::T_WORD, 'Muñiz'],
+                ]
+            ],
+            /*
+             * END: ACCENTED CHARS
+             */
+
+
+
+            /*
+             * START: RAPPERS and POP STARS
+             */
+            [
+                'name' => 'crazy a$$ names',
+                'input' => 'p!nk and K$sha in a tr33 with 50¢',
+                'expected' => [
+                    [T::T_WORD, 'p!nk'],
+                    T::T_WHITE_SPACE,
+                    T::T_AND,
+                    T::T_WHITE_SPACE,
+                    [T::T_WORD, 'K$sha'],
+                    T::T_WHITE_SPACE,
+                    [T::T_WORD, 'in'],
+                    T::T_WHITE_SPACE,
+                    [T::T_WORD, 'a'],
+                    T::T_WHITE_SPACE,
+                    [T::T_WORD, 'tr33'],
+                    T::T_WHITE_SPACE,
+                    [T::T_WORD, 'with'],
+                    T::T_WHITE_SPACE,
+                    [T::T_WORD, '50¢'],
+                ]
+            ],
+
+            [
+                'name' => 'my name is math(ish)',
+                'input' => '+florence+machine ac/dc^11 Stellastarr* T\'Pau ​¡Forward, Russia! "¡Forward, Russia!"~',
+                'expected' => [
+                    T::T_REQUIRED,
+                    [T::T_WORD, 'florence+machine'],
+                    T::T_WHITE_SPACE,
+                    [T::T_WORD, 'ac/dc'],
+                    T::T_BOOST,
+                    [T::T_NUMBER, 11.0],
+                    T::T_WHITE_SPACE,
+                    [T::T_WORD, 'Stellastarr'],
+                    T::T_WILDCARD,
+                    T::T_WHITE_SPACE,
+                    [T::T_WORD, 'T\'Pau'],
+                    T::T_WHITE_SPACE,
+                    [T::T_WORD, '​¡Forward'],
+                    T::T_WHITE_SPACE,
+                    [T::T_WORD, 'Russia'],
+                    T::T_WHITE_SPACE,
+                    [T::T_PHRASE, '¡Forward, Russia'],
+                    T::T_FUZZY,
+                ]
+            ],
+            /*
+             * END: RAPPERS and POP STARS
+             */
+
+
+
+            /*
+             * START: WEIRD QUERIES
+             */
+            [
+                'name' => 'whip nae nae',
+                'input' => 'Watch Me (Whip/Nae Nae)',
+                'expected' => [
+                    [T::T_WORD, 'Watch'],
+                    T::T_WHITE_SPACE,
+                    [T::T_WORD, 'Me'],
+                    T::T_WHITE_SPACE,
+                    T::T_SUBQUERY_START,
+                    [T::T_WORD, 'Whip/Nae'],
+                    T::T_WHITE_SPACE,
+                    [T::T_WORD, 'Nae'],
+                    T::T_SUBQUERY_END,
+                ]
+            ],
+
+            [
+                'name' => 'use of || then and required subquery',
+                'input' => 'test || AND what (+test)',
+                'expected' => [
+                    [T::T_WORD, 'test'],
+                    T::T_WHITE_SPACE,
+                    T::T_OR,
+                    T::T_WHITE_SPACE,
+                    T::T_AND,
+                    T::T_WHITE_SPACE,
+                    [T::T_WORD, 'what'],
+                    T::T_WHITE_SPACE,
+                    T::T_SUBQUERY_START,
+                    T::T_REQUIRED,
+                    [T::T_WORD, 'test'],
+                    T::T_SUBQUERY_END,
+                ]
+            ],
+
+            [
+                'name' => 'mega subqueries, all non-sensical',
+                'input' => 'test OR ( ( 1 ) OR ( ( 2 ) ) OR ( ( ( 3.14 ) ) ) OR a OR +b ) OR +field:>1',
+                'expected' => [
+                    [T::T_WORD, 'test'],
+                    T::T_WHITE_SPACE,
+                    T::T_OR,
+                    T::T_WHITE_SPACE,
+                    T::T_SUBQUERY_START,
+                    T::T_WHITE_SPACE,
+                    T::T_SUBQUERY_START,
+                    T::T_WHITE_SPACE,
+                    [T::T_NUMBER, 1.0],
+                    T::T_WHITE_SPACE,
+                    T::T_SUBQUERY_END,
+                    T::T_WHITE_SPACE,
+                    T::T_OR,
+                    T::T_WHITE_SPACE,
+                    T::T_SUBQUERY_START,
+                    T::T_WHITE_SPACE,
+                    T::T_SUBQUERY_START,
+                    T::T_WHITE_SPACE,
+                    [T::T_NUMBER, 2.0],
+                    T::T_WHITE_SPACE,
+                    T::T_SUBQUERY_END,
+                    T::T_WHITE_SPACE,
+                    T::T_SUBQUERY_END,
+                    T::T_WHITE_SPACE,
+                    T::T_OR,
+                    T::T_WHITE_SPACE,
+                    T::T_SUBQUERY_START,
+                    T::T_WHITE_SPACE,
+                    T::T_SUBQUERY_START,
+                    T::T_WHITE_SPACE,
+                    T::T_SUBQUERY_START,
+                    T::T_WHITE_SPACE,
+                    [T::T_NUMBER, 3.14],
+                    T::T_WHITE_SPACE,
+                    T::T_SUBQUERY_END,
+                    T::T_WHITE_SPACE,
+                    T::T_SUBQUERY_END,
+                    T::T_WHITE_SPACE,
+                    T::T_SUBQUERY_END,
+                    T::T_WHITE_SPACE,
+                    T::T_OR,
+                    T::T_WHITE_SPACE,
+                    [T::T_WORD, 'a'],
+                    T::T_WHITE_SPACE,
+                    T::T_OR,
+                    T::T_WHITE_SPACE,
+                    T::T_REQUIRED,
+                    [T::T_WORD, 'b'],
+                    T::T_WHITE_SPACE,
+                    T::T_SUBQUERY_END,
+                    T::T_WHITE_SPACE,
+                    T::T_OR,
+                    T::T_WHITE_SPACE,
+                    T::T_REQUIRED,
+                    [T::T_FIELD, 'field'],
+                    T::T_GREATER_THAN,
+                    [T::T_NUMBER, 1.0],
+                ]
+            ],
+
+            [
+                'name' => 'common dotted things',
+                'input' => 'R.I.P. Motörhead',
+                'expected' => [
+                    [T::T_WORD, 'R.I.P'],
+                    T::T_WHITE_SPACE,
+                    [T::T_WORD, 'Motörhead'],
+                ]
+            ],
+
+            [
+                'name' => 'ignored chars',
+                'input' => '!!! ! $ _ . ; %',
+                'expected' => [
+                    [T::T_IGNORED, '!!!'],
+                    T::T_WHITE_SPACE,
+                    [T::T_IGNORED, '!'],
+                    T::T_WHITE_SPACE,
+                    [T::T_IGNORED, '$'],
+                    T::T_WHITE_SPACE,
+                    [T::T_IGNORED, '_'],
+                    T::T_WHITE_SPACE,
+                    [T::T_IGNORED, '.'],
+                    T::T_WHITE_SPACE,
+                    [T::T_IGNORED, ';'],
+                    T::T_WHITE_SPACE,
+                    [T::T_IGNORED, '%'],
+                ]
+            ],
+            //
+            /*
+             * END: WEIRD QUERIES
+             */
+        ];
+    }
+}
