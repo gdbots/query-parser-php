@@ -261,6 +261,14 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                     [T::T_PHRASE, 'boosted^51.50 .. field:test~5'],
                 ]
             ],
+
+            [
+                'name' => 'phrase with dates',
+                'input' => '"in the year >=2000-01-01"',
+                'expected' => [
+                    [T::T_PHRASE, 'in the year >=2000-01-01'],
+                ]
+            ],
             /*
              * END: PHRASES
              */
@@ -320,6 +328,15 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                     [T::T_NUMBER, 100.0],
                 ]
             ],
+
+            // todo: should we refactor to catch #hashtag#hashtag or @mention#tag or #tag@mention?
+            [
+                'name' => 'hashtag on hashtag',
+                'input' => '#cat#cat',
+                'expected' => [
+                    [T::T_WORD, 'cat#cat'],
+                ]
+            ],
             /*
              * END: HASHTAGS
              */
@@ -367,6 +384,36 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                     [T::T_MENTION, 'user.name'],
                     T::T_PROHIBITED,
                     [T::T_MENTION, 'user-name'],
+                ]
+            ],
+
+            [
+                'name' => 'mentions with emails and hashtags',
+                'input' => '@john@doe.com @john#doe',
+                'expected' => [
+                    [T::T_WORD, 'john@doe.com'],
+                    [T::T_WORD, 'john#doe'],
+                ]
+            ],
+
+            [
+                'name' => 'mentions with punctuation',
+                'input' => '@john. @wtf! @who?',
+                'expected' => [
+                    [T::T_MENTION, 'john'],
+                    [T::T_MENTION, 'wtf'],
+                    [T::T_MENTION, 'who'],
+                ]
+            ],
+
+            [
+                'name' => 'mentions with special chars',
+                'input' => '@john^doe @john!doe',
+                'expected' => [
+                    [T::T_MENTION, 'john'],
+                    T::T_BOOST,
+                    [T::T_WORD, 'doe'],
+                    [T::T_WORD, 'john!doe'],
                 ]
             ],
             /*
@@ -469,8 +516,6 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
 
             /*
              * START: FIELDS
-             * todo: need more field tests (ranges, phrases, etc.)
-             * todo: test dates
              */
             [
                 'name' => 'fields with hypen, underscore and dot',
@@ -507,6 +552,24 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                 'input' => 'field:',
                 'expected' => [
                     [T::T_FILTER_START, 'field'],
+                    T::T_FILTER_END,
+                ]
+            ],
+
+            [
+                'name' => 'field with phrases',
+                'input' => 'field:"boosted^5 +required"^1 -field:"[1..5]"~4',
+                'expected' => [
+                    [T::T_FILTER_START, 'field'],
+                    [T::T_PHRASE, 'boosted^5 +required'],
+                    T::T_BOOST,
+                    [T::T_NUMBER, 1.0],
+                    T::T_FILTER_END,
+                    T::T_PROHIBITED,
+                    [T::T_FILTER_START, 'field'],
+                    [T::T_PHRASE, '[1..5]'],
+                    T::T_FUZZY,
+                    [T::T_NUMBER, 4.0],
                     T::T_FILTER_END,
                 ]
             ],
@@ -622,7 +685,77 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                     T::T_FILTER_END,
                 ]
             ],
-            //
+
+            [
+                'name' => 'field with dates',
+                'input' => 'field:2015-12-18 field:>2015-12-18 field:<2015-12-18 field:>=2015-12-18 field:<=2015-12-18',
+                'expected' => [
+                    [T::T_FILTER_START, 'field'],
+                    [T::T_DATE, '2015-12-18'],
+                    T::T_FILTER_END,
+                    [T::T_FILTER_START, 'field'],
+                    T::T_GREATER_THAN,
+                    [T::T_DATE, '2015-12-18'],
+                    T::T_FILTER_END,
+                    [T::T_FILTER_START, 'field'],
+                    T::T_LESS_THAN,
+                    [T::T_DATE, '2015-12-18'],
+                    T::T_FILTER_END,
+                    [T::T_FILTER_START, 'field'],
+                    T::T_GREATER_THAN,
+                    T::T_EQUALS,
+                    [T::T_DATE, '2015-12-18'],
+                    T::T_FILTER_END,
+                    [T::T_FILTER_START, 'field'],
+                    T::T_LESS_THAN,
+                    T::T_EQUALS,
+                    [T::T_DATE, '2015-12-18'],
+                    T::T_FILTER_END,
+                ]
+            ],
+
+            [
+                'name' => 'field leading _ and uuid',
+                'input' => '_id:a9fc3e46-150a-45cd-ad39-c80f93119900^5',
+                'expected' => [
+                    [T::T_FILTER_START, '_id'],
+                    [T::T_WORD, 'a9fc3e46-150a-45cd-ad39-c80f93119900'],
+                    T::T_BOOST,
+                    [T::T_NUMBER, 5.0],
+                    T::T_FILTER_END,
+                ]
+            ],
+
+            [
+                'name' => 'field with mentions and emails',
+                'input' => 'email:john@doe.com -user:@twitterz',
+                'expected' => [
+                    [T::T_FILTER_START, 'email'],
+                    [T::T_WORD, 'john@doe.com'],
+                    T::T_FILTER_END,
+                    T::T_PROHIBITED,
+                    [T::T_FILTER_START, 'user'],
+                    [T::T_MENTION, 'twitterz'],
+                    T::T_FILTER_END,
+                ]
+            ],
+
+            [
+                'name' => 'field with hashtags',
+                'input' => 'tags:#cats tags:(#cats || #dogs)',
+                'expected' => [
+                    [T::T_FILTER_START, 'tags'],
+                    [T::T_HASHTAG, 'cats'],
+                    T::T_FILTER_END,
+                    [T::T_FILTER_START, 'tags'],
+                    T::T_SUBQUERY_START,
+                    [T::T_HASHTAG, 'cats'],
+                    T::T_OR,
+                    [T::T_HASHTAG, 'dogs'],
+                    T::T_SUBQUERY_END,
+                    T::T_FILTER_END,
+                ]
+            ],
             /*
              * END: FIELDS
              */
@@ -634,10 +767,12 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
              */
             [
                 'name' => 'word with hashtag or mention in it',
-                'input' => 'omg#lol omg@user',
+                'input' => 'omg#lol omg@user @mention#tag #tag@mention',
                 'expected' => [
                     [T::T_WORD, 'omg#lol'],
                     [T::T_WORD, 'omg@user'],
+                    [T::T_WORD, 'mention#tag'],
+                    [T::T_WORD, 'tag@mention'],
                 ]
             ],
 
@@ -678,6 +813,40 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
 
 
             /*
+             * START: DATES
+             */
+            [
+                'name' => 'dates in string',
+                'input' => '2000-01-01 >=2000-01-01 (+2015-12-18) -2015-12-18',
+                'expected' => [
+                    [T::T_DATE, '2000-01-01'],
+                    [T::T_DATE, '2000-01-01'],
+                    T::T_SUBQUERY_START,
+                    T::T_REQUIRED,
+                    [T::T_DATE, '2015-12-18'],
+                    T::T_SUBQUERY_END,
+                    T::T_PROHIBITED,
+                    [T::T_DATE, '2015-12-18'],
+                ]
+            ],
+
+            [
+                'name' => 'dates on dates',
+                'input' => '2000-01-012000-01-01 2000-01-01^2000-01-01',
+                'expected' => [
+                    [T::T_WORD, '2000-01-012000-01-01'],
+                    [T::T_DATE, '2000-01-01'],
+                    T::T_BOOST,
+                    [T::T_DATE, '2000-01-01'],
+                ]
+            ],
+            /*
+             * END: DATES
+             */
+
+
+
+            /*
              * START: ACCENTED CHARS
              */
             [
@@ -693,13 +862,14 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
 
             [
                 'name' => 'accents and hyphen spice',
-                'input' => 'J. Lo => Emme Maribel Muñiz',
+                'input' => 'J. Lo => Emme Maribel Muñiz $p0rty-spicé',
                 'expected' => [
                     [T::T_WORD, 'J'],
                     [T::T_WORD, 'Lo'],
                     [T::T_WORD, 'Emme'],
                     [T::T_WORD, 'Maribel'],
                     [T::T_WORD, 'Muñiz'],
+                    [T::T_WORD, '$p0rty-spicé'],
                 ]
             ],
             /*
@@ -842,7 +1012,65 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                     [T::T_NUMBER, 4.0],
                 ]
             ],
-            //
+
+            [
+                'name' => 'intentionally mutant',
+                'input' => '[blah "[[shortcode]]" akd_ -gj% ! @* (+=} --> ;\' <a onclick="javascript:alert(\'test\')>click</a>',
+                'expected' => [
+                    [T::T_WORD, 'blah'],
+                    [T::T_PHRASE, '[[shortcode]]'],
+                    [T::T_WORD, 'akd_'],
+                    T::T_PROHIBITED,
+                    [T::T_WORD, 'gj%'],
+                    T::T_SUBQUERY_START,
+                    T::T_REQUIRED,
+                    T::T_PROHIBITED,
+                    [T::T_WORD, 'a'],
+                    [T::T_WORD, 'onclick'],
+                    [T::T_WORD, 'javascript:alert'],
+                    [T::T_WORD, 'test'],
+                    T::T_SUBQUERY_END,
+                    [T::T_WORD, 'click'],
+                    [T::T_WORD, 'a'],
+                ]
+            ],
+
+            [
+                'name' => 'intentionally mutanter',
+                'input' => '[blah &quot;[[shortcode]]&quot; akd_ -gj% ! @* (+=} --&gt; ;\' &lt;a onclick=&quot;javascript:alert(\'test\')&gt;click&lt;/a&gt;',
+                'expected' => [
+                    [T::T_WORD, 'blah'],
+                    [T::T_WORD, 'quot'],
+                    [T::T_WORD, 'shortcode'],
+                    [T::T_WORD, 'quot'],
+                    [T::T_WORD, 'akd_'],
+                    T::T_PROHIBITED,
+                    [T::T_WORD, 'gj%'],
+                    T::T_SUBQUERY_START,
+                    T::T_REQUIRED,
+                    T::T_PROHIBITED,
+                    [T::T_WORD, 'gt'],
+                    [T::T_WORD, 'lt;a'],
+                    [T::T_WORD, 'onclick'],
+                    [T::T_WORD, 'quot;javascript:alert'],
+                    [T::T_WORD, 'test'],
+                    T::T_SUBQUERY_END,
+                    [T::T_WORD, 'gt;click&lt;/a&gt'],
+                ]
+            ],
+
+            [
+                'name' => 'xss1',
+                'input' => '<IMG SRC=j&#X41vascript:alert(\'test2\')>',
+                'expected' => [
+                    [T::T_WORD, 'IMG'],
+                    [T::T_WORD, 'SRC'],
+                    [T::T_WORD, 'j&#X41vascript:alert'],
+                    T::T_SUBQUERY_START,
+                    [T::T_WORD, 'test2'],
+                    T::T_SUBQUERY_END,
+                ]
+            ],
             /*
              * END: WEIRD QUERIES
              */

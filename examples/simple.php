@@ -7,6 +7,13 @@ use Gdbots\QueryParser\SimpleParser;
 $parser = new SimpleParser();
 
 $tests = [
+    '<IMG SRC=j&#X41vascript:alert(\'test2\')>',
+    '[blah "[[shortcode]]" akd_ -gj% ! @* (+=} --> ;\' <a onclick="javascript:alert(\'test\')>click</a>',
+    htmlentities('[blah "[[shortcode]]" akd_ -gj% ! @* (+=} --> ;\' <a onclick="javascript:alert(\'test\')>click</a>'),
+    '#cat#cat john@doe.com #cat!dog',
+    'tags:#cats tags:(#cats || #dogs)',
+    '@john.doe @john@doe.com @john#doe #not@hashtag #hash#hash @mention@mention',
+    '_id:a9fc3e46-150a-45cd-ad39-c80f93119900^5',
     'field:[1..5] +field:[1 TO 5]',
     'field:{1.1..5.5} +field:{1.1 TO 5.5}',
     'field:(cat or dog) test',
