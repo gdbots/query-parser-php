@@ -27,15 +27,14 @@ class SimpleParser
     public function parse($input)
     {
         $this->tokenizer->scan($input);
-        $this->tokenizer->moveNext();
 
-        while (null !== $this->tokenizer->lookahead()) {
-            if (isset($this->tokenizer->lookahead()['type'])) {
-                echo str_pad($this->tokenizer->getTypeName($this->tokenizer->lookahead()['type']), 19, ' ') .
-                    ($this->tokenizer->lookahead()['value'] ? ' => ' . $this->tokenizer->lookahead()['value'] : '') . PHP_EOL;
+        while ($this->tokenizer->moveNext()) {
+            $token = $this->tokenizer->lookahead();
+
+            if (isset($token['type'])) {
+                echo str_pad($this->tokenizer->getTypeName($token['type']), 19, ' ') .
+                    ($token['value'] ? ' => ' . $token['value'] : '') . PHP_EOL;
             }
-
-            $this->tokenizer->moveNext();
         }
 
         return $this->tokenizer->getTokens();

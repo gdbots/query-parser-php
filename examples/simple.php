@@ -7,7 +7,12 @@ use Gdbots\QueryParser\SimpleParser;
 $parser = new SimpleParser();
 
 $tests = [
-    'field:{1.1..5.5}',
+    'field:[1..5] +field:[1 TO 5]',
+    'field:{1.1..5.5} +field:{1.1 TO 5.5}',
+    'field:(cat or dog) test',
+    ') (( ~1 field:{(1.1..(5.5)] f:vevo:video:playa*',
+    'unbalanced test field:) field:(1 OR (2)) ((',
+    '"john smith"^2   (foo bar)^4',
     'first-name:homer last_name:simpson job.performance:poor',
     '+florence+machine ac/dc^11 Stellastarr* T\'Pau ​¡Forward, Russia! "¡Forward, Russia!"~',
     'a | <3 :) :(  #test ! candy .. and oreos ^5^5 -test:123~1 florence+machine "a / ^ : phrase"^5 what~5',
@@ -35,7 +40,7 @@ foreach ($tests as $test) {
     echo 'input: ' . $test . PHP_EOL;
     echo str_repeat('=', 10) . PHP_EOL . PHP_EOL;
     $tokens = $parser->parse($test);
-    echo json_encode($tokens) . PHP_EOL;
+    //echo json_encode($tokens) . PHP_EOL;
     echo str_repeat('=', 10) . PHP_EOL . PHP_EOL;
     fgets(STDIN);
 }

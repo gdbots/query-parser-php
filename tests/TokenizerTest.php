@@ -40,10 +40,7 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
         }
 
         $this->tokenizer->scan($input);
-
-        if ($expected !== $this->tokenizer->getTokens()) {
-            $this->fail("Sample [{$name}] with input [{$input}] failed.");
-        }
+        $this->assertSame($expected, $this->tokenizer->getTokens(), "Sample [{$name}] with input [{$input}] failed.");
     }
 
     /**
@@ -135,7 +132,6 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                 'input' => ':) :(',
                 'expected' => [
                     [T::T_EMOTICON, ':)'],
-                    T::T_WHITE_SPACE,
                     [T::T_EMOTICON, ':('],
                 ]
             ],
@@ -153,15 +149,10 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                 'input' => 'ice 🍦 poop 💩 doh 😳',
                 'expected' => [
                     [T::T_WORD, 'ice'],
-                    T::T_WHITE_SPACE,
                     [T::T_EMOJI, '🍦'],
-                    T::T_WHITE_SPACE,
                     [T::T_WORD, 'poop'],
-                    T::T_WHITE_SPACE,
                     [T::T_EMOJI, '💩'],
-                    T::T_WHITE_SPACE,
                     [T::T_WORD, 'doh'],
-                    T::T_WHITE_SPACE,
                     [T::T_EMOJI, '😳'],
                 ]
             ],
@@ -179,7 +170,6 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                 'input' => 'a "simple phrase"',
                 'expected' => [
                     [T::T_WORD, 'a'],
-                    T::T_WHITE_SPACE,
                     [T::T_PHRASE, 'simple phrase'],
                 ]
             ],
@@ -189,7 +179,6 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                 'input' => 'a +"simple phrase"',
                 'expected' => [
                     [T::T_WORD, 'a'],
-                    T::T_WHITE_SPACE,
                     T::T_REQUIRED,
                     [T::T_PHRASE, 'simple phrase'],
                 ]
@@ -200,7 +189,6 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                 'input' => 'a -"simple phrase"',
                 'expected' => [
                     [T::T_WORD, 'a'],
-                    T::T_WHITE_SPACE,
                     T::T_PROHIBITED,
                     [T::T_PHRASE, 'simple phrase'],
                 ]
@@ -211,7 +199,6 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                 'input' => 'a "simple phrase"^1',
                 'expected' => [
                     [T::T_WORD, 'a'],
-                    T::T_WHITE_SPACE,
                     [T::T_PHRASE, 'simple phrase'],
                     T::T_BOOST,
                     [T::T_NUMBER, 1.0],
@@ -223,7 +210,6 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                 'input' => 'a "simple phrase"^0.1',
                 'expected' => [
                     [T::T_WORD, 'a'],
-                    T::T_WHITE_SPACE,
                     [T::T_PHRASE, 'simple phrase'],
                     T::T_BOOST,
                     [T::T_NUMBER, 0.1],
@@ -235,7 +221,6 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                 'input' => 'a "simple phrase"~1',
                 'expected' => [
                     [T::T_WORD, 'a'],
-                    T::T_WHITE_SPACE,
                     [T::T_PHRASE, 'simple phrase'],
                     T::T_FUZZY,
                     [T::T_NUMBER, 1.0],
@@ -247,7 +232,6 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                 'input' => 'a "simple phrase"~0.1',
                 'expected' => [
                     [T::T_WORD, 'a'],
-                    T::T_WHITE_SPACE,
                     [T::T_PHRASE, 'simple phrase'],
                     T::T_FUZZY,
                     [T::T_NUMBER, 0.1],
@@ -291,13 +275,9 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                 'input' => 'a #Cat in a #hat',
                 'expected' => [
                     [T::T_WORD, 'a'],
-                    T::T_WHITE_SPACE,
                     [T::T_HASHTAG, 'Cat'],
-                    T::T_WHITE_SPACE,
                     [T::T_WORD, 'in'],
-                    T::T_WHITE_SPACE,
                     [T::T_WORD, 'a'],
-                    T::T_WHITE_SPACE,
                     [T::T_HASHTAG, 'hat'],
                 ]
             ],
@@ -308,7 +288,6 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                 'expected' => [
                     T::T_REQUIRED,
                     [T::T_HASHTAG, 'Cat'],
-                    T::T_WHITE_SPACE,
                     T::T_PROHIBITED,
                     [T::T_HASHTAG, 'hat'],
                     T::T_BOOST,
@@ -323,7 +302,6 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                     [T::T_HASHTAG, 'hat'],
                     T::T_FUZZY,
                     [T::T_NUMBER, 100.0],
-                    T::T_WHITE_SPACE,
                     [T::T_HASHTAG, 'hat'],
                     T::T_FUZZY,
                     [T::T_NUMBER, 100.1],
@@ -336,7 +314,6 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                 'expected' => [
                     T::T_REQUIRED,
                     [T::T_HASHTAG, 'Cat'],
-                    T::T_WHITE_SPACE,
                     T::T_PROHIBITED,
                     [T::T_HASHTAG, 'hat'],
                     T::T_BOOST,
@@ -357,11 +334,8 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                 'input' => '@user @user_name @user.name @user-name',
                 'expected' => [
                     [T::T_MENTION, 'user'],
-                    T::T_WHITE_SPACE,
                     [T::T_MENTION, 'user_name'],
-                    T::T_WHITE_SPACE,
                     [T::T_MENTION, 'user.name'],
-                    T::T_WHITE_SPACE,
                     [T::T_MENTION, 'user-name'],
                 ]
             ],
@@ -372,13 +346,10 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                 'expected' => [
                     T::T_REQUIRED,
                     [T::T_MENTION, 'user'],
-                    T::T_WHITE_SPACE,
                     T::T_REQUIRED,
                     [T::T_MENTION, 'user_name'],
-                    T::T_WHITE_SPACE,
                     T::T_REQUIRED,
                     [T::T_MENTION, 'user.name'],
-                    T::T_WHITE_SPACE,
                     T::T_REQUIRED,
                     [T::T_MENTION, 'user-name'],
                 ]
@@ -390,13 +361,10 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                 'expected' => [
                     T::T_PROHIBITED,
                     [T::T_MENTION, 'user'],
-                    T::T_WHITE_SPACE,
                     T::T_PROHIBITED,
                     [T::T_MENTION, 'user_name'],
-                    T::T_WHITE_SPACE,
                     T::T_PROHIBITED,
                     [T::T_MENTION, 'user.name'],
-                    T::T_WHITE_SPACE,
                     T::T_PROHIBITED,
                     [T::T_MENTION, 'user-name'],
                 ]
@@ -415,9 +383,7 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                 'input' => '100 3.1415926535898 2.2E-5',
                 'expected' => [
                     [T::T_NUMBER, 100.0],
-                    T::T_WHITE_SPACE,
                     [T::T_NUMBER, 3.1415926535898],
-                    T::T_WHITE_SPACE,
                     [T::T_NUMBER, 2.2E-5],
                 ]
             ],
@@ -427,9 +393,7 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                 'input' => '-100 -3.1415926535898 -2.2E-5',
                 'expected' => [
                     [T::T_NUMBER, -100.0],
-                    T::T_WHITE_SPACE,
                     [T::T_NUMBER, -3.1415926535898],
-                    T::T_WHITE_SPACE,
                     [T::T_NUMBER, -2.2E-5],
                 ]
             ],
@@ -441,11 +405,9 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                     [T::T_WORD, 'word'],
                     T::T_BOOST,
                     [T::T_NUMBER, 100.0],
-                    T::T_WHITE_SPACE,
                     [T::T_WORD, 'word'],
                     T::T_BOOST,
                     [T::T_NUMBER, 3.1415926535898],
-                    T::T_WHITE_SPACE,
                     [T::T_WORD, 'word'],
                     T::T_BOOST,
                     [T::T_NUMBER, 2.2E-5],
@@ -459,11 +421,9 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                     [T::T_WORD, 'word'],
                     T::T_BOOST,
                     [T::T_NUMBER, -100.0],
-                    T::T_WHITE_SPACE,
                     [T::T_WORD, 'word'],
                     T::T_BOOST,
                     [T::T_NUMBER, -3.1415926535898],
-                    T::T_WHITE_SPACE,
                     [T::T_WORD, 'word'],
                     T::T_BOOST,
                     [T::T_NUMBER, -2.2E-5],
@@ -477,11 +437,9 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                     [T::T_WORD, 'word'],
                     T::T_FUZZY,
                     [T::T_NUMBER, 100.0],
-                    T::T_WHITE_SPACE,
                     [T::T_WORD, 'word'],
                     T::T_FUZZY,
                     [T::T_NUMBER, 3.1415926535898],
-                    T::T_WHITE_SPACE,
                     [T::T_WORD, 'word'],
                     T::T_FUZZY,
                     [T::T_NUMBER, 2.2E-5],
@@ -495,11 +453,9 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                     [T::T_WORD, 'word'],
                     T::T_FUZZY,
                     [T::T_NUMBER, -100.0],
-                    T::T_WHITE_SPACE,
                     [T::T_WORD, 'word'],
                     T::T_FUZZY,
                     [T::T_NUMBER, -3.1415926535898],
-                    T::T_WHITE_SPACE,
                     [T::T_WORD, 'word'],
                     T::T_FUZZY,
                     [T::T_NUMBER, -2.2E-5],
@@ -514,23 +470,25 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
             /*
              * START: FIELDS
              * todo: need more field tests (ranges, phrases, etc.)
+             * todo: test dates
              */
             [
                 'name' => 'fields with hypen, underscore and dot',
                 'input' => '+first-name:homer -last_name:simpson job.performance:poor^5',
                 'expected' => [
                     T::T_REQUIRED,
-                    [T::T_FIELD, 'first-name'],
+                    [T::T_FILTER_START, 'first-name'],
                     [T::T_WORD, 'homer'],
-                    T::T_WHITE_SPACE,
+                    T::T_FILTER_END,
                     T::T_PROHIBITED,
-                    [T::T_FIELD, 'last_name'],
+                    [T::T_FILTER_START, 'last_name'],
                     [T::T_WORD, 'simpson'],
-                    T::T_WHITE_SPACE,
-                    [T::T_FIELD, 'job.performance'],
+                    T::T_FILTER_END,
+                    [T::T_FILTER_START, 'job.performance'],
                     [T::T_WORD, 'poor'],
                     T::T_BOOST,
                     [T::T_NUMBER, 5.0],
+                    T::T_FILTER_END,
                 ]
             ],
 
@@ -538,9 +496,9 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                 'name' => 'field with field in it',
                 'input' => 'field:subfield:what',
                 'expected' => [
-                    [T::T_FIELD, 'field'],
-                    [T::T_WORD, 'subfield:'],
-                    [T::T_WORD, 'what'],
+                    [T::T_FILTER_START, 'field'],
+                    [T::T_WORD, 'subfield:what'],
+                    T::T_FILTER_END,
                 ]
             ],
 
@@ -548,7 +506,8 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                 'name' => 'field with no value',
                 'input' => 'field:',
                 'expected' => [
-                    [T::T_FIELD, 'field'],
+                    [T::T_FILTER_START, 'field'],
+                    T::T_FILTER_END,
                 ]
             ],
 
@@ -556,23 +515,24 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                 'name' => 'field with greater/less than',
                 'input' => 'field:>100 field:>=100.1 field:<100 field:<=100.1',
                 'expected' => [
-                    [T::T_FIELD, 'field'],
+                    [T::T_FILTER_START, 'field'],
                     T::T_GREATER_THAN,
                     [T::T_NUMBER, 100.0],
-                    T::T_WHITE_SPACE,
-                    [T::T_FIELD, 'field'],
+                    T::T_FILTER_END,
+                    [T::T_FILTER_START, 'field'],
                     T::T_GREATER_THAN,
                     T::T_EQUALS,
                     [T::T_NUMBER, 100.1],
-                    T::T_WHITE_SPACE,
-                    [T::T_FIELD, 'field'],
+                    T::T_FILTER_END,
+                    [T::T_FILTER_START, 'field'],
                     T::T_LESS_THAN,
                     [T::T_NUMBER, 100.0],
-                    T::T_WHITE_SPACE,
-                    [T::T_FIELD, 'field'],
+                    T::T_FILTER_END,
+                    [T::T_FILTER_START, 'field'],
                     T::T_LESS_THAN,
                     T::T_EQUALS,
                     [T::T_NUMBER, 100.1],
+                    T::T_FILTER_END,
                 ]
             ],
 
@@ -580,11 +540,12 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                 'name' => 'field with a hashtag or mention',
                 'input' => 'field:#cats field:@user.name',
                 'expected' => [
-                    [T::T_FIELD, 'field'],
+                    [T::T_FILTER_START, 'field'],
                     [T::T_HASHTAG, 'cats'],
-                    T::T_WHITE_SPACE,
-                    [T::T_FIELD, 'field'],
+                    T::T_FILTER_END,
+                    [T::T_FILTER_START, 'field'],
                     [T::T_MENTION, 'user.name'],
+                    T::T_FILTER_END,
                 ]
             ],
 
@@ -592,22 +553,21 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                 'name' => 'field with inclusive range',
                 'input' => 'field:[1..5] +field:[1 TO 5]',
                 'expected' => [
-                    [T::T_FIELD, 'field'],
+                    [T::T_FILTER_START, 'field'],
                     T::T_RANGE_INCL_START,
                     [T::T_NUMBER, 1.0],
                     T::T_TO,
                     [T::T_NUMBER, 5.0],
                     T::T_RANGE_INCL_END,
-                    T::T_WHITE_SPACE,
+                    T::T_FILTER_END,
                     T::T_REQUIRED,
-                    [T::T_FIELD, 'field'],
+                    [T::T_FILTER_START, 'field'],
                     T::T_RANGE_INCL_START,
                     [T::T_NUMBER, 1.0],
-                    T::T_WHITE_SPACE,
                     T::T_TO,
-                    T::T_WHITE_SPACE,
                     [T::T_NUMBER, 5.0],
                     T::T_RANGE_INCL_END,
+                    T::T_FILTER_END,
                 ]
             ],
 
@@ -615,24 +575,54 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                 'name' => 'field with exclusive range',
                 'input' => 'field:{1.1..5.5} +field:{1.1 TO 5.5}',
                 'expected' => [
-                    [T::T_FIELD, 'field'],
+                    [T::T_FILTER_START, 'field'],
                     T::T_RANGE_EXCL_START,
                     [T::T_NUMBER, 1.1],
                     T::T_TO,
                     [T::T_NUMBER, 5.5],
                     T::T_RANGE_EXCL_END,
-                    T::T_WHITE_SPACE,
+                    T::T_FILTER_END,
                     T::T_REQUIRED,
-                    [T::T_FIELD, 'field'],
+                    [T::T_FILTER_START, 'field'],
                     T::T_RANGE_EXCL_START,
                     [T::T_NUMBER, 1.1],
-                    T::T_WHITE_SPACE,
                     T::T_TO,
-                    T::T_WHITE_SPACE,
                     [T::T_NUMBER, 5.5],
                     T::T_RANGE_EXCL_END,
+                    T::T_FILTER_END,
                 ]
             ],
+
+            [
+                'name' => 'field with subquery',
+                'input' => 'field:(cat or dog) test',
+                'expected' => [
+                    [T::T_FILTER_START, 'field'],
+                    T::T_SUBQUERY_START,
+                    [T::T_WORD, 'cat'],
+                    T::T_OR,
+                    [T::T_WORD, 'dog'],
+                    T::T_SUBQUERY_END,
+                    T::T_FILTER_END,
+                    [T::T_WORD, 'test'],
+                ]
+            ],
+
+            [
+                'name' => 'field with range in subquery',
+                'input' => 'field:(cat or 1..5)',
+                'expected' => [
+                    [T::T_FILTER_START, 'field'],
+                    T::T_SUBQUERY_START,
+                    [T::T_WORD, 'cat'],
+                    T::T_OR,
+                    [T::T_NUMBER, 1.0],
+                    [T::T_NUMBER, 5.0],
+                    T::T_SUBQUERY_END,
+                    T::T_FILTER_END,
+                ]
+            ],
+            //
             /*
              * END: FIELDS
              */
@@ -647,7 +637,6 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                 'input' => 'omg#lol omg@user',
                 'expected' => [
                     [T::T_WORD, 'omg#lol'],
-                    T::T_WHITE_SPACE,
                     [T::T_WORD, 'omg@user'],
                 ]
             ],
@@ -658,10 +647,8 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                 'expected' => [
                     T::T_REQUIRED,
                     [T::T_WORD, 'c.h.u.d'],
-                    T::T_WHITE_SPACE,
                     T::T_PROHIBITED,
                     [T::T_WORD, 'zombieland'],
-                    T::T_WHITE_SPACE,
                     T::T_REQUIRED,
                     [T::T_WORD, 'ac/dc'],
                     T::T_BOOST,
@@ -674,17 +661,11 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                 'input' => 'candy and oreos || dandy && chores^5',
                 'expected' => [
                     [T::T_WORD, 'candy'],
-                    T::T_WHITE_SPACE,
                     T::T_AND,
-                    T::T_WHITE_SPACE,
                     [T::T_WORD, 'oreos'],
-                    T::T_WHITE_SPACE,
                     T::T_OR,
-                    T::T_WHITE_SPACE,
                     [T::T_WORD, 'dandy'],
-                    T::T_WHITE_SPACE,
                     T::T_AND,
-                    T::T_WHITE_SPACE,
                     [T::T_WORD, 'chores'],
                     T::T_BOOST,
                     [T::T_NUMBER, 5.0],
@@ -705,9 +686,7 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                 'expected' => [
                     T::T_REQUIRED,
                     [T::T_WORD, 'Beyoncé'],
-                    T::T_WHITE_SPACE,
                     [T::T_WORD, 'Giselle'],
-                    T::T_WHITE_SPACE,
                     [T::T_WORD, 'Knowles-Carter'],
                 ]
             ],
@@ -717,16 +696,9 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                 'input' => 'J. Lo => Emme Maribel Muñiz',
                 'expected' => [
                     [T::T_WORD, 'J'],
-                    T::T_WHITE_SPACE,
                     [T::T_WORD, 'Lo'],
-                    T::T_WHITE_SPACE,
-                    T::T_EQUALS,
-                    T::T_GREATER_THAN,
-                    T::T_WHITE_SPACE,
                     [T::T_WORD, 'Emme'],
-                    T::T_WHITE_SPACE,
                     [T::T_WORD, 'Maribel'],
-                    T::T_WHITE_SPACE,
                     [T::T_WORD, 'Muñiz'],
                 ]
             ],
@@ -744,19 +716,12 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                 'input' => 'p!nk and K$sha in a tr33 with 50¢',
                 'expected' => [
                     [T::T_WORD, 'p!nk'],
-                    T::T_WHITE_SPACE,
                     T::T_AND,
-                    T::T_WHITE_SPACE,
                     [T::T_WORD, 'K$sha'],
-                    T::T_WHITE_SPACE,
                     [T::T_WORD, 'in'],
-                    T::T_WHITE_SPACE,
                     [T::T_WORD, 'a'],
-                    T::T_WHITE_SPACE,
                     [T::T_WORD, 'tr33'],
-                    T::T_WHITE_SPACE,
                     [T::T_WORD, 'with'],
-                    T::T_WHITE_SPACE,
                     [T::T_WORD, '50¢'],
                 ]
             ],
@@ -767,20 +732,14 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                 'expected' => [
                     T::T_REQUIRED,
                     [T::T_WORD, 'florence+machine'],
-                    T::T_WHITE_SPACE,
                     [T::T_WORD, 'ac/dc'],
                     T::T_BOOST,
                     [T::T_NUMBER, 11.0],
-                    T::T_WHITE_SPACE,
                     [T::T_WORD, 'Stellastarr'],
                     T::T_WILDCARD,
-                    T::T_WHITE_SPACE,
                     [T::T_WORD, 'T\'Pau'],
-                    T::T_WHITE_SPACE,
                     [T::T_WORD, '​¡Forward'],
-                    T::T_WHITE_SPACE,
                     [T::T_WORD, 'Russia'],
-                    T::T_WHITE_SPACE,
                     [T::T_PHRASE, '¡Forward, Russia'],
                     T::T_FUZZY,
                 ]
@@ -799,12 +758,9 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                 'input' => 'Watch Me (Whip/Nae Nae)',
                 'expected' => [
                     [T::T_WORD, 'Watch'],
-                    T::T_WHITE_SPACE,
                     [T::T_WORD, 'Me'],
-                    T::T_WHITE_SPACE,
                     T::T_SUBQUERY_START,
                     [T::T_WORD, 'Whip/Nae'],
-                    T::T_WHITE_SPACE,
                     [T::T_WORD, 'Nae'],
                     T::T_SUBQUERY_END,
                 ]
@@ -815,13 +771,9 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                 'input' => 'test || AND what (+test)',
                 'expected' => [
                     [T::T_WORD, 'test'],
-                    T::T_WHITE_SPACE,
                     T::T_OR,
-                    T::T_WHITE_SPACE,
                     T::T_AND,
-                    T::T_WHITE_SPACE,
                     [T::T_WORD, 'what'],
-                    T::T_WHITE_SPACE,
                     T::T_SUBQUERY_START,
                     T::T_REQUIRED,
                     [T::T_WORD, 'test'],
@@ -834,62 +786,29 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                 'input' => 'test OR ( ( 1 ) OR ( ( 2 ) ) OR ( ( ( 3.14 ) ) ) OR a OR +b ) OR +field:>1',
                 'expected' => [
                     [T::T_WORD, 'test'],
-                    T::T_WHITE_SPACE,
                     T::T_OR,
-                    T::T_WHITE_SPACE,
                     T::T_SUBQUERY_START,
-                    T::T_WHITE_SPACE,
-                    T::T_SUBQUERY_START,
-                    T::T_WHITE_SPACE,
                     [T::T_NUMBER, 1.0],
-                    T::T_WHITE_SPACE,
                     T::T_SUBQUERY_END,
-                    T::T_WHITE_SPACE,
                     T::T_OR,
-                    T::T_WHITE_SPACE,
                     T::T_SUBQUERY_START,
-                    T::T_WHITE_SPACE,
-                    T::T_SUBQUERY_START,
-                    T::T_WHITE_SPACE,
                     [T::T_NUMBER, 2.0],
-                    T::T_WHITE_SPACE,
                     T::T_SUBQUERY_END,
-                    T::T_WHITE_SPACE,
-                    T::T_SUBQUERY_END,
-                    T::T_WHITE_SPACE,
                     T::T_OR,
-                    T::T_WHITE_SPACE,
                     T::T_SUBQUERY_START,
-                    T::T_WHITE_SPACE,
-                    T::T_SUBQUERY_START,
-                    T::T_WHITE_SPACE,
-                    T::T_SUBQUERY_START,
-                    T::T_WHITE_SPACE,
                     [T::T_NUMBER, 3.14],
-                    T::T_WHITE_SPACE,
                     T::T_SUBQUERY_END,
-                    T::T_WHITE_SPACE,
-                    T::T_SUBQUERY_END,
-                    T::T_WHITE_SPACE,
-                    T::T_SUBQUERY_END,
-                    T::T_WHITE_SPACE,
                     T::T_OR,
-                    T::T_WHITE_SPACE,
                     [T::T_WORD, 'a'],
-                    T::T_WHITE_SPACE,
                     T::T_OR,
-                    T::T_WHITE_SPACE,
                     T::T_REQUIRED,
                     [T::T_WORD, 'b'],
-                    T::T_WHITE_SPACE,
-                    T::T_SUBQUERY_END,
-                    T::T_WHITE_SPACE,
                     T::T_OR,
-                    T::T_WHITE_SPACE,
                     T::T_REQUIRED,
-                    [T::T_FIELD, 'field'],
+                    [T::T_FILTER_START, 'field'],
                     T::T_GREATER_THAN,
                     [T::T_NUMBER, 1.0],
+                    T::T_FILTER_END,
                 ]
             ],
 
@@ -898,7 +817,6 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                 'input' => 'R.I.P. Motörhead',
                 'expected' => [
                     [T::T_WORD, 'R.I.P'],
-                    T::T_WHITE_SPACE,
                     [T::T_WORD, 'Motörhead'],
                 ]
             ],
@@ -906,20 +824,22 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
             [
                 'name' => 'ignored chars',
                 'input' => '!!! ! $ _ . ; %',
+                'expected' => []
+            ],
+
+            [
+                'name' => 'elastic search example 1',
+                'input' => '"john smith"^2   (foo bar)^4',
                 'expected' => [
-                    [T::T_IGNORED, '!!!'],
-                    T::T_WHITE_SPACE,
-                    [T::T_IGNORED, '!'],
-                    T::T_WHITE_SPACE,
-                    [T::T_IGNORED, '$'],
-                    T::T_WHITE_SPACE,
-                    [T::T_IGNORED, '_'],
-                    T::T_WHITE_SPACE,
-                    [T::T_IGNORED, '.'],
-                    T::T_WHITE_SPACE,
-                    [T::T_IGNORED, ';'],
-                    T::T_WHITE_SPACE,
-                    [T::T_IGNORED, '%'],
+                    [T::T_PHRASE, 'john smith'],
+                    T::T_BOOST,
+                    [T::T_NUMBER, 2.0],
+                    T::T_SUBQUERY_START,
+                    [T::T_WORD, 'foo'],
+                    [T::T_WORD, 'bar'],
+                    T::T_SUBQUERY_END,
+                    T::T_BOOST,
+                    [T::T_NUMBER, 4.0],
                 ]
             ],
             //
