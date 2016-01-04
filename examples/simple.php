@@ -2,11 +2,15 @@
 
 require dirname(__DIR__) . '/vendor/autoload.php';
 
-use Gdbots\QueryParser\SimpleParser;
+use Gdbots\QueryParser\QueryParser;
 
-$parser = new SimpleParser();
+$parser = new QueryParser();
 
 $tests = [
+    '-test:>=2015-12-25 +test2:<2015-12-12^5',
+    'f:[1^5..5]^5 f:[1~5..5]~5 f:(test~5)~5 (test^5)^5',
+    '+Beyoncé Giselle Knowles-Carter ',
+    'word*^5 ##cats',
     '<IMG SRC=j&#X41vascript:alert(\'test2\')>',
     '[blah "[[shortcode]]" akd_ -gj% ! @* (+=} --> ;\' <a onclick="javascript:alert(\'test\')>click</a>',
     htmlentities('[blah "[[shortcode]]" akd_ -gj% ! @* (+=} --> ;\' <a onclick="javascript:alert(\'test\')>click</a>'),
@@ -37,7 +41,6 @@ $tests = [
     '#cats #dogs',
     'target_curie:vevo:video',
     '@user outer:abc AND (+test +inner:123)',
-    'Beyoncé Giselle Knowles-Carter ',
     'Beyoncé Knowles (@Beyonce) | Twitter',
     'Beyoncé Knowles (@Beyonce) <a> Twitter',
 ];
@@ -46,8 +49,8 @@ foreach ($tests as $test) {
     echo str_repeat('*', 10) . PHP_EOL . PHP_EOL;
     echo 'input: ' . $test . PHP_EOL;
     echo str_repeat('=', 10) . PHP_EOL . PHP_EOL;
-    $tokens = $parser->parse($test);
-    //echo json_encode($tokens) . PHP_EOL;
+    $result = $parser->parse($test);
+    echo json_encode($result, JSON_PRETTY_PRINT) . PHP_EOL;
     echo str_repeat('=', 10) . PHP_EOL . PHP_EOL;
     fgets(STDIN);
 }

@@ -2,22 +2,22 @@
 
 namespace Gdbots\Tests\QueryParser;
 
-use Gdbots\QueryParser\Tokenizer as T;
+use Gdbots\QueryParser\Token as T;
+use Gdbots\QueryParser\Tokenizer;
 
 class TokenizerTest extends \PHPUnit_Framework_TestCase
 {
-    /** @var T */
+    /** @var Tokenizer */
     protected $tokenizer;
 
     public function setUp()
     {
-        $this->tokenizer = new T();
+        $this->tokenizer = new Tokenizer();
     }
 
     public function testOnlyWhitespace()
     {
-        $this->tokenizer->scan('      ');
-        $this->assertSame([], $this->tokenizer->getTokens());
+        $this->assertEquals([], $this->tokenizer->scan('      ')->getTokens());
     }
 
     /**
@@ -29,18 +29,18 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
      */
     public function testSamples($name, $input, array $expected)
     {
-        // convert the sample 'expected' into token format.
+        // convert the sample 'expected' into token objects.
         foreach ($expected as $k => $v) {
             if (!is_array($v)) {
-                $expected[$k] = ['type' => $v, 'value' => null];
+                $expected[$k] = new T($v);
                 continue;
             }
 
-            $expected[$k] = ['type' => $v[0], 'value' => $v[1]];
+            $expected[$k] = new T($v[0], $v[1]);
         }
 
-        $this->tokenizer->scan($input);
-        $this->assertSame($expected, $this->tokenizer->getTokens(), "Sample [{$name}] with input [{$input}] failed.");
+        $tokenStream = $this->tokenizer->scan($input);
+        $this->assertEquals($expected, $tokenStream->getTokens(), "Sample [{$name}] with input [{$input}] failed.");
     }
 
     /**
@@ -158,6 +158,59 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
             ],
             /*
              * END: EMOJIS
+             */
+
+
+
+            /*
+             * START: BOOST AND FUZZY
+             * todo: need more emoticon tests
+             */
+            [
+                'name' => 'boost and fuzzy in filter',
+                'input' => 'f:b^5 f:f~5',
+                'expected' => [
+                    [T::T_FILTER_START, 'f'],
+                    [T::T_WORD, 'b'],
+                    T::T_FILTER_END,
+                    T::T_BOOST,
+                    [T::T_NUMBER, 5.0],
+                    [T::T_FILTER_START, 'f'],
+                    [T::T_WORD, 'f'],
+                    T::T_FILTER_END,
+                    T::T_FUZZY,
+                    [T::T_NUMBER, 5.0],
+                ]
+            ],
+
+            [
+                'name' => 'boost and fuzzy in range',
+                'input' => 'f:[1^5..5]^5 f:[1~5..5]~5',
+                'expected' => [
+                    [T::T_FILTER_START, 'f'],
+                    T::T_RANGE_INCL_START,
+                    [T::T_NUMBER, 1.0],
+                    [T::T_NUMBER, 5.0],
+                    T::T_TO,
+                    [T::T_NUMBER, 5.0],
+                    T::T_RANGE_INCL_END,
+                    T::T_FILTER_END,
+                    T::T_BOOST,
+                    [T::T_NUMBER, 5.0],
+                    [T::T_FILTER_START, 'f'],
+                    T::T_RANGE_INCL_START,
+                    [T::T_NUMBER, 1.0],
+                    [T::T_NUMBER, 5.0],
+                    T::T_TO,
+                    [T::T_NUMBER, 5.0],
+                    T::T_RANGE_INCL_END,
+                    T::T_FILTER_END,
+                    T::T_FUZZY,
+                    [T::T_NUMBER, 5.0],
+                ]
+            ],
+            /*
+             * END: BOOST AND FUZZY
              */
 
 
@@ -318,7 +371,7 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
 
             [
                 'name' => 'required/prohibited hashtags with boost',
-                'input' => '+#Cat -#hat^100',
+                'input' => '+#Cat -#hat^100 #_cat #2015cat__',
                 'expected' => [
                     T::T_REQUIRED,
                     [T::T_HASHTAG, 'Cat'],
@@ -326,15 +379,19 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                     [T::T_HASHTAG, 'hat'],
                     T::T_BOOST,
                     [T::T_NUMBER, 100.0],
+                    [T::T_HASHTAG, '_cat'],
+                    [T::T_HASHTAG, '2015cat__'],
                 ]
             ],
 
             // todo: should we refactor to catch #hashtag#hashtag or @mention#tag or #tag@mention?
             [
-                'name' => 'hashtag on hashtag',
-                'input' => '#cat#cat',
+                'name' => 'hashtag on hashtag and double hashtag',
+                'input' => '#cat#cat ##cat #####cat',
                 'expected' => [
                     [T::T_WORD, 'cat#cat'],
+                    [T::T_HASHTAG, 'cat'],
+                    [T::T_HASHTAG, 'cat'],
                 ]
             ],
             /*
@@ -531,9 +588,9 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                     T::T_FILTER_END,
                     [T::T_FILTER_START, 'job.performance'],
                     [T::T_WORD, 'poor'],
+                    T::T_FILTER_END,
                     T::T_BOOST,
                     [T::T_NUMBER, 5.0],
-                    T::T_FILTER_END,
                 ]
             ],
 
@@ -562,15 +619,15 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                 'expected' => [
                     [T::T_FILTER_START, 'field'],
                     [T::T_PHRASE, 'boosted^5 +required'],
+                    T::T_FILTER_END,
                     T::T_BOOST,
                     [T::T_NUMBER, 1.0],
-                    T::T_FILTER_END,
                     T::T_PROHIBITED,
                     [T::T_FILTER_START, 'field'],
                     [T::T_PHRASE, '[1..5]'],
+                    T::T_FILTER_END,
                     T::T_FUZZY,
                     [T::T_NUMBER, 4.0],
-                    T::T_FILTER_END,
                 ]
             ],
 
@@ -720,9 +777,9 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                 'expected' => [
                     [T::T_FILTER_START, '_id'],
                     [T::T_WORD, 'a9fc3e46-150a-45cd-ad39-c80f93119900'],
+                    T::T_FILTER_END,
                     T::T_BOOST,
                     [T::T_NUMBER, 5.0],
-                    T::T_FILTER_END,
                 ]
             ],
 
