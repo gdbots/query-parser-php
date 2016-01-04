@@ -450,9 +450,9 @@ class QueryParser
         $array = [
             'trailing_wildcard' => $this->stream->nextIfLookahead(Token::T_WILDCARD),
             'use_boost' => false,
-            'boost' => 1.0,
+            'boost' => Node::DEFAULT_BOOST,
             'use_fuzzy' => false,
-            'fuzzy' => 1,
+            'fuzzy' => Node::DEFAULT_FUZZY,
         ];
 
         if ($this->stream->nextIfLookahead(Token::T_BOOST) && $this->stream->nextIfLookahead(Token::T_NUMBER)) {
