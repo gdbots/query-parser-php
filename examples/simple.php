@@ -7,6 +7,7 @@ use Gdbots\QueryParser\QueryParser;
 $parser = new QueryParser();
 
 $tests = [
+    'cat AND dog and field:test or banana',
     '+"+c" +(f:c to d)',
     '-test:>=2015-12-25 +test2:<2015-12-12^5',
     'f:[1^5..5]^5 f:[1~5..5]~5 f:(test~5)~5 (test^5)^5',

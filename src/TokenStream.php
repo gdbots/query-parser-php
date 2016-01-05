@@ -184,6 +184,30 @@ class TokenStream implements \JsonSerializable
     }
 
     /**
+     * Returns true if the previous token type equals the given type.
+     *
+     * @param int $type
+     *
+     * @return bool
+     */
+    public function prevTypeIs($type)
+    {
+        return isset($this->tokens[$this->position - 2]) && $this->tokens[$this->position - 2]->typeEquals($type);
+    }
+
+    /**
+     * Returns true if the previous token type equals any of the given types.
+     *
+     * @param array $types
+     *
+     * @return bool
+     */
+    public function prevTypeIsAnyOf(array $types)
+    {
+        return isset($this->tokens[$this->position - 2]) && $this->tokens[$this->position - 2]->typeEqualsAnyOf($types);
+    }
+
+    /**
      * @return Token
      */
     public function getCurrent()
