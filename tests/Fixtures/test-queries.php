@@ -304,6 +304,16 @@ return [
         [T::T_PHRASE, 'in the year >=2000-01-01'],
     ]
 ],
+
+[
+    'name' => 'phrase on phrase',
+    'input' => '"p1""p2""p3',
+    'expected_tokens' => [
+        [T::T_PHRASE, 'p1'],
+        [T::T_PHRASE, 'p2'],
+        [T::T_WORD, 'p3'],
+    ]
+],
 /*
  * END: PHRASES
  */
@@ -960,6 +970,39 @@ return [
 
 
 /*
+ * START: SUBQUERIES
+ */
+[
+    'name' => 'mismatched subqueries',
+    'input' => ') test (123 (abc f:a)',
+    'expected_tokens' => [
+        [T::T_WORD, 'test'],
+        T::T_SUBQUERY_START,
+        [T::T_NUMBER, 123.0],
+        [T::T_WORD, 'abc'],
+        [T::T_WORD, 'f:a'],
+        T::T_SUBQUERY_END,
+    ]
+],
+
+[
+    'name' => 'filter inside of subquery',
+    'input' => 'word(word:a>(#hashtag:b)',
+    'expected_tokens' => [
+        [T::T_WORD, 'word'],
+        T::T_SUBQUERY_START,
+        [T::T_WORD, 'word:a'],
+        [T::T_WORD, 'hashtag:b'],
+        T::T_SUBQUERY_END,
+    ]
+],
+/*
+ * END: SUBQUERIES
+ */
+
+
+
+/*
  * START: WEIRD QUERIES
  */
 [
@@ -1095,6 +1138,15 @@ return [
         [T::T_WORD, 'test'],
         T::T_SUBQUERY_END,
         [T::T_WORD, 'gt;click&lt;/a&gt'],
+    ]
+],
+
+[
+    'name' => 'intentionally mutanterer',
+    'input' => 'a"b"#c"#d e',
+    'expected_tokens' => [
+        [T::T_WORD, 'a"b"#c"#d'],
+        [T::T_WORD, 'e'],
     ]
 ],
 

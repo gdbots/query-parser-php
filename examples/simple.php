@@ -7,11 +7,12 @@ use Gdbots\QueryParser\QueryParser;
 $parser = new QueryParser();
 
 $tests = [
+    'word(word:a>(#hashtag:b)',
     '"p1""p2""p3',
     'a"b"#c"#d e',
     'a"b c"#d"#e',
     'Or>Word(WORD:a>(#Hashtag:b)',
-    'hello world = 你好，世界',
+    'hello world  te = 你好，世界',
     'cat AND dog and field:test or banana',
     '+"+c" +(f:c to d)',
     '-test:>=2015-12-25 +test2:<2015-12-12^5',

@@ -65,6 +65,7 @@ class QueryParser
             if (null !== $node) {
                 $this->query->addNode($node);
             }
+
         }
 
         return $this->query;
@@ -367,16 +368,7 @@ class QueryParser
             return null;
         }
 
-        if (count($nodes) === 1) {
-            if ($m['use_boost']) {
-                $nodes[0]->setUseBoost($m['boost']);
-            }
-            if ($m['boost']) {
-                $nodes[0]->setBoost($m['boost']);
-            }
-
-            return $nodes[0];
-        }
+        // todo: if only one node, return the node itself?
 
         return new Subquery($nodes, $m['use_boost'], $m['boost']);
     }
