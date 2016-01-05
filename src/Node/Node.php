@@ -15,8 +15,8 @@ abstract class Node implements FromArray, ToArray, \JsonSerializable
     // "^" BOOST refers to scoring parts of the query.
     const SUPPORTS_BOOST = true;
     const DEFAULT_BOOST = 1.0;
-    const MIN_BOOST = 0;
-    const MAX_BOOST = 10;
+    const MIN_BOOST = 0.0;
+    const MAX_BOOST = 10.0;
 
     // "~" FUZZY refers to fuzzy matching terms and proximity on phrases and distance
     const SUPPORTS_FUZZY = false;

@@ -72,11 +72,11 @@ return [
 
 [
     'name' => 'url with boost float',
-    'input' => 'http://test.com/1_2.html?a=b%20&c=1+2#test^5.5',
+    'input' => 'http://test.com/1_2.html?a=b%20&c=1+2#test^15.5',
     'expected_tokens' => [
         [T::T_URL, 'http://test.com/1_2.html?a=b%20&c=1+2#test'],
         T::T_BOOST,
-        [T::T_NUMBER, 5.5],
+        [T::T_NUMBER, 15.5],
     ]
 ],
 
