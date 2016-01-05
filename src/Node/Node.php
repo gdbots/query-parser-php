@@ -182,11 +182,35 @@ abstract class Node implements FromArray, ToArray, \JsonSerializable
     }
 
     /**
+     * @param bool $useBoost
+     *
+     * @return self
+     */
+    final public function setUseBoost($useBoost)
+    {
+        $this->useBoost = $useBoost;
+
+        return $this;
+    }
+
+    /**
      * @return bool
      */
     final public function useBoost()
     {
         return $this->useBoost;
+    }
+
+    /**
+     * @param float $boost
+     *
+     * @return self
+     */
+    final public function setBoost($boost)
+    {
+        $this->boost = $boost;
+
+        return $this;
     }
 
     /**
@@ -198,11 +222,35 @@ abstract class Node implements FromArray, ToArray, \JsonSerializable
     }
 
     /**
+     * @param bool $useFuzzy
+     *
+     * @return self
+     */
+    final public function setUseFuzzy($useFuzzy)
+    {
+        $this->useFuzzy = $useFuzzy;
+
+        return $this;
+    }
+
+    /**
      * @return bool
      */
     final public function useFuzzy()
     {
         return $this->useFuzzy;
+    }
+
+    /**
+     * @param float $fuzzy
+     *
+     * @return self
+     */
+    final public function setFuzzy($fuzzy)
+    {
+        $this->fuzzy = $fuzzy;
+
+        return $this;
     }
 
     /**
