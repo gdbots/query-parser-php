@@ -967,7 +967,7 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                     [T::T_WORD, 'T\'Pau'],
                     [T::T_WORD, '​¡Forward'],
                     [T::T_WORD, 'Russia'],
-                    [T::T_PHRASE, '¡Forward, Russia'],
+                    [T::T_PHRASE, '¡Forward, Russia!'],
                     T::T_FUZZY,
                 ]
             ],
