@@ -35,13 +35,6 @@ class QueryParser
     protected $query;
 
     /**
-     * When "T_AND" token is encountered, require the next node.
-     *
-     * @var bool
-     */
-    protected $requireNextNode = false;
-
-    /**
      * Constructs a new SimpleParser.
      */
     public function __construct()
@@ -418,18 +411,15 @@ class QueryParser
      */
     protected function getBoolOperator($default = BoolOperator::OPTIONAL)
     {
-        $this->requireNextNode = $this->stream->prevTypeIs(Token::T_AND);
-
-        if ($this->stream->nextIf(Token::T_REQUIRED) || $this->stream->lookaheadTypeIs(Token::T_AND)) {
+        if ($this->stream->nextIf(Token::T_REQUIRED)
+            || $this->stream->lookaheadTypeIs(Token::T_AND)
+            || $this->stream->prevTypeIs(Token::T_AND)
+        ) {
             return BoolOperator::REQUIRED();
         }
 
         if ($this->stream->nextIf(Token::T_PROHIBITED)) {
             return BoolOperator::PROHIBITED();
-        }
-
-        if ($this->requireNextNode) {
-            return BoolOperator::REQUIRED();
         }
 
         return BoolOperator::create($default);
