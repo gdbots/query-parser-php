@@ -82,7 +82,7 @@ return [
             [T::T_NUMBER, 15.5],
         ],
         'expected_nodes' => [
-            new Url('http://test.com/1_2.html?a=b%20&c=1+2#test', null, true, 15.5)
+            new Url('http://test.com/1_2.html?a=b%20&c=1+2#test', null, true, Url::MAX_BOOST)
         ]
     ],
 
@@ -116,7 +116,6 @@ return [
      */
 
 
-
     /*
      * START: EMOTICONS
      * todo: need more emoticon tests
@@ -136,7 +135,6 @@ return [
     /*
      * END: EMOTICONS
      */
-
 
 
     /*
@@ -167,10 +165,8 @@ return [
      */
 
 
-
     /*
      * START: BOOST AND FUZZY
-     * todo: need more emoticon tests
      */
     [
         'name' => 'boost and fuzzy in filter',
@@ -188,8 +184,8 @@ return [
             [T::T_NUMBER, 5.0],
         ],
         'expected_nodes' => [
-            new Filter('f',null, true, 5.0, new Word('b')),
-            new Filter('f',null, false, Filter::DEFAULT_BOOST, new Word('f')),
+            new Filter('f', null, true, 5.0, new Word('b')),
+            new Filter('f', null, false, Filter::DEFAULT_BOOST, new Word('f')),
         ]
     ],
 
@@ -219,14 +215,33 @@ return [
             [T::T_NUMBER, 5.0],
         ],
         'expected_nodes' => [
-            new Filter('f',null, true, 5.0, null, new NumberRange(new Number(1), new Number(5))),
-            new Filter('f',null, false, Filter::DEFAULT_BOOST, null, new NumberRange(new Number(1), new Number(5))),
+            new Filter(
+                'f',
+                null,
+                true,
+                5.0,
+                null,
+                new NumberRange(
+                    new Number(1.0),
+                    new Number(5.0)
+                )
+            ),
+            new Filter(
+                'f',
+                null,
+                false,
+                Filter::DEFAULT_BOOST,
+                null,
+                new NumberRange(
+                    new Number(1.0),
+                    new Number(5.0)
+                )
+            ),
         ]
     ],
     /*
      * END: BOOST AND FUZZY
      */
-
 
 
     /*
@@ -314,7 +329,7 @@ return [
         ],
         'expected_nodes' => [
             new Word('a'),
-            new Phrase('simple phrase', null, false, Phrase::DEFAULT_BOOST, true, 1),
+            new Phrase('simple phrase', null, false, Phrase::DEFAULT_BOOST, true, Phrase::MIN_FUZZY),
         ]
     ],
 
@@ -329,7 +344,7 @@ return [
         ],
         'expected_nodes' => [
             new Word('a'),
-            new Phrase('simple phrase', null, false, Phrase::DEFAULT_BOOST, true, 1),
+            new Phrase('simple phrase', null, false, Phrase::DEFAULT_BOOST, true, Phrase::MIN_FUZZY),
         ]
     ],
 
@@ -396,7 +411,6 @@ return [
      */
 
 
-
     /*
      * START: HASHTAGS
      */
@@ -432,7 +446,7 @@ return [
         ],
         'expected_nodes' => [
             new Hashtag('Cat', BoolOperator::REQUIRED()),
-            new Hashtag('hat', BoolOperator::PROHIBITED(), true, 10.0)
+            new Hashtag('hat', BoolOperator::PROHIBITED(), true, Hashtag::MAX_BOOST)
         ]
     ],
 
@@ -468,13 +482,13 @@ return [
         ],
         'expected_nodes' => [
             new Hashtag('Cat', BoolOperator::REQUIRED()),
-            new Hashtag('hat', BoolOperator::PROHIBITED(), true, 10.0),
+            new Hashtag('hat', BoolOperator::PROHIBITED(), true, Hashtag::MAX_BOOST),
             new Hashtag('_cat', BoolOperator::REQUIRED()),
             new Hashtag('2015cat__', BoolOperator::REQUIRED()),
         ]
     ],
 
-// todo: should we refactor to catch #hashtag#hashtag or @mention#tag or #tag@mention?
+    // todo: should we refactor to catch #hashtag#hashtag or @mention#tag or #tag@mention?
     [
         'name' => 'hashtag on hashtag and double hashtag',
         'input' => '#cat#cat ##cat #####cat',
@@ -492,7 +506,6 @@ return [
     /*
      * END: HASHTAGS
      */
-
 
 
     /*
@@ -606,7 +619,6 @@ return [
      */
 
 
-
     /*
      * START: NUMBERS
      */
@@ -697,9 +709,9 @@ return [
             [T::T_NUMBER, 2.2E-5],
         ],
         'expected_nodes' => [
-            new Word('word', null, false, Word::DEFAULT_BOOST, true, 5),
-            new Word('word', null, false, Word::DEFAULT_BOOST, true, 2),
-            new Word('word', null, false, Word::DEFAULT_BOOST, true, 1),
+            new Word('word', null, false, Word::DEFAULT_BOOST, true, Word::MAX_FUZZY),
+            new Word('word', null, false, Word::DEFAULT_BOOST, true, Word::MAX_FUZZY),
+            new Word('word', null, false, Word::DEFAULT_BOOST, true, Word::MIN_FUZZY),
         ]
     ],
 
@@ -718,15 +730,14 @@ return [
             [T::T_NUMBER, -2.2E-5],
         ],
         'expected_nodes' => [
-            new Word('word', null, false, Word::DEFAULT_BOOST, true, 1),
-            new Word('word', null, false, Word::DEFAULT_BOOST, true, 1),
-            new Word('word', null, false, Word::DEFAULT_BOOST, true, 1),
+            new Word('word', null, false, Word::DEFAULT_BOOST, true, Word::MIN_FUZZY),
+            new Word('word', null, false, Word::DEFAULT_BOOST, true, Word::MIN_FUZZY),
+            new Word('word', null, false, Word::DEFAULT_BOOST, true, Word::MIN_FUZZY),
         ]
     ],
     /*
      * END: NUMBERS
      */
-
 
 
     /*
@@ -751,9 +762,9 @@ return [
             [T::T_NUMBER, 5.0],
         ],
         'expected_nodes' => [
-            new Filter('first-name',BoolOperator::REQUIRED(), false, Filter::DEFAULT_BOOST, new Word('homer')),
-            new Filter('last_name',BoolOperator::PROHIBITED(), false, Filter::DEFAULT_BOOST, new Word('simpson')),
-            new Filter('job.performance',null, true, 5.0, new Word('poor')),
+            new Filter('first-name', BoolOperator::REQUIRED(), false, Filter::DEFAULT_BOOST, new Word('homer')),
+            new Filter('last_name', BoolOperator::PROHIBITED(), false, Filter::DEFAULT_BOOST, new Word('simpson')),
+            new Filter('job.performance', null, true, 5.0, new Word('poor')),
         ]
     ],
 
@@ -766,7 +777,7 @@ return [
             T::T_FILTER_END,
         ],
         'expected_nodes' => [
-            new Filter('field',null, false, Filter::DEFAULT_BOOST, new Word('subfield:what')),
+            new Filter('field', null, false, Filter::DEFAULT_BOOST, new Word('subfield:what')),
         ]
     ],
 
@@ -774,10 +785,11 @@ return [
         'name' => 'field with no value',
         'input' => 'field:',
         'expected_tokens' => [
-            [T::T_WORD, 'field:'],
+            [T::T_FILTER_START, 'field'],
+            T::T_FILTER_END,
         ],
         'expected_nodes' => [
-            new Word('field:'),
+            new Word('field'),
         ]
     ],
 
@@ -798,8 +810,8 @@ return [
             [T::T_NUMBER, 4.0],
         ],
         'expected_nodes' => [
-            new Filter('field',null, true, 1.0, new Phrase('boosted^5 +required')),
-            new Filter('field',BoolOperator::PROHIBITED(), false, Filter::DEFAULT_BOOST, new Phrase('[1..5]')),
+            new Filter('field', null, true, 1.0, new Phrase('boosted^5 +required')),
+            new Filter('field', BoolOperator::PROHIBITED(), false, Filter::DEFAULT_BOOST, new Phrase('[1..5]')),
         ]
     ],
 
@@ -827,10 +839,10 @@ return [
             T::T_FILTER_END,
         ],
         'expected_nodes' => [
-            new Filter('field',null, false, Filter::DEFAULT_BOOST, new Number(100, ComparisonOperator::GT())),
-            new Filter('field',null, false, Filter::DEFAULT_BOOST, new Number(100.1, ComparisonOperator::GTE())),
-            new Filter('field',null, false, Filter::DEFAULT_BOOST, new Number(100, ComparisonOperator::LT())),
-            new Filter('field',null, false, Filter::DEFAULT_BOOST, new Number(100.1, ComparisonOperator::LTE())),
+            new Filter('field', null, false, Filter::DEFAULT_BOOST, new Number(100, ComparisonOperator::GT())),
+            new Filter('field', null, false, Filter::DEFAULT_BOOST, new Number(100.1, ComparisonOperator::GTE())),
+            new Filter('field', null, false, Filter::DEFAULT_BOOST, new Number(100, ComparisonOperator::LT())),
+            new Filter('field', null, false, Filter::DEFAULT_BOOST, new Number(100.1, ComparisonOperator::LTE())),
         ]
     ],
 
@@ -846,8 +858,8 @@ return [
             T::T_FILTER_END,
         ],
         'expected_nodes' => [
-            new Filter('field',null, false, Filter::DEFAULT_BOOST, new Hashtag('cats', BoolOperator::REQUIRED())),
-            new Filter('field',null, false, Filter::DEFAULT_BOOST, new Mention('user.name', BoolOperator::REQUIRED())),
+            new Filter('field', null, false, Filter::DEFAULT_BOOST, new Hashtag('cats', BoolOperator::REQUIRED())),
+            new Filter('field', null, false, Filter::DEFAULT_BOOST, new Mention('user.name', BoolOperator::REQUIRED())),
         ]
     ],
 
@@ -872,8 +884,28 @@ return [
             T::T_FILTER_END,
         ],
         'expected_nodes' => [
-            new Filter('field', null, false, Filter::DEFAULT_BOOST, null, new NumberRange(new Number(1), new Number(5))),
-            new Filter('field', BoolOperator::REQUIRED(), false, Filter::DEFAULT_BOOST, null, new NumberRange(new Number(1), new Number(5))),
+            new Filter(
+                'field',
+                null,
+                false,
+                Filter::DEFAULT_BOOST,
+                null,
+                new NumberRange(
+                    new Number(1),
+                    new Number(5)
+                )
+            ),
+            new Filter(
+                'field',
+                BoolOperator::REQUIRED(),
+                false,
+                Filter::DEFAULT_BOOST,
+                null,
+                new NumberRange(
+                    new Number(1),
+                    new Number(5)
+                )
+            ),
         ]
     ],
 
@@ -898,14 +930,36 @@ return [
             T::T_FILTER_END,
         ],
         'expected_nodes' => [
-            new Filter('field', null, false, Filter::DEFAULT_BOOST, null, new NumberRange(new Number(1.1), new Number(5.5), true)),
-            new Filter('field', BoolOperator::REQUIRED(), false, Filter::DEFAULT_BOOST, null, new NumberRange(new Number(1.1), new Number(5.5), true)),
+            new Filter(
+                'field',
+                null,
+                false,
+                Filter::DEFAULT_BOOST,
+                null,
+                new NumberRange(
+                    new Number(1.1),
+                    new Number(5.5),
+                    true
+                )
+            ),
+            new Filter(
+                'field',
+                BoolOperator::REQUIRED(),
+                false,
+                Filter::DEFAULT_BOOST,
+                null,
+                new NumberRange(
+                    new Number(1.1),
+                    new Number(5.5),
+                    true
+                )
+            ),
         ]
     ],
 
     [
         'name' => 'field with subquery',
-        'input' => 'field:(cat or dog) test',
+        'input' => 'field:(cat OR dog) test',
         'expected_tokens' => [
             [T::T_FILTER_START, 'field'],
             T::T_SUBQUERY_START,
@@ -917,14 +971,25 @@ return [
             [T::T_WORD, 'test'],
         ],
         'expected_nodes' => [
-            new Filter('field', null, false, Filter::DEFAULT_BOOST, new Subquery([new Word('cat'), new Word('dog')])),
+            new Filter(
+                'field',
+                null,
+                false,
+                Filter::DEFAULT_BOOST,
+                null,
+                null,
+                new Subquery([
+                    new Word('cat'),
+                    new Word('dog')
+                ])
+            ),
             new Word('test'),
         ]
     ],
 
     [
         'name' => 'field with range in subquery',
-        'input' => 'field:(cat or 1..5)',
+        'input' => 'field:(cat OR 1..5)',
         'expected_tokens' => [
             [T::T_FILTER_START, 'field'],
             T::T_SUBQUERY_START,
@@ -936,7 +1001,19 @@ return [
             T::T_FILTER_END,
         ],
         'expected_nodes' => [
-            new Filter('field', null, false, Filter::DEFAULT_BOOST, new Subquery([new Word('cat'), new Number(1), new Number(5)])),
+            new Filter(
+                'field',
+                null,
+                false,
+                Filter::DEFAULT_BOOST,
+                null,
+                null,
+                new Subquery([
+                    new Word('cat'),
+                    new Number(1.0),
+                    new Number(5.0)
+                ])
+            ),
         ]
     ],
 
@@ -1015,7 +1092,6 @@ return [
      */
 
 
-
     /*
      * START: WORDS
      */
@@ -1047,7 +1123,7 @@ return [
 
     [
         'name' => 'words that have embedded operators',
-        'input' => 'candy and oreos || dandy && chores^5',
+        'input' => 'candy AND oreos || dandy && chores^5',
         'expected_tokens' => [
             [T::T_WORD, 'candy'],
             T::T_AND,
@@ -1063,7 +1139,6 @@ return [
     /*
      * END: WORDS
      */
-
 
 
     /*
@@ -1099,7 +1174,6 @@ return [
      */
 
 
-
     /*
      * START: ACCENTED CHARS
      */
@@ -1131,13 +1205,12 @@ return [
      */
 
 
-
     /*
      * START: RAPPERS and POP STARS
      */
     [
         'name' => 'crazy a$$ names',
-        'input' => 'p!nk and K$sha in a tr33 with 50¢',
+        'input' => 'p!nk AND K$sha in a tr33 with 50¢',
         'expected_tokens' => [
             [T::T_WORD, 'p!nk'],
             T::T_AND,
@@ -1173,7 +1246,6 @@ return [
      */
 
 
-
     /*
      * START: SUBQUERIES
      */
@@ -1206,7 +1278,6 @@ return [
      */
 
 
-
     /*
      * START: WEIRD QUERIES
      */
@@ -1228,7 +1299,7 @@ return [
         'input' => 'epic or fail',
         'expected_tokens' => [
             [T::T_WORD, 'epic'],
-            T::T_OR,
+            [T::T_WORD, 'or'],
             [T::T_WORD, 'fail'],
         ]
     ],

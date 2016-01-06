@@ -7,8 +7,15 @@ use Gdbots\QueryParser\QueryParser;
 $parser = new QueryParser();
 
 $tests = [
+    'f:[a..5] AND f:{1 TO f} OR f:[1..!]',
+    'f:[2015-01-01..2015-12-31] AND f:{2015-01-01 TO 2015-12-31}',
+    'f:[a..f] AND f:{a TO F}',
+    'a (cat or dog!)^5 boat',
+    'f:(>cat) f:(>=123',
+    'field:(cat OR 1..5)',
     '+(cat)~5) -(+cats)^2',
     're: doctor appt',
+    'epic or fail',
     'word(word:a>(#hashtag:b)',
     '"p1""p2""p3',
     'a"b"#c"#d e',
