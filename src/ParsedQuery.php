@@ -46,6 +46,19 @@ class ParsedQuery implements FromArray, ToArray, \JsonSerializable
     }
 
     /**
+     * @param Node[] $nodes
+     * @return static
+     */
+    public function addNodes(array $nodes)
+    {
+        foreach ($nodes as $node) {
+            $this->addNode($node);
+        }
+
+        return $this;
+    }
+
+    /**
      * @param Node $node
      * @return static
      */

@@ -21,7 +21,6 @@ use Gdbots\QueryParser\Node\Word;
 /**
  * Parses a query and returns a ParsedQuery object with a set of
  * nodes per type, i.e. words, phrases, hashtags, etc.
- * The subquery aspects that are tokenized are ignored by this parser.
  */
 class QueryParser
 {
@@ -55,17 +54,13 @@ class QueryParser
             $boolOperator = $this->getBoolOperator();
             $token = $this->stream->getCurrent();
 
-            echo str_pad($token->getTypeName(), 19, ' ') . ($token->getValue() ? ' => ' . $token->getValue() : '') . PHP_EOL;
+            //echo str_pad($token->getTypeName(), 19, ' ') . ($token->getValue() ? ' => ' . $token->getValue() : '') . PHP_EOL;
 
             if ($token->typeEquals(Token::T_EOI)) {
                 break;
             }
 
-            $node = $this->createNode($token, $boolOperator);
-            if (null !== $node) {
-                $this->query->addNode($node);
-            }
-
+            $this->query->addNodes($this->createNodes($token, $boolOperator));
         }
 
         return $this->query;
@@ -76,65 +71,64 @@ class QueryParser
      * @param BoolOperator $boolOperator
      * @param ComparisonOperator $comparisonOperator
      *
-     * @return Node|null
+     * @return Node[]
      */
-    protected function createNode(
+    protected function createNodes(
         Token $token,
         BoolOperator $boolOperator,
         ComparisonOperator $comparisonOperator = null
     ) {
-        $node = null;
-
         switch ($token->getType()) {
             case Token::T_WORD:
-                $node = $this->createWord($token->getValue(), $boolOperator);
+                $nodes = $this->handleWord($token->getValue(), $boolOperator);
                 break;
 
             case Token::T_DATE:
-                $node = $this->createDate($token->getValue(), $boolOperator, $comparisonOperator);
+                $nodes = $this->handleDate($token->getValue(), $boolOperator, $comparisonOperator);
                 break;
 
             case Token::T_EMOJI:
-                $node = $this->createEmoji($token->getValue(), $boolOperator);
+                $nodes = $this->handleEmoji($token->getValue(), $boolOperator);
                 break;
 
             case Token::T_EMOTICON:
-                $node = $this->createEmoticon($token->getValue(), $boolOperator);
+                $nodes = $this->handleEmoticon($token->getValue(), $boolOperator);
                 break;
 
             case Token::T_FILTER_START:
-                $node = $this->createFilter($boolOperator);
+                $nodes = $this->handleFilter($token->getValue(), $boolOperator);
                 break;
 
             case Token::T_HASHTAG:
-                $node = $this->createHashtag($token->getValue(), $boolOperator);
+                $nodes = $this->handleHashtag($token->getValue(), $boolOperator);
                 break;
 
             case Token::T_MENTION:
-                $node = $this->createMention($token->getValue(), $boolOperator);
+                $nodes = $this->handleMention($token->getValue(), $boolOperator);
                 break;
 
             case Token::T_NUMBER:
-                $node = $this->createNumber($token->getValue(), $comparisonOperator);
+                $nodes = $this->handleNumber($token->getValue(), $comparisonOperator);
                 break;
 
             case Token::T_PHRASE:
-                $node = $this->createPhrase($token->getValue(), $boolOperator);
+                $nodes = $this->handlePhrase($token->getValue(), $boolOperator);
                 break;
 
             case Token::T_SUBQUERY_START:
-                $node = $this->createSubquery();
+                $nodes = $this->handleSubquery($boolOperator);
                 break;
 
             case Token::T_URL:
-                $node = $this->createUrl($token->getValue(), $boolOperator);
+                $nodes = $this->handleUrl($token->getValue(), $boolOperator);
                 break;
 
             default:
+                $nodes = [];
                 break;
         }
 
-        return $node;
+        return $nodes instanceof Node ? [$nodes] : $nodes;
     }
 
     /**
@@ -144,7 +138,7 @@ class QueryParser
      *
      * @return Date
      */
-    protected function createDate($value, BoolOperator $boolOperator, ComparisonOperator $comparisonOperator = null)
+    protected function handleDate($value, BoolOperator $boolOperator, ComparisonOperator $comparisonOperator = null)
     {
         $m = $this->getModifiers();
         return new Date(
@@ -164,7 +158,7 @@ class QueryParser
      *
      * @return Emoji
      */
-    protected function createEmoji($value, BoolOperator $boolOperator)
+    protected function handleEmoji($value, BoolOperator $boolOperator)
     {
         $boolOperator = $boolOperator->equals(BoolOperator::OPTIONAL()) ? BoolOperator::REQUIRED() : $boolOperator;
         $m = $this->getModifiers();
@@ -177,7 +171,7 @@ class QueryParser
      *
      * @return Emoticon
      */
-    protected function createEmoticon($value, BoolOperator $boolOperator)
+    protected function handleEmoticon($value, BoolOperator $boolOperator)
     {
         $boolOperator = $boolOperator->equals(BoolOperator::OPTIONAL()) ? BoolOperator::REQUIRED() : $boolOperator;
         $m = $this->getModifiers();
@@ -187,21 +181,23 @@ class QueryParser
     /**
      * @param BoolOperator $boolOperator
      *
-     * @return Filter|null
+     * @param string $fieldName
+     * @return Node[]|Node
      */
-    protected function createFilter(BoolOperator $boolOperator)
+    protected function handleFilter($fieldName, BoolOperator $boolOperator)
     {
-        $fieldName = $this->stream->getCurrent()->getValue();
-
         $lookahead = $this->stream->getLookahead();
         if (!$lookahead instanceof Token) {
-            return $this->createWord($fieldName, $boolOperator);
+            return $this->handleWord($fieldName, $boolOperator);
         }
 
         switch ($lookahead->getType()) {
             case Token::T_RANGE_INCL_START:
             case Token::T_RANGE_EXCL_START:
-                return $this->createFilterWithRange($boolOperator);
+                return $this->handleFilterWithRange($boolOperator);
+
+            case Token::T_FILTER_END:
+                return $this->handleWord($fieldName, $boolOperator);
 
             default:
                 break;
@@ -218,9 +214,10 @@ class QueryParser
 
         $comparisonOperator = $this->getComparisonOperator();
         $fieldValue = $this->stream->getCurrent();
-        $node = $this->createNode($fieldValue, BoolOperator::OPTIONAL(), $comparisonOperator);
+        $nodes = $this->createNodes($fieldValue, BoolOperator::OPTIONAL(), $comparisonOperator);
 
         // todo: handle no node created scenario
+        // todo: handle multiple nodes created scenario?
 
         $this->stream->next();
         $m = $this->getModifiers();
@@ -229,7 +226,7 @@ class QueryParser
             $boolOperator,
             $m['use_boost'],
             $m['boost'],
-            $node
+            $nodes[0]
         );
 
         return $filter;
@@ -238,9 +235,9 @@ class QueryParser
     /**
      * @param BoolOperator $boolOperator
      *
-     * @return Filter|null
+     * @return Filter|Node[]|Node
      */
-    protected function createFilterWithRange(BoolOperator $boolOperator)
+    protected function handleFilterWithRange(BoolOperator $boolOperator)
     {
         $fieldName = $this->stream->getCurrent()->getValue();
         $this->stream->next();
@@ -251,7 +248,7 @@ class QueryParser
 
         switch ($this->stream->getCurrent()->getType()) {
             case Token::T_NUMBER:
-                $lowerNode = $this->createNumber($this->stream->getCurrent()->getValue());
+                $lowerNode = $this->handleNumber($this->stream->getCurrent()->getValue());
                 $this->stream->skipUntil(Token::T_TO);
                 break;
 
@@ -265,7 +262,7 @@ class QueryParser
 
         switch ($this->stream->getCurrent()->getType()) {
             case Token::T_NUMBER:
-                $upperNode = $this->createNumber($this->stream->getCurrent()->getValue());
+                $upperNode = $this->handleNumber($this->stream->getCurrent()->getValue());
                 $this->stream->skipUntil(Token::T_FILTER_END);
                 break;
 
@@ -277,7 +274,7 @@ class QueryParser
 
         if ($matchTypes && !$lowerNode instanceof $upperNode) {
             // todo: add field name and/or nodes that aren't null as words?
-            return null;
+            return [];
         }
 
         $this->stream->skipUntil(Token::T_FILTER_END);
@@ -287,6 +284,8 @@ class QueryParser
             $range = new NumberRange($lowerNode, $upperNode, $exclusive);
             return new Filter($fieldName, $boolOperator, $m['use_boost'], $m['boost'], null, $range);
         }
+
+        return [];
     }
 
     /**
@@ -295,7 +294,7 @@ class QueryParser
      *
      * @return Hashtag
      */
-    protected function createHashtag($value, BoolOperator $boolOperator)
+    protected function handleHashtag($value, BoolOperator $boolOperator)
     {
         $boolOperator = $boolOperator->equals(BoolOperator::OPTIONAL()) ? BoolOperator::REQUIRED() : $boolOperator;
         $m = $this->getModifiers();
@@ -308,7 +307,7 @@ class QueryParser
      *
      * @return Mention
      */
-    protected function createMention($value, BoolOperator $boolOperator)
+    protected function handleMention($value, BoolOperator $boolOperator)
     {
         $boolOperator = $boolOperator->equals(BoolOperator::OPTIONAL()) ? BoolOperator::REQUIRED() : $boolOperator;
         $m = $this->getModifiers();
@@ -321,7 +320,7 @@ class QueryParser
      *
      * @return Number
      */
-    protected function createNumber($value, ComparisonOperator $comparisonOperator = null)
+    protected function handleNumber($value, ComparisonOperator $comparisonOperator = null)
     {
         // move the stream and ignore them if they exist
         $this->getModifiers();
@@ -334,27 +333,30 @@ class QueryParser
      *
      * @return Phrase
      */
-    protected function createPhrase($value, BoolOperator $boolOperator)
+    protected function handlePhrase($value, BoolOperator $boolOperator)
     {
         $m = $this->getModifiers();
         return new Phrase($value, $boolOperator, $m['use_boost'], $m['boost'], $m['use_fuzzy'], $m['fuzzy']);
     }
 
     /**
-     * @return Subquery|null
+     * @param BoolOperator $queryBoolOperator
+     *
+     * @return Subquery|Node[]|Node
      */
-    protected function createSubquery()
+    protected function handleSubquery(BoolOperator $queryBoolOperator)
     {
         $this->stream->nextIf(Token::T_SUBQUERY_START);
+        /** @var Node[] $nodes */
         $nodes = [];
 
         do {
             $boolOperator = $this->getBoolOperator();
             $comparisonOperator = $this->getComparisonOperator();
-            $node = $this->createNode($this->stream->getCurrent(), $boolOperator, $comparisonOperator);
-            if ($node instanceof Node) {
-                $nodes[] = $node;
-            }
+            $nodes = array_merge(
+                $nodes,
+                $this->createNodes($this->stream->getCurrent(), $boolOperator, $comparisonOperator)
+            );
 
             if (!$this->stream->next()) {
                 break;
@@ -365,10 +367,43 @@ class QueryParser
         $m = $this->getModifiers();
 
         if (empty($nodes)) {
-            return null;
+            return [];
         }
 
-        // todo: if only one node, return the node itself?
+        /*
+         * if we only found one node within the subquery then we'll take the original query bool
+         * operator, recreate the node with that (unless it has its own) and any modifiers found
+         * and magically convert "+(cats)^5 to "+cats^5" or "-(+cats)~2 to "+cats~2" etc.
+         */
+        if (count($nodes) === 1) {
+            $data = $nodes[0]->toArray();
+
+            if (!isset($data['bool_operator'])) {
+                $data['bool_operator'] = $queryBoolOperator;
+            }
+
+            if (!isset($data['use_boost'])) {
+                $data['use_boost'] = $m['use_boost'];
+            }
+
+            if (!isset($data['boost'])) {
+                $data['boost'] = $m['boost'];
+            }
+
+            if (!isset($data['use_fuzzy'])) {
+                $data['use_fuzzy'] = $m['use_fuzzy'];
+            }
+
+            if (!isset($data['fuzzy'])) {
+                $data['fuzzy'] = $m['fuzzy'];
+            }
+
+            if (!isset($data['trailing_wildcard'])) {
+                $data['trailing_wildcard'] = $m['trailing_wildcard'];
+            }
+
+            return $nodes[0]::fromArray($data);
+        }
 
         return new Subquery($nodes, $m['use_boost'], $m['boost']);
     }
@@ -379,7 +414,7 @@ class QueryParser
      *
      * @return Url
      */
-    protected function createUrl($value, BoolOperator $boolOperator)
+    protected function handleUrl($value, BoolOperator $boolOperator)
     {
         $m = $this->getModifiers();
         return new Url($value, $boolOperator, $m['use_boost'], $m['boost']);
@@ -391,7 +426,7 @@ class QueryParser
      *
      * @return Word
      */
-    protected function createWord($value, BoolOperator $boolOperator)
+    protected function handleWord($value, BoolOperator $boolOperator)
     {
         $m = $this->getModifiers();
         return new Word(
