@@ -7,6 +7,8 @@ use Gdbots\QueryParser\QueryParser;
 $parser = new QueryParser();
 
 $tests = [
+    '+(cat)~5) -(+cats)^2',
+    're: doctor appt',
     'word(word:a>(#hashtag:b)',
     '"p1""p2""p3',
     'a"b"#c"#d e',

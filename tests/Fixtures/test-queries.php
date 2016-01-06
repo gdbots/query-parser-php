@@ -1224,6 +1224,16 @@ return [
     ],
 
     [
+        'name' => 'epic or fail',
+        'input' => 'epic or fail',
+        'expected_tokens' => [
+            [T::T_WORD, 'epic'],
+            T::T_OR,
+            [T::T_WORD, 'fail'],
+        ]
+    ],
+
+    [
         'name' => 'use of || then and required subquery',
         'input' => 'test || AND what (+test)',
         'expected_tokens' => [
