@@ -7,6 +7,7 @@ use Gdbots\QueryParser\QueryParser;
 $parser = new QueryParser();
 
 $tests = [
+    'candy AND oreos || dandy && chores^5',
     'f:[a..5] AND f:{1 TO f} OR f:[1..!]',
     'f:[2015-01-01..2015-12-31] AND f:{2015-01-01 TO 2015-12-31}',
     'f:[a..f] AND f:{a TO F}',

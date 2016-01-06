@@ -24,10 +24,6 @@ class QueryParserTest extends \PHPUnit_Framework_TestCase
      */
     public function testParse($name, $input, $ignored, array $expectedNodes = [])
     {
-        if (!isset($expectedNodes) || empty($expectedNodes)) {
-            return;
-        }
-
         $result = $this->parser->parse($input);
         $this->assertEquals($expectedNodes, $result->getNodes(), "Test query [{$name}] with input [{$input}] failed.");
     }

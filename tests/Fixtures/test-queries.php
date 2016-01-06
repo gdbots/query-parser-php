@@ -1042,6 +1042,75 @@ return [
             T::T_EQUALS,
             [T::T_DATE, '2015-12-18'],
             T::T_FILTER_END,
+        ],
+        'expected_nodes' => [
+            new Filter(
+                'field',
+                null,
+                false,
+                Filter::DEFAULT_BOOST,
+                new Date('2015-12-18')
+            ),
+            new Filter(
+                'field',
+                null,
+                false,
+                Filter::DEFAULT_BOOST,
+                new Date(
+                    '2015-12-18',
+                    null,
+                    false,
+                    Date::DEFAULT_BOOST,
+                    false,
+                    Date::DEFAULT_FUZZY,
+                    ComparisonOperator::GT()
+                )
+            ),
+            new Filter(
+                'field',
+                null,
+                false,
+                Filter::DEFAULT_BOOST,
+                new Date(
+                    '2015-12-18',
+                    null,
+                    false,
+                    Date::DEFAULT_BOOST,
+                    false,
+                    Date::DEFAULT_FUZZY,
+                    ComparisonOperator::LT()
+                )
+            ),
+            new Filter(
+                'field',
+                null,
+                false,
+                Filter::DEFAULT_BOOST,
+                new Date(
+                    '2015-12-18',
+                    null,
+                    false,
+                    Date::DEFAULT_BOOST,
+                    false,
+                    Date::DEFAULT_FUZZY,
+                    ComparisonOperator::GTE()
+                )
+            ),
+            new Filter(
+                'field',
+                null,
+                false,
+                Filter::DEFAULT_BOOST,
+                new Date(
+                    '2015-12-18',
+                    null,
+                    false,
+                    Date::DEFAULT_BOOST,
+                    false,
+                    Date::DEFAULT_FUZZY,
+                    ComparisonOperator::LTE()
+                )
+            ),
         ]
     ],
 
@@ -1054,6 +1123,9 @@ return [
             T::T_FILTER_END,
             T::T_BOOST,
             [T::T_NUMBER, 5.0],
+        ],
+        'expected_nodes' => [
+            new Filter('_id', null, true, 5.0, new Word('a9fc3e46-150a-45cd-ad39-c80f93119900')),
         ]
     ],
 
@@ -1068,6 +1140,10 @@ return [
             [T::T_FILTER_START, 'user'],
             [T::T_MENTION, 'twitterz'],
             T::T_FILTER_END,
+        ],
+        'expected_nodes' => [
+            new Filter('email', null, false, Filter::DEFAULT_BOOST, new Word('john@doe.com')),
+            new Filter('user', BoolOperator::PROHIBITED(), false, Filter::DEFAULT_BOOST, new Mention('twitterz', BoolOperator::REQUIRED())),
         ]
     ],
 
@@ -1085,6 +1161,27 @@ return [
             [T::T_HASHTAG, 'dogs'],
             T::T_SUBQUERY_END,
             T::T_FILTER_END,
+        ],
+        'expected_nodes' => [
+            new Filter(
+                'tags',
+                null,
+                false,
+                Filter::DEFAULT_BOOST,
+                new Hashtag('cats', BoolOperator::REQUIRED())
+            ),
+            new Filter(
+                'tags',
+                null,
+                false,
+                Filter::DEFAULT_BOOST,
+                null,
+                null,
+                new Subquery([
+                    new Hashtag('cats', BoolOperator::REQUIRED()),
+                    new Hashtag('dogs', BoolOperator::REQUIRED()),
+                ])
+            ),
         ]
     ],
     /*
@@ -1103,6 +1200,12 @@ return [
             [T::T_WORD, 'omg@user'],
             [T::T_WORD, 'mention#tag'],
             [T::T_WORD, 'tag@mention'],
+        ],
+        'expected_nodes' => [
+            new Word('omg#lol'),
+            new Word('omg@user'),
+            new Word('mention#tag'),
+            new Word('tag@mention'),
         ]
     ],
 
@@ -1118,6 +1221,11 @@ return [
             [T::T_WORD, 'ac/dc'],
             T::T_BOOST,
             [T::T_NUMBER, 5.0],
+        ],
+        'expected_nodes' => [
+            new Word('c.h.u.d', BoolOperator::REQUIRED()),
+            new Word('zombieland', BoolOperator::PROHIBITED()),
+            new Word('ac/dc', BoolOperator::REQUIRED(), true, 5.0 ),
         ]
     ],
 
@@ -1134,6 +1242,12 @@ return [
             [T::T_WORD, 'chores'],
             T::T_BOOST,
             [T::T_NUMBER, 5.0],
+        ],
+        'expected_nodes' => [
+            new Word('candy', BoolOperator::REQUIRED()),
+            new Word('oreos', BoolOperator::REQUIRED()),
+            new Word('dandy', BoolOperator::REQUIRED()),
+            new Word('chores', BoolOperator::REQUIRED(), true, 5.0),
         ]
     ],
     /*
@@ -1156,6 +1270,12 @@ return [
             T::T_SUBQUERY_END,
             T::T_PROHIBITED,
             [T::T_DATE, '2015-12-18'],
+        ],
+        'expected_nodes' => [
+            new Date('2000-01-01'),
+            new Date('2000-01-01'),
+            new Date('2015-12-18', BoolOperator::REQUIRED()),
+            new Date('2015-12-18', BoolOperator::PROHIBITED()),
         ]
     ],
 
@@ -1167,6 +1287,11 @@ return [
             [T::T_DATE, '2000-01-01'],
             T::T_BOOST,
             [T::T_DATE, '2000-01-01'],
+        ],
+        'expected_nodes' => [
+            new Word('2000-01-012000-01-01'),
+            new Date('2000-01-01'),
+            new Date('2000-01-01'),
         ]
     ],
     /*
@@ -1185,6 +1310,11 @@ return [
             [T::T_WORD, 'Beyoncé'],
             [T::T_WORD, 'Giselle'],
             [T::T_WORD, 'Knowles-Carter'],
+        ],
+        'expected_nodes' => [
+            new Word('Beyoncé', BoolOperator::REQUIRED()),
+            new Word('Giselle'),
+            new Word('Knowles-Carter'),
         ]
     ],
 
@@ -1198,6 +1328,14 @@ return [
             [T::T_WORD, 'Maribel'],
             [T::T_WORD, 'Muñiz'],
             [T::T_WORD, '$p0rty-spicé'],
+        ],
+        'expected_nodes' => [
+            new Word('J'),
+            new Word('Lo'),
+            new Word('Emme'),
+            new Word('Maribel'),
+            new Word('Muñiz'),
+            new Word('$p0rty-spicé'),
         ]
     ],
     /*
@@ -1220,6 +1358,15 @@ return [
             [T::T_WORD, 'tr33'],
             [T::T_WORD, 'with'],
             [T::T_WORD, '50¢'],
+        ],
+        'expected_nodes' => [
+            new Word('p!nk', BoolOperator::REQUIRED()),
+            new Word('K$sha', BoolOperator::REQUIRED()),
+            new Word('in'),
+            new Word('a'),
+            new Word('tr33'),
+            new Word('with'),
+            new Word('50¢'),
         ]
     ],
 
@@ -1239,6 +1386,15 @@ return [
             [T::T_WORD, 'Russia'],
             [T::T_PHRASE, '¡Forward, Russia!'],
             T::T_FUZZY,
+        ],
+        'expected_nodes' => [
+            new Word('florence+machine', BoolOperator::REQUIRED()),
+            new Word('ac/dc', null, true, Word::MAX_BOOST),
+            new Word('Stellastarr', null, false, Word::DEFAULT_BOOST, false, Word::DEFAULT_FUZZY, true),
+            new Word('T\'Pau'),
+            new Word('​¡Forward'),
+            new Word('Russia'),
+            new Phrase('¡Forward, Russia!', null, false, Phrase::DEFAULT_BOOST, true, Phrase::DEFAULT_FUZZY),
         ]
     ],
     /*
@@ -1259,6 +1415,10 @@ return [
             [T::T_WORD, 'abc'],
             [T::T_WORD, 'f:a'],
             T::T_SUBQUERY_END,
+        ],
+        'expected_nodes' => [
+            new Word('test'),
+            new Subquery([new Number(123.0), new Word('abc'), new Word('f:a')]),
         ]
     ],
 
@@ -1271,6 +1431,10 @@ return [
             [T::T_WORD, 'word:a'],
             [T::T_WORD, 'hashtag:b'],
             T::T_SUBQUERY_END,
+        ],
+        'expected_nodes' => [
+            new Word('word'),
+            new Subquery([new Word('word:a'), new Word('hashtag:b')]),
         ]
     ],
     /*
@@ -1291,6 +1455,11 @@ return [
             [T::T_WORD, 'Whip/Nae'],
             [T::T_WORD, 'Nae'],
             T::T_SUBQUERY_END,
+        ],
+        'expected_nodes' => [
+            new Word('Watch'),
+            new Word('Me'),
+            new Subquery([new Word('Whip/Nae'), new Word('Nae')]),
         ]
     ],
 
@@ -1301,6 +1470,11 @@ return [
             [T::T_WORD, 'epic'],
             [T::T_WORD, 'or'],
             [T::T_WORD, 'fail'],
+        ],
+        'expected_nodes' => [
+            new Word('epic'),
+            new Word('or'),
+            new Word('fail'),
         ]
     ],
 
@@ -1316,6 +1490,11 @@ return [
             T::T_REQUIRED,
             [T::T_WORD, 'test'],
             T::T_SUBQUERY_END,
+        ],
+        'expected_nodes' => [
+            new Word('test'),
+            new Word('what', BoolOperator::REQUIRED()),
+            new Word('test', BoolOperator::REQUIRED()),
         ]
     ],
 
@@ -1347,6 +1526,15 @@ return [
             T::T_GREATER_THAN,
             [T::T_NUMBER, 1.0],
             T::T_FILTER_END,
+        ],
+        'expected_nodes' => [
+            new Word('test'),
+            new Number(1),
+            new Number(2),
+            new Number(3.14),
+            new Word('a'),
+            new Word('b', BoolOperator::REQUIRED()),
+            new Filter('field', BoolOperator::REQUIRED(), false, Filter::DEFAULT_BOOST, new Number(1, ComparisonOperator::GT()))
         ]
     ],
 
@@ -1356,13 +1544,18 @@ return [
         'expected_tokens' => [
             [T::T_WORD, 'R.I.P'],
             [T::T_WORD, 'Motörhead'],
+        ],
+        'expected_nodes' => [
+            new Word('R.I.P'),
+            new Word('Motörhead'),
         ]
     ],
 
     [
         'name' => 'ignored chars',
         'input' => '!!! ! $ _ . ; %',
-        'expected_tokens' => []
+        'expected_tokens' => [],
+        'expected_nodes' => []
     ],
 
     [
@@ -1378,6 +1571,10 @@ return [
             T::T_SUBQUERY_END,
             T::T_BOOST,
             [T::T_NUMBER, 4.0],
+        ],
+        'expected_nodes' => [
+            new Phrase('john smith', null, true, 2.0),
+            new Subquery([new Word('foo'), new Word('bar')], true, 4.0),
         ]
     ],
 
@@ -1400,6 +1597,15 @@ return [
             T::T_SUBQUERY_END,
             [T::T_WORD, 'click'],
             [T::T_WORD, 'a'],
+        ],
+        'expected_nodes' => [
+            new Word('blah'),
+            new Phrase('[[shortcode]]'),
+            new Word('akd_'),
+            new Word('gj%', BoolOperator::PROHIBITED()),
+            new Subquery([new Word('a'), new Word('onclick'), new Word('javascript:alert'), new Word('test')]),
+            new Word('click'),
+            new Word('a'),
         ]
     ],
 
@@ -1424,6 +1630,24 @@ return [
             [T::T_WORD, 'test'],
             T::T_SUBQUERY_END,
             [T::T_WORD, 'gt;click&lt;/a&gt'],
+        ],
+        'expected_nodes' => [
+            new Word('blah'),
+            new Word('quot'),
+            new Word('shortcode'),
+            new Word('quot'),
+            new Word('akd_'),
+            new Word('gj%', BoolOperator::PROHIBITED()),
+            new Subquery(
+                [
+                    new Word('gt'),
+                    new Word('lt;a'),
+                    new Word('onclick'),
+                    new Word('quot;javascript:alert'),
+                    new Word('test')
+                ]
+            ),
+            new Word('gt;click&lt;/a&gt'),
         ]
     ],
 
@@ -1433,6 +1657,10 @@ return [
         'expected_tokens' => [
             [T::T_WORD, 'a"b"#c"#d'],
             [T::T_WORD, 'e'],
+        ],
+        'expected_nodes' => [
+            new Word('a"b"#c"#d'),
+            new Word('e'),
         ]
     ],
 
@@ -1446,6 +1674,12 @@ return [
             T::T_SUBQUERY_START,
             [T::T_WORD, 'test2'],
             T::T_SUBQUERY_END,
+        ],
+        'expected_nodes' => [
+            new Word('IMG'),
+            new Word('SRC'),
+            new Word('j&#X41vascript:alert'),
+            new Word('test2'),
         ]
     ],
     /*
