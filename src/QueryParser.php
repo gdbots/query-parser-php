@@ -195,8 +195,8 @@ class QueryParser
     }
 
     /**
-     * @param BoolOperator $boolOperator
      * @param string $fieldName
+     * @param BoolOperator $boolOperator
      *
      * @return Filter|Node[]|Node
      */
@@ -277,13 +277,13 @@ class QueryParser
 
         $m = $this->getModifiers();
 
-        if ($lowerNode instanceof Number) {
+        if ($lowerNode instanceof Number || $upperNode instanceof Number) {
             $range = new NumberRange($lowerNode, $upperNode, $exclusive);
             return new Filter($fieldName, $boolOperator, $m['use_boost'], $m['boost'], null, $range);
-        } elseif ($lowerNode instanceof Date) {
+        } elseif ($lowerNode instanceof Date || $upperNode instanceof Date) {
             $range = new DateRange($lowerNode, $upperNode, $exclusive);
             return new Filter($fieldName, $boolOperator, $m['use_boost'], $m['boost'], null, $range);
-        } elseif ($lowerNode instanceof Word) {
+        } elseif ($lowerNode instanceof Word || $upperNode instanceof Word) {
             $range = new WordRange($lowerNode, $upperNode, $exclusive);
             return new Filter($fieldName, $boolOperator, $m['use_boost'], $m['boost'], null, $range);
         }
@@ -292,8 +292,8 @@ class QueryParser
     }
 
     /**
-     * @param BoolOperator $boolOperator
      * @param string $fieldName
+     * @param BoolOperator $boolOperator
      *
      * @return Filter|Node
      */
