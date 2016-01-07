@@ -2,6 +2,8 @@
 
 namespace Gdbots\QueryParser\Node;
 
+use Gdbots\QueryParser\Builder\QueryBuilder;
+
 class Subquery extends Node
 {
     const NODE_TYPE = 'subquery';
@@ -62,5 +64,13 @@ class Subquery extends Node
     public function getNodes()
     {
         return $this->nodes;
+    }
+
+    /**
+     * @param QueryBuilder $builder
+     */
+    public function acceptBuilder(QueryBuilder $builder)
+    {
+        $builder->addSubquery($this);
     }
 }

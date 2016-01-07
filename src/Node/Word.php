@@ -2,6 +2,7 @@
 
 namespace Gdbots\QueryParser\Node;
 
+use Gdbots\QueryParser\Builder\QueryBuilder;
 use Gdbots\QueryParser\Enum\BoolOperator;
 
 final class Word extends Node
@@ -82,8 +83,24 @@ final class Word extends Node
     /**
      * @return bool
      */
+    public function hasTrailingWildcard()
+    {
+        return $this->trailingWildcard;
+    }
+
+    /**
+     * @return bool
+     */
     public function isStopWord()
     {
         return in_array(strtolower($this->getValue()), self::$stopWords);
+    }
+
+    /**
+     * @param QueryBuilder $builder
+     */
+    public function acceptBuilder(QueryBuilder $builder)
+    {
+        $builder->addWord($this);
     }
 }

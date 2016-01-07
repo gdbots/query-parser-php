@@ -2,6 +2,7 @@
 
 namespace Gdbots\QueryParser\Node;
 
+use Gdbots\QueryParser\Builder\QueryBuilder;
 use Gdbots\QueryParser\Enum\ComparisonOperator;
 
 class Number extends Node
@@ -60,5 +61,13 @@ class Number extends Node
     public function getComparisonOperator()
     {
         return $this->comparisonOperator;
+    }
+
+    /**
+     * @param QueryBuilder $builder
+     */
+    public function acceptBuilder(QueryBuilder $builder)
+    {
+        $builder->addNumber($this);
     }
 }

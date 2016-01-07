@@ -2,6 +2,7 @@
 
 namespace Gdbots\QueryParser\Node;
 
+use Gdbots\QueryParser\Builder\QueryBuilder;
 use Gdbots\QueryParser\Enum\BoolOperator;
 use Gdbots\QueryParser\Enum\FilterType;
 
@@ -142,5 +143,13 @@ final class Filter extends Node
     public function getSubquery()
     {
         return $this->subquery;
+    }
+
+    /**
+     * @param QueryBuilder $builder
+     */
+    public function acceptBuilder(QueryBuilder $builder)
+    {
+        $builder->addFilter($this);
     }
 }

@@ -1143,7 +1143,13 @@ return [
         ],
         'expected_nodes' => [
             new Filter('email', null, false, Filter::DEFAULT_BOOST, new Word('john@doe.com')),
-            new Filter('user', BoolOperator::PROHIBITED(), false, Filter::DEFAULT_BOOST, new Mention('twitterz', BoolOperator::REQUIRED())),
+            new Filter(
+                'user',
+                BoolOperator::PROHIBITED(),
+                false,
+                Filter::DEFAULT_BOOST,
+                new Mention('twitterz', BoolOperator::REQUIRED())
+            ),
         ]
     ],
 
@@ -1225,7 +1231,7 @@ return [
         'expected_nodes' => [
             new Word('c.h.u.d', BoolOperator::REQUIRED()),
             new Word('zombieland', BoolOperator::PROHIBITED()),
-            new Word('ac/dc', BoolOperator::REQUIRED(), true, 5.0 ),
+            new Word('ac/dc', BoolOperator::REQUIRED(), true, 5.0),
         ]
     ],
 
@@ -1534,7 +1540,13 @@ return [
             new Number(3.14),
             new Word('a'),
             new Word('b', BoolOperator::REQUIRED()),
-            new Filter('field', BoolOperator::REQUIRED(), false, Filter::DEFAULT_BOOST, new Number(1, ComparisonOperator::GT()))
+            new Filter(
+                'field',
+                BoolOperator::REQUIRED(),
+                false,
+                Filter::DEFAULT_BOOST,
+                new Number(1.0, ComparisonOperator::GT())
+            )
         ]
     ],
 
@@ -1638,15 +1650,13 @@ return [
             new Word('quot'),
             new Word('akd_'),
             new Word('gj%', BoolOperator::PROHIBITED()),
-            new Subquery(
-                [
-                    new Word('gt'),
-                    new Word('lt;a'),
-                    new Word('onclick'),
-                    new Word('quot;javascript:alert'),
-                    new Word('test')
-                ]
-            ),
+            new Subquery([
+                new Word('gt'),
+                new Word('lt;a'),
+                new Word('onclick'),
+                new Word('quot;javascript:alert'),
+                new Word('test')
+            ]),
             new Word('gt;click&lt;/a&gt'),
         ]
     ],

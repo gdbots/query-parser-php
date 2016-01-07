@@ -3,11 +3,14 @@
 require dirname(__DIR__) . '/vendor/autoload.php';
 
 use Gdbots\QueryParser\QueryParser;
+use Gdbots\QueryParser\Builder\PrettyPrinter;
 
 $parser = new QueryParser();
+$printer = new PrettyPrinter();
 
 $tests = [
     'candy AND oreos || dandy && chores^5',
+    '2015-12-25',
     'f:[a..5] AND f:{1 TO f} OR f:[1..!]',
     'f:[2015-01-01..2015-12-31] AND f:{2015-01-01 TO 2015-12-31}',
     'f:[a..f] AND f:{a TO F}',
@@ -63,12 +66,21 @@ $tests = [
     'Beyoncé Knowles (@Beyonce) <a> Twitter',
 ];
 
+$header = PHP_EOL.PHP_EOL.'#### %s '.PHP_EOL;
+
 foreach ($tests as $test) {
-    echo str_repeat('*', 10) . PHP_EOL . PHP_EOL;
-    echo 'input: ' . $test . PHP_EOL;
-    echo str_repeat('=', 10) . PHP_EOL . PHP_EOL;
     $result = $parser->parse($test);
-    echo json_encode($result, JSON_PRETTY_PRINT) . PHP_EOL;
-    echo str_repeat('=', 10) . PHP_EOL . PHP_EOL;
+
+    echo sprintf($header, 'START INPUT');
+    echo $test;
+
+    echo sprintf($header, 'JSON');
+    echo json_encode($result, JSON_PRETTY_PRINT);
+
+    echo sprintf($header, 'PRETTY');
+    echo $printer->fromParsedQuery($result)->getResult();
+
+    echo sprintf($header, 'END INPUT');
+    echo $test.PHP_EOL.PHP_EOL;
     fgets(STDIN);
 }

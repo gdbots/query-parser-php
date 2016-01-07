@@ -2,6 +2,7 @@
 
 namespace Gdbots\QueryParser\Node;
 
+use Gdbots\QueryParser\Builder\QueryBuilder;
 use Gdbots\QueryParser\Enum\BoolOperator;
 
 class Phrase extends Node
@@ -50,5 +51,13 @@ class Phrase extends Node
         }
 
         return new self($value, $boolOperator, $useBoost, $boost, $useFuzzy, $fuzzy);
+    }
+
+    /**
+     * @param QueryBuilder $builder
+     */
+    public function acceptBuilder(QueryBuilder $builder)
+    {
+        $builder->addPhrase($this);
     }
 }

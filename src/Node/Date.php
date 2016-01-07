@@ -2,6 +2,7 @@
 
 namespace Gdbots\QueryParser\Node;
 
+use Gdbots\QueryParser\Builder\QueryBuilder;
 use Gdbots\QueryParser\Enum\BoolOperator;
 use Gdbots\QueryParser\Enum\ComparisonOperator;
 
@@ -105,5 +106,13 @@ final class Date extends Node
         }
 
         return $date;
+    }
+
+    /**
+     * @param QueryBuilder $builder
+     */
+    public function acceptBuilder(QueryBuilder $builder)
+    {
+        $builder->addDate($this);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Gdbots\QueryParser\Node;
 
+use Gdbots\QueryParser\Builder\QueryBuilder;
 use Gdbots\QueryParser\Enum\BoolOperator;
 
 final class Emoticon extends Node
@@ -42,5 +43,13 @@ final class Emoticon extends Node
         }
 
         return new self($value, $boolOperator, $useBoost, $boost);
+    }
+
+    /**
+     * @param QueryBuilder $builder
+     */
+    public function acceptBuilder(QueryBuilder $builder)
+    {
+        $builder->addEmoticon($this);
     }
 }

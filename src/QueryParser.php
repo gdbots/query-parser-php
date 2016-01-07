@@ -249,8 +249,9 @@ class QueryParser
 
         $this->stream->skipUntil(Token::T_FILTER_END);
 
+        // todo: add field name and/or nodes that aren't null as words?
+        // todo: handle mismatched node
         if ($matchTypes && !$lowerNode instanceof $upperNode) {
-            // todo: add field name and/or nodes that aren't null as words?
             $nodes = [];
 
             if ($lowerNode instanceof Node) {

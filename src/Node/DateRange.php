@@ -2,6 +2,8 @@
 
 namespace Gdbots\QueryParser\Node;
 
+use Gdbots\QueryParser\Builder\QueryBuilder;
+
 final class DateRange extends Range
 {
     const NODE_TYPE = 'date_range';
@@ -32,5 +34,13 @@ final class DateRange extends Range
     public function getUpperNode()
     {
         return parent::getUpperNode();
+    }
+
+    /**
+     * @param QueryBuilder $builder
+     */
+    public function acceptBuilder(QueryBuilder $builder)
+    {
+        $builder->addDateRange($this);
     }
 }

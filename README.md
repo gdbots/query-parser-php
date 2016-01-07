@@ -30,7 +30,7 @@ It supports the following features:
 <?php
 
 use Gdbots\QueryParser\QueryParser;
-use Gdbots\QueryParser\Visitor\QueryItemPrinter;
+use Gdbots\QueryParser\Builder\QueryItemPrinter;
 
 $parser = new QueryParser();
 $query = $parser->parseWithOperator('+mandatoryWord AND -excludedWord fieldName:"value"');

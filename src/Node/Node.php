@@ -6,6 +6,7 @@ use Gdbots\Common\FromArray;
 use Gdbots\Common\ToArray;
 use Gdbots\Common\Util\NumberUtils;
 use Gdbots\Common\Util\StringUtils;
+use Gdbots\QueryParser\Builder\QueryBuilder;
 use Gdbots\QueryParser\Enum\BoolOperator;
 
 abstract class Node implements FromArray, ToArray, \JsonSerializable
@@ -211,5 +212,13 @@ abstract class Node implements FromArray, ToArray, \JsonSerializable
     final public function getFuzzy()
     {
         return $this->fuzzy;
+    }
+
+    /**
+     * @param QueryBuilder $builder
+     */
+    public function acceptBuilder(QueryBuilder $builder)
+    {
+        // do nothing
     }
 }
