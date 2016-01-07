@@ -4,6 +4,7 @@ namespace Gdbots\QueryParser;
 
 use Gdbots\Common\FromArray;
 use Gdbots\Common\ToArray;
+use Gdbots\QueryParser\Node\Filter;
 use Gdbots\QueryParser\Node\Node;
 
 class ParsedQuery implements FromArray, ToArray, \JsonSerializable
@@ -84,5 +85,23 @@ class ParsedQuery implements FromArray, ToArray, \JsonSerializable
     public function getNodesOfType($type)
     {
         return isset($this->nodesByType[$type]) ? $this->nodesByType[$type] : [];
+    }
+
+    /**
+     * Returns an array of filters (specifically the field names) that are
+     * used in this query.  e.g. "status:active", "status" is the field name.
+     *
+     * @return array
+     */
+    public function getFiltersUsed()
+    {
+        $filters = [];
+
+        /** @var Filter $node */
+        foreach ($this->getNodesOfType(Filter::NODE_TYPE) as $node) {
+            $filters[$node->getField()] = true;
+        }
+
+        return array_keys($filters);
     }
 }

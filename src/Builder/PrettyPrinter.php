@@ -15,12 +15,10 @@ use Gdbots\QueryParser\Node\Subquery;
 use Gdbots\QueryParser\Node\Word;
 use Gdbots\QueryParser\ParsedQuery;
 
-class PrettyPrinter implements QueryBuilder
+class PrettyPrinter extends AbstractQueryBuilder
 {
-    use QueryBuilderTrait;
-
     /** @var string */
-    private $result;
+    protected $result;
 
     /**
      * @return string
@@ -204,5 +202,47 @@ class PrettyPrinter implements QueryBuilder
     {
         $this->result = trim($this->result).')';
         $this->printPostfix($subquery);
+    }
+
+    /**
+     * @param Node $node
+     */
+    protected function mustMatchText(Node $node)
+    {
+    }
+
+    /**
+     * @param Node $node
+     */
+    protected function shouldMatchText(Node $node)
+    {
+    }
+
+    /**
+     * @param Node $node
+     */
+    protected function mustNotMatchText(Node $node)
+    {
+    }
+
+    /**
+     * @param Node $node
+     */
+    protected function mustMatchTerm(Node $node)
+    {
+    }
+
+    /**
+     * @param Node $node
+     */
+    protected function shouldMatchTerm(Node $node)
+    {
+    }
+
+    /**
+     * @param Node $node
+     */
+    protected function mustNotMatchTerm(Node $node)
+    {
     }
 }

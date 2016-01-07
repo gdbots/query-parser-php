@@ -9,7 +9,7 @@ $parser = new QueryParser();
 $printer = new PrettyPrinter();
 
 $tests = [
-    'candy AND oreos || dandy && chores^5',
+    'cANDy AND OReos || dANDy && chORes^5',
     '2015-12-25',
     'f:[a..5] AND f:{1 TO f} OR f:[1..!]',
     'f:[2015-01-01..2015-12-31] AND f:{2015-01-01 TO 2015-12-31}',

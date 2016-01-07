@@ -64,7 +64,7 @@ abstract class Node implements FromArray, ToArray, \JsonSerializable
         $this->value = $value;
         $this->boolOperator = $boolOperator ?: BoolOperator::OPTIONAL();
 
-        $this->useBoost = (bool)$useBoost && static::SUPPORTS_BOOST;
+        $this->useBoost = (bool)$useBoost && static::SUPPORTS_BOOST && $this->boolOperator === BoolOperator::OPTIONAL();
         if ($this->useBoost) {
             $this->boost = (float)$boost;
             if ($this->boost < static::MIN_BOOST) {
@@ -76,7 +76,7 @@ abstract class Node implements FromArray, ToArray, \JsonSerializable
             }
         }
 
-        $this->useFuzzy = (bool)$useFuzzy && static::SUPPORTS_FUZZY;
+        $this->useFuzzy = (bool)$useFuzzy && static::SUPPORTS_FUZZY && $this->boolOperator === BoolOperator::OPTIONAL();
         if ($this->useFuzzy) {
             $this->fuzzy = NumberUtils::bound($fuzzy, static::MIN_FUZZY, static::MAX_FUZZY);
         }
