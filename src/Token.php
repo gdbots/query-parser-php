@@ -26,8 +26,8 @@ class Token implements \JsonSerializable
     const T_OR               = 19; // 'OR' or '||'
     const T_TO               = 20; // 'TO' or '..'
     const T_WORD             = 21;
-    const T_FILTER_START     = 22; // The "field:" portion of "field:value".
-    const T_FILTER_END       = 23; // when a filter lexeme ends, i.e. "field:value". This token has no value.
+    const T_FIELD_START      = 22; // The "field:" portion of "field:value".
+    const T_FIELD_END        = 23; // when a field lexeme ends, i.e. "field:value". This token has no value.
     const T_PHRASE           = 24; // Phrase (one or more quoted words)
     const T_URL              = 25; // a valid url
     const T_DATE             = 26; // date in the format YYYY-MM-DD

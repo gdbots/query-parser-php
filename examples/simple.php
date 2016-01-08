@@ -78,7 +78,7 @@ foreach ($tests as $test) {
     echo json_encode($result, JSON_PRETTY_PRINT);
 
     echo sprintf($header, 'PRETTY');
-    echo $printer->fromParsedQuery($result)->getResult();
+    echo $printer->addParsedQuery($result)->getResult();
 
     echo sprintf($header, 'END INPUT');
     echo $test.PHP_EOL.PHP_EOL;

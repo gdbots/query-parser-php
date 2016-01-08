@@ -4,11 +4,11 @@ namespace Gdbots\QueryParser\Node;
 
 use Gdbots\QueryParser\Builder\QueryBuilder;
 use Gdbots\QueryParser\Enum\BoolOperator;
-use Gdbots\QueryParser\Enum\FilterType;
+use Gdbots\QueryParser\Enum\FieldType;
 
-final class Filter extends Node
+final class Field extends Node
 {
-    const NODE_TYPE = 'filter';
+    const NODE_TYPE = 'field';
 
     /** @var Node */
     protected $node;
@@ -19,13 +19,13 @@ final class Filter extends Node
     /** @var Subquery */
     protected $subquery;
 
-    /** @var FilterType */
-    protected $filterType;
+    /** @var FieldType */
+    protected $fieldType;
 
     /**
-     * Filter constructor.
+     * Field constructor.
      *
-     * @param string $field
+     * @param string $value
      * @param BoolOperator $boolOperator
      * @param bool $useBoost
      * @param float $boost
@@ -34,7 +34,7 @@ final class Filter extends Node
      * @param Subquery $subquery
      */
     public function __construct(
-        $field,
+        $value,
         BoolOperator $boolOperator = null,
         $useBoost = false,
         $boost = self::DEFAULT_BOOST,
@@ -42,17 +42,17 @@ final class Filter extends Node
         Range $range = null,
         Subquery $subquery = null
     ) {
-        parent::__construct($field, $boolOperator, $useBoost, $boost);
+        parent::__construct($value, $boolOperator, $useBoost, $boost);
 
         if (null !== $node) {
             $this->node = $node;
-            $this->filterType = FilterType::SIMPLE();
+            $this->fieldType = FieldType::SIMPLE();
         } elseif (null !== $range) {
             $this->range = $range;
-            $this->filterType = FilterType::RANGE();
+            $this->fieldType = FieldType::RANGE();
         } elseif (null !== $subquery) {
             $this->subquery = $subquery;
-            $this->filterType = FilterType::SUBQUERY();
+            $this->fieldType = FieldType::SUBQUERY();
         }
     }
 
@@ -62,7 +62,7 @@ final class Filter extends Node
      */
     public static function fromArray(array $data = [])
     {
-        $field    = isset($data['value']) ? $data['value'] : null;
+        $value    = isset($data['value']) ? $data['value'] : null;
         $useBoost = isset($data['use_boost']) ? (bool)$data['use_boost'] : false;
         $boost    = isset($data['boost']) ? (float)$data['boost'] : self::DEFAULT_BOOST;
 
@@ -84,7 +84,7 @@ final class Filter extends Node
             $subquery = static::factory($data['subquery']);
         }
 
-        return new self($field, $boolOperator, $useBoost, $boost, $node, $range, $subquery);
+        return new self($value, $boolOperator, $useBoost, $boost, $node, $range, $subquery);
     }
 
     /**
@@ -108,17 +108,41 @@ final class Filter extends Node
     /**
      * @return string
      */
-    public function getField()
+    public function getName()
     {
         return $this->getValue();
     }
 
     /**
-     * @return FilterType
+     * @return FieldType
      */
-    public function getFilterType()
+    public function getFieldType()
     {
-        return $this->filterType;
+        return $this->fieldType;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasSimpleValue()
+    {
+        return $this->fieldType->equals(FieldType::SIMPLE());
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasRangeValue()
+    {
+        return $this->fieldType->equals(FieldType::RANGE());
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasSubqueryValue()
+    {
+        return $this->fieldType->equals(FieldType::SUBQUERY());
     }
 
     /**
@@ -150,6 +174,6 @@ final class Filter extends Node
      */
     public function acceptBuilder(QueryBuilder $builder)
     {
-        $builder->addFilter($this);
+        $builder->addField($this);
     }
 }

@@ -8,7 +8,7 @@ use Gdbots\QueryParser\Node\Date;
 use Gdbots\QueryParser\Node\DateRange;
 use Gdbots\QueryParser\Node\Emoji;
 use Gdbots\QueryParser\Node\Emoticon;
-use Gdbots\QueryParser\Node\Filter;
+use Gdbots\QueryParser\Node\Field;
 use Gdbots\QueryParser\Node\Hashtag;
 use Gdbots\QueryParser\Node\Mention;
 use Gdbots\QueryParser\Node\Node;
@@ -103,8 +103,8 @@ class QueryParser
                 $nodes = $this->createEmoticon($token->getValue(), $boolOperator);
                 break;
 
-            case Token::T_FILTER_START:
-                $nodes = $this->handleFilter($token->getValue(), $boolOperator);
+            case Token::T_FIELD_START:
+                $nodes = $this->handleField($token->getValue(), $boolOperator);
                 break;
 
             case Token::T_HASHTAG:
@@ -143,9 +143,9 @@ class QueryParser
      * @param string $fieldName
      * @param BoolOperator $boolOperator
      *
-     * @return Filter|Node[]|Node
+     * @return Field|Node[]|Node
      */
-    protected function handleFilter($fieldName, BoolOperator $boolOperator)
+    protected function handleField($fieldName, BoolOperator $boolOperator)
     {
         $lookahead = $this->stream->getLookahead();
         if (!$lookahead instanceof Token) {
@@ -157,12 +157,12 @@ class QueryParser
         switch ($lookahead->getType()) {
             case Token::T_RANGE_INCL_START:
             case Token::T_RANGE_EXCL_START:
-                return $this->handleFilterWithRange($fieldName, $boolOperator);
+                return $this->handleFieldWithRange($fieldName, $boolOperator);
 
             case Token::T_SUBQUERY_START:
-                return $this->handleFilterWithSubquery($fieldName, $boolOperator);
+                return $this->handleFieldWithSubquery($fieldName, $boolOperator);
 
-            case Token::T_FILTER_END:
+            case Token::T_FIELD_END:
                 return $this->createWord($fieldName, $boolOperator);
 
             default:
@@ -180,7 +180,7 @@ class QueryParser
         $comparisonOperator = $this->getComparisonOperator();
         $fieldValue = $this->stream->getCurrent();
         $nodes = $this->createNodes($fieldValue, BoolOperator::OPTIONAL(), $comparisonOperator);
-        $this->stream->skipUntil(Token::T_FILTER_END);
+        $this->stream->skipUntil(Token::T_FIELD_END);
 
         if (empty($nodes)) {
             return $this->createWord($fieldName, $boolOperator);
@@ -191,16 +191,16 @@ class QueryParser
         }
 
         $m = $this->getModifiers();
-        return new Filter($fieldName, $boolOperator, $m['use_boost'], $m['boost'], $nodes[0]);
+        return new Field($fieldName, $boolOperator, $m['use_boost'], $m['boost'], $nodes[0]);
     }
 
     /**
      * @param string $fieldName
      * @param BoolOperator $boolOperator
      *
-     * @return Filter|Node[]|Node
+     * @return Field|Node[]|Node
      */
-    protected function handleFilterWithRange($fieldName, BoolOperator $boolOperator)
+    protected function handleFieldWithRange($fieldName, BoolOperator $boolOperator)
     {
         $exclusive = $this->stream->typeIs(Token::T_RANGE_EXCL_START);
         $matchTypes = true;
@@ -247,7 +247,7 @@ class QueryParser
                 break;
         }
 
-        $this->stream->skipUntil(Token::T_FILTER_END);
+        $this->stream->skipUntil(Token::T_FIELD_END);
 
         // todo: add field name and/or nodes that aren't null as words?
         // todo: handle mismatched node
@@ -269,24 +269,24 @@ class QueryParser
             $m = $this->getModifiers();
 
             if (count($nodes) === 1) {
-                return new Filter($fieldName, $boolOperator, $m['use_boost'], $m['boost'], $nodes[0]);
+                return new Field($fieldName, $boolOperator, $m['use_boost'], $m['boost'], $nodes[0]);
             }
 
             $subquery = new Subquery($nodes, $m['use_boost'], $m['boost']);
-            return new Filter($fieldName, $boolOperator, $m['use_boost'], $m['boost'], $subquery);
+            return new Field($fieldName, $boolOperator, $m['use_boost'], $m['boost'], $subquery);
         }
 
         $m = $this->getModifiers();
 
         if ($lowerNode instanceof Number || $upperNode instanceof Number) {
             $range = new NumberRange($lowerNode, $upperNode, $exclusive);
-            return new Filter($fieldName, $boolOperator, $m['use_boost'], $m['boost'], null, $range);
+            return new Field($fieldName, $boolOperator, $m['use_boost'], $m['boost'], null, $range);
         } elseif ($lowerNode instanceof Date || $upperNode instanceof Date) {
             $range = new DateRange($lowerNode, $upperNode, $exclusive);
-            return new Filter($fieldName, $boolOperator, $m['use_boost'], $m['boost'], null, $range);
+            return new Field($fieldName, $boolOperator, $m['use_boost'], $m['boost'], null, $range);
         } elseif ($lowerNode instanceof Word || $upperNode instanceof Word) {
             $range = new WordRange($lowerNode, $upperNode, $exclusive);
-            return new Filter($fieldName, $boolOperator, $m['use_boost'], $m['boost'], null, $range);
+            return new Field($fieldName, $boolOperator, $m['use_boost'], $m['boost'], null, $range);
         }
 
         return $this->createWord($fieldName, $boolOperator);
@@ -296,17 +296,17 @@ class QueryParser
      * @param string $fieldName
      * @param BoolOperator $boolOperator
      *
-     * @return Filter|Node
+     * @return Field|Node
      */
-    protected function handleFilterWithSubquery($fieldName, BoolOperator $boolOperator)
+    protected function handleFieldWithSubquery($fieldName, BoolOperator $boolOperator)
     {
         $this->stream->nextIf(Token::T_SUBQUERY_START);
         $subquery = $this->handleSubquery($boolOperator);
-        $this->stream->skipUntil(Token::T_FILTER_END);
+        $this->stream->skipUntil(Token::T_FIELD_END);
 
         if ($subquery instanceof Subquery) {
             $m = $this->getModifiers();
-            return new Filter($fieldName, $boolOperator, $m['use_boost'], $m['boost'], null, null, $subquery);
+            return new Field($fieldName, $boolOperator, $m['use_boost'], $m['boost'], null, null, $subquery);
         }
 
         if (empty($subquery)) {
@@ -314,7 +314,7 @@ class QueryParser
         }
 
         $m = $this->getModifiers();
-        return new Filter($fieldName, $boolOperator, $m['use_boost'], $m['boost'], $subquery);
+        return new Field($fieldName, $boolOperator, $m['use_boost'], $m['boost'], $subquery);
     }
 
     /**

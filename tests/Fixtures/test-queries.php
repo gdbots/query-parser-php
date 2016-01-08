@@ -2,12 +2,12 @@
 
 use Gdbots\QueryParser\Enum\BoolOperator;
 use Gdbots\QueryParser\Enum\ComparisonOperator;
-use Gdbots\QueryParser\Enum\FilterType;
+use Gdbots\QueryParser\Enum\FieldType;
 use Gdbots\QueryParser\Node\Date;
 use Gdbots\QueryParser\Node\DateRange;
 use Gdbots\QueryParser\Node\Emoji;
 use Gdbots\QueryParser\Node\Emoticon;
-use Gdbots\QueryParser\Node\Filter;
+use Gdbots\QueryParser\Node\Field;
 use Gdbots\QueryParser\Node\Hashtag;
 use Gdbots\QueryParser\Node\Mention;
 use Gdbots\QueryParser\Node\Node;
@@ -172,20 +172,20 @@ return [
         'name' => 'boost and fuzzy in filter',
         'input' => 'f:b^5 f:f~5',
         'expected_tokens' => [
-            [T::T_FILTER_START, 'f'],
+            [T::T_FIELD_START, 'f'],
             [T::T_WORD, 'b'],
-            T::T_FILTER_END,
+            T::T_FIELD_END,
             T::T_BOOST,
             [T::T_NUMBER, 5.0],
-            [T::T_FILTER_START, 'f'],
+            [T::T_FIELD_START, 'f'],
             [T::T_WORD, 'f'],
-            T::T_FILTER_END,
+            T::T_FIELD_END,
             T::T_FUZZY,
             [T::T_NUMBER, 5.0],
         ],
         'expected_nodes' => [
-            new Filter('f', null, true, 5.0, new Word('b')),
-            new Filter('f', null, false, Filter::DEFAULT_BOOST, new Word('f')),
+            new Field('f', null, true, 5.0, new Word('b')),
+            new Field('f', null, false, Field::DEFAULT_BOOST, new Word('f')),
         ]
     ],
 
@@ -193,29 +193,29 @@ return [
         'name' => 'boost and fuzzy in range',
         'input' => 'f:[1^5..5]^5 f:[1~5..5]~5',
         'expected_tokens' => [
-            [T::T_FILTER_START, 'f'],
+            [T::T_FIELD_START, 'f'],
             T::T_RANGE_INCL_START,
             [T::T_NUMBER, 1.0],
             [T::T_NUMBER, 5.0],
             T::T_TO,
             [T::T_NUMBER, 5.0],
             T::T_RANGE_INCL_END,
-            T::T_FILTER_END,
+            T::T_FIELD_END,
             T::T_BOOST,
             [T::T_NUMBER, 5.0],
-            [T::T_FILTER_START, 'f'],
+            [T::T_FIELD_START, 'f'],
             T::T_RANGE_INCL_START,
             [T::T_NUMBER, 1.0],
             [T::T_NUMBER, 5.0],
             T::T_TO,
             [T::T_NUMBER, 5.0],
             T::T_RANGE_INCL_END,
-            T::T_FILTER_END,
+            T::T_FIELD_END,
             T::T_FUZZY,
             [T::T_NUMBER, 5.0],
         ],
         'expected_nodes' => [
-            new Filter(
+            new Field(
                 'f',
                 null,
                 true,
@@ -226,11 +226,11 @@ return [
                     new Number(5.0)
                 )
             ),
-            new Filter(
+            new Field(
                 'f',
                 null,
                 false,
-                Filter::DEFAULT_BOOST,
+                Field::DEFAULT_BOOST,
                 null,
                 new NumberRange(
                     new Number(1.0),
@@ -748,23 +748,23 @@ return [
         'input' => '+first-name:homer -last_name:simpson job.performance:poor^5',
         'expected_tokens' => [
             T::T_REQUIRED,
-            [T::T_FILTER_START, 'first-name'],
+            [T::T_FIELD_START, 'first-name'],
             [T::T_WORD, 'homer'],
-            T::T_FILTER_END,
+            T::T_FIELD_END,
             T::T_PROHIBITED,
-            [T::T_FILTER_START, 'last_name'],
+            [T::T_FIELD_START, 'last_name'],
             [T::T_WORD, 'simpson'],
-            T::T_FILTER_END,
-            [T::T_FILTER_START, 'job.performance'],
+            T::T_FIELD_END,
+            [T::T_FIELD_START, 'job.performance'],
             [T::T_WORD, 'poor'],
-            T::T_FILTER_END,
+            T::T_FIELD_END,
             T::T_BOOST,
             [T::T_NUMBER, 5.0],
         ],
         'expected_nodes' => [
-            new Filter('first-name', BoolOperator::REQUIRED(), false, Filter::DEFAULT_BOOST, new Word('homer')),
-            new Filter('last_name', BoolOperator::PROHIBITED(), false, Filter::DEFAULT_BOOST, new Word('simpson')),
-            new Filter('job.performance', null, true, 5.0, new Word('poor')),
+            new Field('first-name', BoolOperator::REQUIRED(), false, Field::DEFAULT_BOOST, new Word('homer')),
+            new Field('last_name', BoolOperator::PROHIBITED(), false, Field::DEFAULT_BOOST, new Word('simpson')),
+            new Field('job.performance', null, true, 5.0, new Word('poor')),
         ]
     ],
 
@@ -772,12 +772,12 @@ return [
         'name' => 'field with field in it',
         'input' => 'field:subfield:what',
         'expected_tokens' => [
-            [T::T_FILTER_START, 'field'],
+            [T::T_FIELD_START, 'field'],
             [T::T_WORD, 'subfield:what'],
-            T::T_FILTER_END,
+            T::T_FIELD_END,
         ],
         'expected_nodes' => [
-            new Filter('field', null, false, Filter::DEFAULT_BOOST, new Word('subfield:what')),
+            new Field('field', null, false, Field::DEFAULT_BOOST, new Word('subfield:what')),
         ]
     ],
 
@@ -785,8 +785,8 @@ return [
         'name' => 'field with no value',
         'input' => 'field:',
         'expected_tokens' => [
-            [T::T_FILTER_START, 'field'],
-            T::T_FILTER_END,
+            [T::T_FIELD_START, 'field'],
+            T::T_FIELD_END,
         ],
         'expected_nodes' => [
             new Word('field'),
@@ -797,21 +797,21 @@ return [
         'name' => 'field with phrases',
         'input' => 'field:"boosted^5 +required"^1 -field:"[1..5]"~4',
         'expected_tokens' => [
-            [T::T_FILTER_START, 'field'],
+            [T::T_FIELD_START, 'field'],
             [T::T_PHRASE, 'boosted^5 +required'],
-            T::T_FILTER_END,
+            T::T_FIELD_END,
             T::T_BOOST,
             [T::T_NUMBER, 1.0],
             T::T_PROHIBITED,
-            [T::T_FILTER_START, 'field'],
+            [T::T_FIELD_START, 'field'],
             [T::T_PHRASE, '[1..5]'],
-            T::T_FILTER_END,
+            T::T_FIELD_END,
             T::T_FUZZY,
             [T::T_NUMBER, 4.0],
         ],
         'expected_nodes' => [
-            new Filter('field', null, true, 1.0, new Phrase('boosted^5 +required')),
-            new Filter('field', BoolOperator::PROHIBITED(), false, Filter::DEFAULT_BOOST, new Phrase('[1..5]')),
+            new Field('field', null, true, 1.0, new Phrase('boosted^5 +required')),
+            new Field('field', BoolOperator::PROHIBITED(), false, Field::DEFAULT_BOOST, new Phrase('[1..5]')),
         ]
     ],
 
@@ -819,30 +819,30 @@ return [
         'name' => 'field with greater/less than',
         'input' => 'field:>100 field:>=100.1 field:<100 field:<=100.1',
         'expected_tokens' => [
-            [T::T_FILTER_START, 'field'],
+            [T::T_FIELD_START, 'field'],
             T::T_GREATER_THAN,
             [T::T_NUMBER, 100.0],
-            T::T_FILTER_END,
-            [T::T_FILTER_START, 'field'],
+            T::T_FIELD_END,
+            [T::T_FIELD_START, 'field'],
             T::T_GREATER_THAN,
             T::T_EQUALS,
             [T::T_NUMBER, 100.1],
-            T::T_FILTER_END,
-            [T::T_FILTER_START, 'field'],
+            T::T_FIELD_END,
+            [T::T_FIELD_START, 'field'],
             T::T_LESS_THAN,
             [T::T_NUMBER, 100.0],
-            T::T_FILTER_END,
-            [T::T_FILTER_START, 'field'],
+            T::T_FIELD_END,
+            [T::T_FIELD_START, 'field'],
             T::T_LESS_THAN,
             T::T_EQUALS,
             [T::T_NUMBER, 100.1],
-            T::T_FILTER_END,
+            T::T_FIELD_END,
         ],
         'expected_nodes' => [
-            new Filter('field', null, false, Filter::DEFAULT_BOOST, new Number(100, ComparisonOperator::GT())),
-            new Filter('field', null, false, Filter::DEFAULT_BOOST, new Number(100.1, ComparisonOperator::GTE())),
-            new Filter('field', null, false, Filter::DEFAULT_BOOST, new Number(100, ComparisonOperator::LT())),
-            new Filter('field', null, false, Filter::DEFAULT_BOOST, new Number(100.1, ComparisonOperator::LTE())),
+            new Field('field', null, false, Field::DEFAULT_BOOST, new Number(100, ComparisonOperator::GT())),
+            new Field('field', null, false, Field::DEFAULT_BOOST, new Number(100.1, ComparisonOperator::GTE())),
+            new Field('field', null, false, Field::DEFAULT_BOOST, new Number(100, ComparisonOperator::LT())),
+            new Field('field', null, false, Field::DEFAULT_BOOST, new Number(100.1, ComparisonOperator::LTE())),
         ]
     ],
 
@@ -850,16 +850,16 @@ return [
         'name' => 'field with a hashtag or mention',
         'input' => 'field:#cats field:@user.name',
         'expected_tokens' => [
-            [T::T_FILTER_START, 'field'],
+            [T::T_FIELD_START, 'field'],
             [T::T_HASHTAG, 'cats'],
-            T::T_FILTER_END,
-            [T::T_FILTER_START, 'field'],
+            T::T_FIELD_END,
+            [T::T_FIELD_START, 'field'],
             [T::T_MENTION, 'user.name'],
-            T::T_FILTER_END,
+            T::T_FIELD_END,
         ],
         'expected_nodes' => [
-            new Filter('field', null, false, Filter::DEFAULT_BOOST, new Hashtag('cats', BoolOperator::REQUIRED())),
-            new Filter('field', null, false, Filter::DEFAULT_BOOST, new Mention('user.name', BoolOperator::REQUIRED())),
+            new Field('field', null, false, Field::DEFAULT_BOOST, new Hashtag('cats', BoolOperator::REQUIRED())),
+            new Field('field', null, false, Field::DEFAULT_BOOST, new Mention('user.name', BoolOperator::REQUIRED())),
         ]
     ],
 
@@ -867,39 +867,39 @@ return [
         'name' => 'field with inclusive range',
         'input' => 'field:[1..5] +field:[1 TO 5]',
         'expected_tokens' => [
-            [T::T_FILTER_START, 'field'],
+            [T::T_FIELD_START, 'field'],
             T::T_RANGE_INCL_START,
             [T::T_NUMBER, 1.0],
             T::T_TO,
             [T::T_NUMBER, 5.0],
             T::T_RANGE_INCL_END,
-            T::T_FILTER_END,
+            T::T_FIELD_END,
             T::T_REQUIRED,
-            [T::T_FILTER_START, 'field'],
+            [T::T_FIELD_START, 'field'],
             T::T_RANGE_INCL_START,
             [T::T_NUMBER, 1.0],
             T::T_TO,
             [T::T_NUMBER, 5.0],
             T::T_RANGE_INCL_END,
-            T::T_FILTER_END,
+            T::T_FIELD_END,
         ],
         'expected_nodes' => [
-            new Filter(
+            new Field(
                 'field',
                 null,
                 false,
-                Filter::DEFAULT_BOOST,
+                Field::DEFAULT_BOOST,
                 null,
                 new NumberRange(
                     new Number(1),
                     new Number(5)
                 )
             ),
-            new Filter(
+            new Field(
                 'field',
                 BoolOperator::REQUIRED(),
                 false,
-                Filter::DEFAULT_BOOST,
+                Field::DEFAULT_BOOST,
                 null,
                 new NumberRange(
                     new Number(1),
@@ -913,28 +913,28 @@ return [
         'name' => 'field with exclusive range',
         'input' => 'field:{1.1..5.5} +field:{1.1 TO 5.5}',
         'expected_tokens' => [
-            [T::T_FILTER_START, 'field'],
+            [T::T_FIELD_START, 'field'],
             T::T_RANGE_EXCL_START,
             [T::T_NUMBER, 1.1],
             T::T_TO,
             [T::T_NUMBER, 5.5],
             T::T_RANGE_EXCL_END,
-            T::T_FILTER_END,
+            T::T_FIELD_END,
             T::T_REQUIRED,
-            [T::T_FILTER_START, 'field'],
+            [T::T_FIELD_START, 'field'],
             T::T_RANGE_EXCL_START,
             [T::T_NUMBER, 1.1],
             T::T_TO,
             [T::T_NUMBER, 5.5],
             T::T_RANGE_EXCL_END,
-            T::T_FILTER_END,
+            T::T_FIELD_END,
         ],
         'expected_nodes' => [
-            new Filter(
+            new Field(
                 'field',
                 null,
                 false,
-                Filter::DEFAULT_BOOST,
+                Field::DEFAULT_BOOST,
                 null,
                 new NumberRange(
                     new Number(1.1),
@@ -942,11 +942,11 @@ return [
                     true
                 )
             ),
-            new Filter(
+            new Field(
                 'field',
                 BoolOperator::REQUIRED(),
                 false,
-                Filter::DEFAULT_BOOST,
+                Field::DEFAULT_BOOST,
                 null,
                 new NumberRange(
                     new Number(1.1),
@@ -961,21 +961,21 @@ return [
         'name' => 'field with subquery',
         'input' => 'field:(cat OR dog) test',
         'expected_tokens' => [
-            [T::T_FILTER_START, 'field'],
+            [T::T_FIELD_START, 'field'],
             T::T_SUBQUERY_START,
             [T::T_WORD, 'cat'],
             T::T_OR,
             [T::T_WORD, 'dog'],
             T::T_SUBQUERY_END,
-            T::T_FILTER_END,
+            T::T_FIELD_END,
             [T::T_WORD, 'test'],
         ],
         'expected_nodes' => [
-            new Filter(
+            new Field(
                 'field',
                 null,
                 false,
-                Filter::DEFAULT_BOOST,
+                Field::DEFAULT_BOOST,
                 null,
                 null,
                 new Subquery([
@@ -991,21 +991,21 @@ return [
         'name' => 'field with range in subquery',
         'input' => 'field:(cat OR 1..5)',
         'expected_tokens' => [
-            [T::T_FILTER_START, 'field'],
+            [T::T_FIELD_START, 'field'],
             T::T_SUBQUERY_START,
             [T::T_WORD, 'cat'],
             T::T_OR,
             [T::T_NUMBER, 1.0],
             [T::T_NUMBER, 5.0],
             T::T_SUBQUERY_END,
-            T::T_FILTER_END,
+            T::T_FIELD_END,
         ],
         'expected_nodes' => [
-            new Filter(
+            new Field(
                 'field',
                 null,
                 false,
-                Filter::DEFAULT_BOOST,
+                Field::DEFAULT_BOOST,
                 null,
                 null,
                 new Subquery([
@@ -1021,41 +1021,41 @@ return [
         'name' => 'field with dates',
         'input' => 'field:2015-12-18 field:>2015-12-18 field:<2015-12-18 field:>=2015-12-18 field:<=2015-12-18',
         'expected_tokens' => [
-            [T::T_FILTER_START, 'field'],
+            [T::T_FIELD_START, 'field'],
             [T::T_DATE, '2015-12-18'],
-            T::T_FILTER_END,
-            [T::T_FILTER_START, 'field'],
+            T::T_FIELD_END,
+            [T::T_FIELD_START, 'field'],
             T::T_GREATER_THAN,
             [T::T_DATE, '2015-12-18'],
-            T::T_FILTER_END,
-            [T::T_FILTER_START, 'field'],
+            T::T_FIELD_END,
+            [T::T_FIELD_START, 'field'],
             T::T_LESS_THAN,
             [T::T_DATE, '2015-12-18'],
-            T::T_FILTER_END,
-            [T::T_FILTER_START, 'field'],
+            T::T_FIELD_END,
+            [T::T_FIELD_START, 'field'],
             T::T_GREATER_THAN,
             T::T_EQUALS,
             [T::T_DATE, '2015-12-18'],
-            T::T_FILTER_END,
-            [T::T_FILTER_START, 'field'],
+            T::T_FIELD_END,
+            [T::T_FIELD_START, 'field'],
             T::T_LESS_THAN,
             T::T_EQUALS,
             [T::T_DATE, '2015-12-18'],
-            T::T_FILTER_END,
+            T::T_FIELD_END,
         ],
         'expected_nodes' => [
-            new Filter(
+            new Field(
                 'field',
                 null,
                 false,
-                Filter::DEFAULT_BOOST,
+                Field::DEFAULT_BOOST,
                 new Date('2015-12-18')
             ),
-            new Filter(
+            new Field(
                 'field',
                 null,
                 false,
-                Filter::DEFAULT_BOOST,
+                Field::DEFAULT_BOOST,
                 new Date(
                     '2015-12-18',
                     null,
@@ -1066,11 +1066,11 @@ return [
                     ComparisonOperator::GT()
                 )
             ),
-            new Filter(
+            new Field(
                 'field',
                 null,
                 false,
-                Filter::DEFAULT_BOOST,
+                Field::DEFAULT_BOOST,
                 new Date(
                     '2015-12-18',
                     null,
@@ -1081,11 +1081,11 @@ return [
                     ComparisonOperator::LT()
                 )
             ),
-            new Filter(
+            new Field(
                 'field',
                 null,
                 false,
-                Filter::DEFAULT_BOOST,
+                Field::DEFAULT_BOOST,
                 new Date(
                     '2015-12-18',
                     null,
@@ -1096,11 +1096,11 @@ return [
                     ComparisonOperator::GTE()
                 )
             ),
-            new Filter(
+            new Field(
                 'field',
                 null,
                 false,
-                Filter::DEFAULT_BOOST,
+                Field::DEFAULT_BOOST,
                 new Date(
                     '2015-12-18',
                     null,
@@ -1118,14 +1118,14 @@ return [
         'name' => 'field leading _ and uuid',
         'input' => '_id:a9fc3e46-150a-45cd-ad39-c80f93119900^5',
         'expected_tokens' => [
-            [T::T_FILTER_START, '_id'],
+            [T::T_FIELD_START, '_id'],
             [T::T_WORD, 'a9fc3e46-150a-45cd-ad39-c80f93119900'],
-            T::T_FILTER_END,
+            T::T_FIELD_END,
             T::T_BOOST,
             [T::T_NUMBER, 5.0],
         ],
         'expected_nodes' => [
-            new Filter('_id', null, true, 5.0, new Word('a9fc3e46-150a-45cd-ad39-c80f93119900')),
+            new Field('_id', null, true, 5.0, new Word('a9fc3e46-150a-45cd-ad39-c80f93119900')),
         ]
     ],
 
@@ -1133,21 +1133,21 @@ return [
         'name' => 'field with mentions and emails',
         'input' => 'email:john@doe.com -user:@twitterz',
         'expected_tokens' => [
-            [T::T_FILTER_START, 'email'],
+            [T::T_FIELD_START, 'email'],
             [T::T_WORD, 'john@doe.com'],
-            T::T_FILTER_END,
+            T::T_FIELD_END,
             T::T_PROHIBITED,
-            [T::T_FILTER_START, 'user'],
+            [T::T_FIELD_START, 'user'],
             [T::T_MENTION, 'twitterz'],
-            T::T_FILTER_END,
+            T::T_FIELD_END,
         ],
         'expected_nodes' => [
-            new Filter('email', null, false, Filter::DEFAULT_BOOST, new Word('john@doe.com')),
-            new Filter(
+            new Field('email', null, false, Field::DEFAULT_BOOST, new Word('john@doe.com')),
+            new Field(
                 'user',
                 BoolOperator::PROHIBITED(),
                 false,
-                Filter::DEFAULT_BOOST,
+                Field::DEFAULT_BOOST,
                 new Mention('twitterz', BoolOperator::REQUIRED())
             ),
         ]
@@ -1157,30 +1157,30 @@ return [
         'name' => 'field with hashtags',
         'input' => 'tags:#cats tags:(#cats || #dogs)',
         'expected_tokens' => [
-            [T::T_FILTER_START, 'tags'],
+            [T::T_FIELD_START, 'tags'],
             [T::T_HASHTAG, 'cats'],
-            T::T_FILTER_END,
-            [T::T_FILTER_START, 'tags'],
+            T::T_FIELD_END,
+            [T::T_FIELD_START, 'tags'],
             T::T_SUBQUERY_START,
             [T::T_HASHTAG, 'cats'],
             T::T_OR,
             [T::T_HASHTAG, 'dogs'],
             T::T_SUBQUERY_END,
-            T::T_FILTER_END,
+            T::T_FIELD_END,
         ],
         'expected_nodes' => [
-            new Filter(
+            new Field(
                 'tags',
                 null,
                 false,
-                Filter::DEFAULT_BOOST,
+                Field::DEFAULT_BOOST,
                 new Hashtag('cats', BoolOperator::REQUIRED())
             ),
-            new Filter(
+            new Field(
                 'tags',
                 null,
                 false,
-                Filter::DEFAULT_BOOST,
+                Field::DEFAULT_BOOST,
                 null,
                 null,
                 new Subquery([
@@ -1528,10 +1528,10 @@ return [
             [T::T_WORD, 'b'],
             T::T_OR,
             T::T_REQUIRED,
-            [T::T_FILTER_START, 'field'],
+            [T::T_FIELD_START, 'field'],
             T::T_GREATER_THAN,
             [T::T_NUMBER, 1.0],
-            T::T_FILTER_END,
+            T::T_FIELD_END,
         ],
         'expected_nodes' => [
             new Word('test'),
@@ -1540,11 +1540,11 @@ return [
             new Number(3.14),
             new Word('a'),
             new Word('b', BoolOperator::REQUIRED()),
-            new Filter(
+            new Field(
                 'field',
                 BoolOperator::REQUIRED(),
                 false,
-                Filter::DEFAULT_BOOST,
+                Field::DEFAULT_BOOST,
                 new Number(1.0, ComparisonOperator::GT())
             )
         ]

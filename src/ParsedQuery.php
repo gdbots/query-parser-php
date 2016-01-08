@@ -4,7 +4,7 @@ namespace Gdbots\QueryParser;
 
 use Gdbots\Common\FromArray;
 use Gdbots\Common\ToArray;
-use Gdbots\QueryParser\Node\Filter;
+use Gdbots\QueryParser\Node\Field;
 use Gdbots\QueryParser\Node\Node;
 
 class ParsedQuery implements FromArray, ToArray, \JsonSerializable
@@ -88,20 +88,38 @@ class ParsedQuery implements FromArray, ToArray, \JsonSerializable
     }
 
     /**
-     * Returns an array of filters (specifically the field names) that are
+     * Returns true if the parsed query contains at least one request for an item
+     * matching the query.  If all of the nodes where "prohibited" values it
+     * can easily review your entire index.
+     *
+     * @return bool
+     */
+    public function hasAMatchableNode()
+    {
+        foreach ($this->nodes as $node) {
+            if (!$node->isProhibited()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Returns an array of fields (specifically the field names) that are
      * used in this query.  e.g. "status:active", "status" is the field name.
      *
      * @return array
      */
-    public function getFiltersUsed()
+    public function getFieldsUsed()
     {
-        $filters = [];
+        $fields = [];
 
-        /** @var Filter $node */
-        foreach ($this->getNodesOfType(Filter::NODE_TYPE) as $node) {
-            $filters[$node->getField()] = true;
+        /** @var Field $node */
+        foreach ($this->getNodesOfType(Field::NODE_TYPE) as $node) {
+            $fields[$node->getName()] = true;
         }
 
-        return array_keys($filters);
+        return array_keys($fields);
     }
 }

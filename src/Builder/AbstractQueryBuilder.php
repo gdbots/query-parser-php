@@ -2,12 +2,12 @@
 
 namespace Gdbots\QueryParser\Builder;
 
-use Gdbots\QueryParser\Enum\FilterType;
+use Gdbots\QueryParser\Enum\FieldType;
 use Gdbots\QueryParser\Node\Date;
 use Gdbots\QueryParser\Node\DateRange;
 use Gdbots\QueryParser\Node\Emoji;
 use Gdbots\QueryParser\Node\Emoticon;
-use Gdbots\QueryParser\Node\Filter;
+use Gdbots\QueryParser\Node\Field;
 use Gdbots\QueryParser\Node\Hashtag;
 use Gdbots\QueryParser\Node\Mention;
 use Gdbots\QueryParser\Node\Node;
@@ -26,11 +26,11 @@ abstract class AbstractQueryBuilder implements QueryBuilder
     /** @var ParsedQuery */
     protected $parsedQuery;
 
-    /** @var Filter */
-    protected $currentFilter;
+    /** @var Field */
+    protected $currentField;
 
     /** @var bool */
-    protected $inFilter = false;
+    protected $inField = false;
 
     /** @var bool */
     protected $inRange = false;
@@ -40,13 +40,11 @@ abstract class AbstractQueryBuilder implements QueryBuilder
 
     /**
      * Array of field names which support full text queries.  This value is
-     * just a default set of common full text fields.  Override in your own
-     * builder to cover your schemas.  Make sure the field names are the
-     * array keys (the value is meaningless - just can't be null).
+     * just a default set of common full text fields.
      *
      * @var array
      */
-    protected $fullTextSearchFields = [
+    private $fullTextSearchFields = [
         '_all' => true,
         'title' => true,
         'tiny_title' => true,
@@ -66,13 +64,45 @@ abstract class AbstractQueryBuilder implements QueryBuilder
     ];
 
     /**
+     * @param array $fields
+     * @return static
+     */
+    final public function setFullTextSearchFields(array $fields)
+    {
+        $this->fullTextSearchFields = array_flip($fields);
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    final public function getFullTextSearchFields()
+    {
+        return array_keys($this->fullTextSearchFields);
+    }
+
+    /**
+     * @param string $field
+     * @return bool
+     */
+    final public function supportsFullTextSearch($field)
+    {
+        $field = trim(strtolower($field));
+        if (empty($field)) {
+            return false;
+        }
+
+        return isset($this->fullTextSearchFields[$field]);
+    }
+
+    /**
      * @param ParsedQuery $parsedQuery
      * @return static
      */
-    final public function fromParsedQuery(ParsedQuery $parsedQuery)
+    final public function addParsedQuery(ParsedQuery $parsedQuery)
     {
         $this->parsedQuery = $parsedQuery;
-        $this->beforeFromParsedQuery($parsedQuery);
+        $this->beforeAddParsedQuery($parsedQuery);
 
         /** @var QueryBuilder $this */
         foreach ($parsedQuery->getNodes() as $node) {
@@ -85,7 +115,9 @@ abstract class AbstractQueryBuilder implements QueryBuilder
     /**
      * @param ParsedQuery $parsedQuery
      */
-    protected function beforeFromParsedQuery(ParsedQuery $parsedQuery) {}
+    protected function beforeAddParsedQuery(ParsedQuery $parsedQuery)
+    {
+    }
 
     /**
      * @param Date $date
@@ -131,27 +163,26 @@ abstract class AbstractQueryBuilder implements QueryBuilder
     }
 
     /**
-     * @param Filter $filter
+     * @param Field $field
      * @return static
      */
-    final public function addFilter(Filter $filter)
+    final public function addField(Field $field)
     {
-        $this->inFilter = true;
-        $this->currentFilter = $filter;
-        $this->startFilter($filter);
+        $this->inField = true;
+        $this->currentField = $field;
+        $this->startField($field);
 
-        /** @var QueryBuilder|self $this */
-        switch ($filter->getFilterType()->getValue()) {
-            case FilterType::SIMPLE:
-                $node = $filter->getNode();
+        switch ($field->getFieldType()->getValue()) {
+            case FieldType::SIMPLE:
+                $node = $field->getNode();
                 break;
 
-            case FilterType::RANGE:
-                $node = $filter->getRange();
+            case FieldType::RANGE:
+                $node = $field->getRange();
                 break;
 
-            case FilterType::SUBQUERY:
-                $node = $filter->getSubquery();
+            case FieldType::SUBQUERY:
+                $node = $field->getSubquery();
                 break;
 
             default:
@@ -163,9 +194,9 @@ abstract class AbstractQueryBuilder implements QueryBuilder
             $node->acceptBuilder($this);
         }
 
-        $this->endFilter($filter);
-        $this->inFilter = false;
-        $this->currentFilter = null;
+        $this->endField($field);
+        $this->inField = false;
+        $this->currentField = null;
 
         return $this;
     }
@@ -207,7 +238,7 @@ abstract class AbstractQueryBuilder implements QueryBuilder
     final public function addNumberRange(NumberRange $numberRange)
     {
         // todo: exception for range not in filter or in subquery
-        if ($this->inFilter && !$this->inRange && !$this->inSubquery) {
+        if ($this->inField && !$this->inRange && !$this->inSubquery) {
             $this->inRange = true;
             $this->startRange($numberRange);
             $this->endRange($numberRange);
@@ -302,6 +333,11 @@ abstract class AbstractQueryBuilder implements QueryBuilder
             return;
         }
 
+        if ($this->inField && !$this->supportsFullTextSearch($this->currentField->getName())) {
+            $this->handleTerm($node);
+            return;
+        }
+
         if ($node->isOptional()) {
             $this->shouldMatchText($node);
         } elseif ($node->isRequired()) {
@@ -316,33 +352,44 @@ abstract class AbstractQueryBuilder implements QueryBuilder
      */
     protected function handleTerm(Node $node)
     {
+        if ($this->inField) {
+            /*
+             * When in a simple field, the bool operator is based on
+             * the field, not the node in the field.
+             */
+            if ($this->currentField->hasSimpleValue()) {
+                if ($this->currentField->isOptional()) {
+                    $this->shouldMatchTerm($node);
+                    return;
+                } elseif ($node->isRequired()) {
+                    $this->mustMatchTerm($node);
+                    return;
+                }
+
+                $this->mustNotMatchTerm($node);
+            }
+        }
+
         if ($node->isOptional()) {
             $this->shouldMatchTerm($node);
+            return;
         } elseif ($node->isRequired()) {
             $this->mustMatchTerm($node);
-        } elseif ($node->isProhibited()) {
-            $this->mustNotMatchTerm($node);
+            return;
         }
+
+        $this->mustNotMatchTerm($node);
     }
 
     /**
-     * @param string $field
-     * @return bool
+     * @param Field $field
      */
-    protected function supportsFullTextSearch($field)
-    {
-        return isset($this->fullTextSearchFields[strtolower($field)]);
-    }
+    protected function startField(Field $field) {}
 
     /**
-     * @param Filter $filter
+     * @param Field $field
      */
-    protected function startFilter(Filter $filter) {}
-
-    /**
-     * @param Filter $filter
-     */
-    protected function endFilter(Filter $filter) {}
+    protected function endField(Field $field) {}
 
     /**
      * @param Range $range

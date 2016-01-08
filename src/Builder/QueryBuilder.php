@@ -6,7 +6,7 @@ use Gdbots\QueryParser\Node\Date;
 use Gdbots\QueryParser\Node\DateRange;
 use Gdbots\QueryParser\Node\Emoji;
 use Gdbots\QueryParser\Node\Emoticon;
-use Gdbots\QueryParser\Node\Filter;
+use Gdbots\QueryParser\Node\Field;
 use Gdbots\QueryParser\Node\Hashtag;
 use Gdbots\QueryParser\Node\Mention;
 use Gdbots\QueryParser\Node\Number;
@@ -21,10 +21,33 @@ use Gdbots\QueryParser\ParsedQuery;
 interface QueryBuilder
 {
     /**
+     * Sets the fields that this builder will enable for full text search.
+     *
+     * @param array $fields
+     * @return static
+     */
+    public function setFullTextSearchFields(array $fields);
+
+    /**
+     * Gets the fields enabled for full text search.
+     *
+     * @return array
+     */
+    public function getFullTextSearchFields();
+
+    /**
+     * Returns true if the given field supports full text searching.
+     *
+     * @param string $field
+     * @return bool
+     */
+    public function supportsFullTextSearch($field);
+
+    /**
      * @param ParsedQuery $parsedQuery
      * @return static
      */
-    public function fromParsedQuery(ParsedQuery $parsedQuery);
+    public function addParsedQuery(ParsedQuery $parsedQuery);
 
     /**
      * @param Date $date
@@ -51,10 +74,10 @@ interface QueryBuilder
     public function addEmoticon(Emoticon $emoticon);
 
     /**
-     * @param Filter $filter
+     * @param Field $field
      * @return static
      */
-    public function addFilter(Filter $filter);
+    public function addField(Field $field);
 
     /**
      * @param Hashtag $hashtag

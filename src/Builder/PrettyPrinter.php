@@ -4,7 +4,7 @@ namespace Gdbots\QueryParser\Builder;
 
 use Gdbots\QueryParser\Enum\ComparisonOperator;
 use Gdbots\QueryParser\Node\Date;
-use Gdbots\QueryParser\Node\Filter;
+use Gdbots\QueryParser\Node\Field;
 use Gdbots\QueryParser\Node\Hashtag;
 use Gdbots\QueryParser\Node\Mention;
 use Gdbots\QueryParser\Node\Node;
@@ -31,7 +31,7 @@ class PrettyPrinter extends AbstractQueryBuilder
     /**
      * @param ParsedQuery $parsedQuery
      */
-    protected function beforeFromParsedQuery(ParsedQuery $parsedQuery)
+    protected function beforeAddParsedQuery(ParsedQuery $parsedQuery)
     {
         $this->result = '';
     }
@@ -75,7 +75,7 @@ class PrettyPrinter extends AbstractQueryBuilder
     {
         $this->printPrefix($node);
         $this->result .= $node instanceof Phrase ? '"'.$node->getValue().'"' : $node->getValue();
-        if ($this->inFilter && !$this->inRange && !$this->inSubquery) {
+        if ($this->inField && !$this->inRange && !$this->inSubquery) {
             return;
         }
         $this->printPostfix($node);
@@ -93,7 +93,7 @@ class PrettyPrinter extends AbstractQueryBuilder
             $this->result .= '@';
         }
         $this->result .= $node->getValue();
-        if ($this->inFilter && !$this->inRange && !$this->inSubquery) {
+        if ($this->inField && !$this->inRange && !$this->inSubquery) {
             return;
         }
         $this->printPostfix($node);
@@ -131,27 +131,27 @@ class PrettyPrinter extends AbstractQueryBuilder
         }
 
         $this->result .= $node->getValue();
-        if ($this->inFilter && !$this->inRange && !$this->inSubquery) {
+        if ($this->inField && !$this->inRange && !$this->inSubquery) {
             return;
         }
         $this->printPostfix($node);
     }
 
     /**
-     * @param Filter $filter
+     * @param Field $field
      */
-    protected function startFilter(Filter $filter)
+    protected function startField(Field $field)
     {
-        $this->printPrefix($filter);
-        $this->result .= $filter->getField().':';
+        $this->printPrefix($field);
+        $this->result .= $field->getName().':';
     }
 
     /**
-     * @param Filter $filter
+     * @param Field $field
      */
-    protected function endFilter(Filter $filter)
+    protected function endField(Field $field)
     {
-        $this->printPostfix($filter);
+        $this->printPostfix($field);
     }
 
     /**
