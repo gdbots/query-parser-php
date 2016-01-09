@@ -2,23 +2,18 @@
 
 use Gdbots\QueryParser\Enum\BoolOperator;
 use Gdbots\QueryParser\Enum\ComparisonOperator;
-use Gdbots\QueryParser\Enum\FieldType;
 use Gdbots\QueryParser\Node\Date;
-use Gdbots\QueryParser\Node\DateRange;
 use Gdbots\QueryParser\Node\Emoji;
 use Gdbots\QueryParser\Node\Emoticon;
 use Gdbots\QueryParser\Node\Field;
 use Gdbots\QueryParser\Node\Hashtag;
 use Gdbots\QueryParser\Node\Mention;
-use Gdbots\QueryParser\Node\Node;
 use Gdbots\QueryParser\Node\Number;
 use Gdbots\QueryParser\Node\NumberRange;
 use Gdbots\QueryParser\Node\Phrase;
-use Gdbots\QueryParser\Node\Range;
 use Gdbots\QueryParser\Node\Subquery;
 use Gdbots\QueryParser\Node\Url;
 use Gdbots\QueryParser\Node\Word;
-use Gdbots\QueryParser\Node\WordRange;
 use Gdbots\QueryParser\Token as T;
 
 return [
@@ -184,8 +179,8 @@ return [
             [T::T_NUMBER, 5.0],
         ],
         'expected_nodes' => [
-            new Field('f', null, true, 5.0, new Word('b')),
-            new Field('f', null, false, Field::DEFAULT_BOOST, new Word('f')),
+            new Field('f', new Word('b'), null, true, 5.0),
+            new Field('f', new Word('f'), null, false, Field::DEFAULT_BOOST),
         ]
     ],
 
@@ -217,25 +212,23 @@ return [
         'expected_nodes' => [
             new Field(
                 'f',
-                null,
-                true,
-                5.0,
-                null,
                 new NumberRange(
                     new Number(1.0),
                     new Number(5.0)
-                )
+                ),
+                null,
+                true,
+                5.0
             ),
             new Field(
                 'f',
-                null,
-                false,
-                Field::DEFAULT_BOOST,
-                null,
                 new NumberRange(
                     new Number(1.0),
                     new Number(5.0)
-                )
+                ),
+                null,
+                false,
+                Field::DEFAULT_BOOST
             ),
         ]
     ],
@@ -762,9 +755,9 @@ return [
             [T::T_NUMBER, 5.0],
         ],
         'expected_nodes' => [
-            new Field('first-name', BoolOperator::REQUIRED(), false, Field::DEFAULT_BOOST, new Word('homer')),
-            new Field('last_name', BoolOperator::PROHIBITED(), false, Field::DEFAULT_BOOST, new Word('simpson')),
-            new Field('job.performance', null, true, 5.0, new Word('poor')),
+            new Field('first-name', new Word('homer'), BoolOperator::REQUIRED(), false, Field::DEFAULT_BOOST),
+            new Field('last_name', new Word('simpson'), BoolOperator::PROHIBITED(), false, Field::DEFAULT_BOOST),
+            new Field('job.performance', new Word('poor'), null, true, 5.0),
         ]
     ],
 
@@ -777,7 +770,7 @@ return [
             T::T_FIELD_END,
         ],
         'expected_nodes' => [
-            new Field('field', null, false, Field::DEFAULT_BOOST, new Word('subfield:what')),
+            new Field('field', new Word('subfield:what'), null, false, Field::DEFAULT_BOOST),
         ]
     ],
 
@@ -810,8 +803,8 @@ return [
             [T::T_NUMBER, 4.0],
         ],
         'expected_nodes' => [
-            new Field('field', null, true, 1.0, new Phrase('boosted^5 +required')),
-            new Field('field', BoolOperator::PROHIBITED(), false, Field::DEFAULT_BOOST, new Phrase('[1..5]')),
+            new Field('field', new Phrase('boosted^5 +required'), null, true, 1.0),
+            new Field('field', new Phrase('[1..5]'), BoolOperator::PROHIBITED(), false, Field::DEFAULT_BOOST),
         ]
     ],
 
@@ -839,10 +832,10 @@ return [
             T::T_FIELD_END,
         ],
         'expected_nodes' => [
-            new Field('field', null, false, Field::DEFAULT_BOOST, new Number(100, ComparisonOperator::GT())),
-            new Field('field', null, false, Field::DEFAULT_BOOST, new Number(100.1, ComparisonOperator::GTE())),
-            new Field('field', null, false, Field::DEFAULT_BOOST, new Number(100, ComparisonOperator::LT())),
-            new Field('field', null, false, Field::DEFAULT_BOOST, new Number(100.1, ComparisonOperator::LTE())),
+            new Field('field', new Number(100, ComparisonOperator::GT()), null, false, Field::DEFAULT_BOOST),
+            new Field('field', new Number(100.1, ComparisonOperator::GTE()), null, false, Field::DEFAULT_BOOST),
+            new Field('field', new Number(100, ComparisonOperator::LT()), null, false, Field::DEFAULT_BOOST),
+            new Field('field', new Number(100.1, ComparisonOperator::LTE()), null, false, Field::DEFAULT_BOOST),
         ]
     ],
 
@@ -858,8 +851,8 @@ return [
             T::T_FIELD_END,
         ],
         'expected_nodes' => [
-            new Field('field', null, false, Field::DEFAULT_BOOST, new Hashtag('cats', BoolOperator::REQUIRED())),
-            new Field('field', null, false, Field::DEFAULT_BOOST, new Mention('user.name', BoolOperator::REQUIRED())),
+            new Field('field', new Hashtag('cats', BoolOperator::REQUIRED()), null, false, Field::DEFAULT_BOOST),
+            new Field('field', new Mention('user.name', BoolOperator::REQUIRED()), null, false, Field::DEFAULT_BOOST),
         ]
     ],
 
@@ -886,25 +879,23 @@ return [
         'expected_nodes' => [
             new Field(
                 'field',
-                null,
-                false,
-                Field::DEFAULT_BOOST,
-                null,
                 new NumberRange(
                     new Number(1),
                     new Number(5)
-                )
+                ),
+                null,
+                false,
+                Field::DEFAULT_BOOST
             ),
             new Field(
                 'field',
-                BoolOperator::REQUIRED(),
-                false,
-                Field::DEFAULT_BOOST,
-                null,
                 new NumberRange(
                     new Number(1),
                     new Number(5)
-                )
+                ),
+                BoolOperator::REQUIRED(),
+                false,
+                Field::DEFAULT_BOOST
             ),
         ]
     ],
@@ -932,27 +923,25 @@ return [
         'expected_nodes' => [
             new Field(
                 'field',
-                null,
-                false,
-                Field::DEFAULT_BOOST,
-                null,
                 new NumberRange(
                     new Number(1.1),
                     new Number(5.5),
                     true
-                )
+                ),
+                null,
+                false,
+                Field::DEFAULT_BOOST
             ),
             new Field(
                 'field',
-                BoolOperator::REQUIRED(),
-                false,
-                Field::DEFAULT_BOOST,
-                null,
                 new NumberRange(
                     new Number(1.1),
                     new Number(5.5),
                     true
-                )
+                ),
+                BoolOperator::REQUIRED(),
+                false,
+                Field::DEFAULT_BOOST
             ),
         ]
     ],
@@ -973,15 +962,13 @@ return [
         'expected_nodes' => [
             new Field(
                 'field',
-                null,
-                false,
-                Field::DEFAULT_BOOST,
-                null,
-                null,
                 new Subquery([
                     new Word('cat'),
                     new Word('dog')
-                ])
+                ]),
+                null,
+                false,
+                Field::DEFAULT_BOOST
             ),
             new Word('test'),
         ]
@@ -1003,16 +990,14 @@ return [
         'expected_nodes' => [
             new Field(
                 'field',
-                null,
-                false,
-                Field::DEFAULT_BOOST,
-                null,
-                null,
                 new Subquery([
                     new Word('cat'),
                     new Number(1.0),
                     new Number(5.0)
-                ])
+                ]),
+                null,
+                false,
+                Field::DEFAULT_BOOST
             ),
         ]
     ],
@@ -1046,16 +1031,13 @@ return [
         'expected_nodes' => [
             new Field(
                 'field',
+                new Date('2015-12-18'),
                 null,
                 false,
-                Field::DEFAULT_BOOST,
-                new Date('2015-12-18')
+                Field::DEFAULT_BOOST
             ),
             new Field(
                 'field',
-                null,
-                false,
-                Field::DEFAULT_BOOST,
                 new Date(
                     '2015-12-18',
                     null,
@@ -1064,13 +1046,13 @@ return [
                     false,
                     Date::DEFAULT_FUZZY,
                     ComparisonOperator::GT()
-                )
+                ),
+                null,
+                false,
+                Field::DEFAULT_BOOST
             ),
             new Field(
                 'field',
-                null,
-                false,
-                Field::DEFAULT_BOOST,
                 new Date(
                     '2015-12-18',
                     null,
@@ -1079,13 +1061,13 @@ return [
                     false,
                     Date::DEFAULT_FUZZY,
                     ComparisonOperator::LT()
-                )
+                ),
+                null,
+                false,
+                Field::DEFAULT_BOOST
             ),
             new Field(
                 'field',
-                null,
-                false,
-                Field::DEFAULT_BOOST,
                 new Date(
                     '2015-12-18',
                     null,
@@ -1094,13 +1076,13 @@ return [
                     false,
                     Date::DEFAULT_FUZZY,
                     ComparisonOperator::GTE()
-                )
+                ),
+                null,
+                false,
+                Field::DEFAULT_BOOST
             ),
             new Field(
                 'field',
-                null,
-                false,
-                Field::DEFAULT_BOOST,
                 new Date(
                     '2015-12-18',
                     null,
@@ -1109,7 +1091,10 @@ return [
                     false,
                     Date::DEFAULT_FUZZY,
                     ComparisonOperator::LTE()
-                )
+                ),
+                null,
+                false,
+                Field::DEFAULT_BOOST
             ),
         ]
     ],
@@ -1125,7 +1110,7 @@ return [
             [T::T_NUMBER, 5.0],
         ],
         'expected_nodes' => [
-            new Field('_id', null, true, 5.0, new Word('a9fc3e46-150a-45cd-ad39-c80f93119900')),
+            new Field('_id', new Word('a9fc3e46-150a-45cd-ad39-c80f93119900'), null, true, 5.0),
         ]
     ],
 
@@ -1142,13 +1127,13 @@ return [
             T::T_FIELD_END,
         ],
         'expected_nodes' => [
-            new Field('email', null, false, Field::DEFAULT_BOOST, new Word('john@doe.com')),
+            new Field('email', new Word('john@doe.com'), null, false, Field::DEFAULT_BOOST),
             new Field(
                 'user',
+                new Mention('twitterz', BoolOperator::REQUIRED()),
                 BoolOperator::PROHIBITED(),
                 false,
-                Field::DEFAULT_BOOST,
-                new Mention('twitterz', BoolOperator::REQUIRED())
+                Field::DEFAULT_BOOST
             ),
         ]
     ],
@@ -1171,22 +1156,20 @@ return [
         'expected_nodes' => [
             new Field(
                 'tags',
+                new Hashtag('cats', BoolOperator::REQUIRED()),
                 null,
                 false,
-                Field::DEFAULT_BOOST,
-                new Hashtag('cats', BoolOperator::REQUIRED())
+                Field::DEFAULT_BOOST
             ),
             new Field(
                 'tags',
-                null,
-                false,
-                Field::DEFAULT_BOOST,
-                null,
-                null,
                 new Subquery([
                     new Hashtag('cats', BoolOperator::REQUIRED()),
                     new Hashtag('dogs', BoolOperator::REQUIRED()),
-                ])
+                ]),
+                null,
+                false,
+                Field::DEFAULT_BOOST
             ),
         ]
     ],
@@ -1237,23 +1220,23 @@ return [
 
     [
         'name' => 'words that have embedded operators',
-        'input' => 'candy AND oreos || dandy && chores^5',
+        'input' => 'cANDy AND OReos || dANDy && chORes^5',
         'expected_tokens' => [
-            [T::T_WORD, 'candy'],
+            [T::T_WORD, 'cANDy'],
             T::T_AND,
-            [T::T_WORD, 'oreos'],
+            [T::T_WORD, 'OReos'],
             T::T_OR,
-            [T::T_WORD, 'dandy'],
+            [T::T_WORD, 'dANDy'],
             T::T_AND,
-            [T::T_WORD, 'chores'],
+            [T::T_WORD, 'chORes'],
             T::T_BOOST,
             [T::T_NUMBER, 5.0],
         ],
         'expected_nodes' => [
-            new Word('candy', BoolOperator::REQUIRED()),
-            new Word('oreos', BoolOperator::REQUIRED()),
-            new Word('dandy', BoolOperator::REQUIRED()),
-            new Word('chores', BoolOperator::REQUIRED(), true, 5.0),
+            new Word('cANDy', BoolOperator::REQUIRED()),
+            new Word('OReos', BoolOperator::REQUIRED()),
+            new Word('dANDy', BoolOperator::REQUIRED()),
+            new Word('chORes', BoolOperator::REQUIRED(), true, 5.0),
         ]
     ],
     /*
@@ -1542,10 +1525,10 @@ return [
             new Word('b', BoolOperator::REQUIRED()),
             new Field(
                 'field',
+                new Number(1.0, ComparisonOperator::GT()),
                 BoolOperator::REQUIRED(),
                 false,
-                Field::DEFAULT_BOOST,
-                new Number(1.0, ComparisonOperator::GT())
+                Field::DEFAULT_BOOST
             )
         ]
     ],

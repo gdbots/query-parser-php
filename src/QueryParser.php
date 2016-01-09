@@ -53,14 +53,6 @@ class QueryParser
         $this->stream = $this->tokenizer->scan($input);
         $this->query = new ParsedQuery();
 
-        /*
-        while ($this->stream->next()) {
-            $token = $this->stream->getCurrent();
-            echo str_pad($token->getTypeName(), 19, ' ') . ($token->getValue() ? ' => ' . $token->getValue() : '') . PHP_EOL;
-        }
-        $this->stream->reset();
-        */
-
         while ($this->stream->next()) {
             $boolOperator = $this->getBoolOperator();
             $token = $this->stream->getCurrent();
@@ -191,7 +183,7 @@ class QueryParser
         }
 
         $m = $this->getModifiers();
-        return new Field($fieldName, $boolOperator, $m['use_boost'], $m['boost'], $nodes[0]);
+        return new Field($fieldName, $nodes[0], $boolOperator, $m['use_boost'], $m['boost']);
     }
 
     /**
@@ -269,24 +261,24 @@ class QueryParser
             $m = $this->getModifiers();
 
             if (count($nodes) === 1) {
-                return new Field($fieldName, $boolOperator, $m['use_boost'], $m['boost'], $nodes[0]);
+                return new Field($fieldName, $nodes[0], $boolOperator, $m['use_boost'], $m['boost']);
             }
 
             $subquery = new Subquery($nodes, $m['use_boost'], $m['boost']);
-            return new Field($fieldName, $boolOperator, $m['use_boost'], $m['boost'], $subquery);
+            return new Field($fieldName, $subquery, $boolOperator, $m['use_boost'], $m['boost']);
         }
 
         $m = $this->getModifiers();
 
         if ($lowerNode instanceof Number || $upperNode instanceof Number) {
             $range = new NumberRange($lowerNode, $upperNode, $exclusive);
-            return new Field($fieldName, $boolOperator, $m['use_boost'], $m['boost'], null, $range);
+            return new Field($fieldName, $range, $boolOperator, $m['use_boost'], $m['boost']);
         } elseif ($lowerNode instanceof Date || $upperNode instanceof Date) {
             $range = new DateRange($lowerNode, $upperNode, $exclusive);
-            return new Field($fieldName, $boolOperator, $m['use_boost'], $m['boost'], null, $range);
+            return new Field($fieldName, $range, $boolOperator, $m['use_boost'], $m['boost']);
         } elseif ($lowerNode instanceof Word || $upperNode instanceof Word) {
             $range = new WordRange($lowerNode, $upperNode, $exclusive);
-            return new Field($fieldName, $boolOperator, $m['use_boost'], $m['boost'], null, $range);
+            return new Field($fieldName, $range, $boolOperator, $m['use_boost'], $m['boost']);
         }
 
         return $this->createWord($fieldName, $boolOperator);
@@ -306,7 +298,7 @@ class QueryParser
 
         if ($subquery instanceof Subquery) {
             $m = $this->getModifiers();
-            return new Field($fieldName, $boolOperator, $m['use_boost'], $m['boost'], null, null, $subquery);
+            return new Field($fieldName, $subquery, $boolOperator, $m['use_boost'], $m['boost']);
         }
 
         if (empty($subquery)) {
@@ -314,7 +306,7 @@ class QueryParser
         }
 
         $m = $this->getModifiers();
-        return new Field($fieldName, $boolOperator, $m['use_boost'], $m['boost'], $subquery);
+        return new Field($fieldName, $subquery, $boolOperator, $m['use_boost'], $m['boost']);
     }
 
     /**

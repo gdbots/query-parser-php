@@ -3,19 +3,17 @@
 namespace Gdbots\QueryParser\Builder;
 
 use Gdbots\QueryParser\Node\Date;
-use Gdbots\QueryParser\Node\DateRange;
 use Gdbots\QueryParser\Node\Emoji;
 use Gdbots\QueryParser\Node\Emoticon;
 use Gdbots\QueryParser\Node\Field;
 use Gdbots\QueryParser\Node\Hashtag;
 use Gdbots\QueryParser\Node\Mention;
 use Gdbots\QueryParser\Node\Number;
-use Gdbots\QueryParser\Node\NumberRange;
 use Gdbots\QueryParser\Node\Phrase;
+use Gdbots\QueryParser\Node\Range;
 use Gdbots\QueryParser\Node\Subquery;
 use Gdbots\QueryParser\Node\Url;
 use Gdbots\QueryParser\Node\Word;
-use Gdbots\QueryParser\Node\WordRange;
 use Gdbots\QueryParser\ParsedQuery;
 
 interface QueryBuilder
@@ -56,12 +54,6 @@ interface QueryBuilder
     public function addDate(Date $date);
 
     /**
-     * @param DateRange $dateRange
-     * @return static
-     */
-    public function addDateRange(DateRange $dateRange);
-
-    /**
      * @param Emoji $emoji
      * @return static
      */
@@ -98,16 +90,16 @@ interface QueryBuilder
     public function addNumber(Number $number);
 
     /**
-     * @param NumberRange $numberRange
-     * @return static
-     */
-    public function addNumberRange(NumberRange $numberRange);
-
-    /**
      * @param Phrase $phrase
      * @return static
      */
     public function addPhrase(Phrase $phrase);
+
+    /**
+     * @param Range $range
+     * @return static
+     */
+    public function addRange(Range $range);
 
     /**
      * @param Subquery $subquery
@@ -126,10 +118,4 @@ interface QueryBuilder
      * @return static
      */
     public function addWord(Word $word);
-
-    /**
-     * @param WordRange $wordRange
-     * @return static
-     */
-    public function addWordRange(WordRange $wordRange);
 }

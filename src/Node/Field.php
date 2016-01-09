@@ -4,56 +4,32 @@ namespace Gdbots\QueryParser\Node;
 
 use Gdbots\QueryParser\Builder\QueryBuilder;
 use Gdbots\QueryParser\Enum\BoolOperator;
-use Gdbots\QueryParser\Enum\FieldType;
 
 final class Field extends Node
 {
     const NODE_TYPE = 'field';
 
     /** @var Node */
-    protected $node;
-
-    /** @var Range */
-    protected $range;
-
-    /** @var Subquery */
-    protected $subquery;
-
-    /** @var FieldType */
-    protected $fieldType;
+    private $node;
 
     /**
      * Field constructor.
      *
-     * @param string $value
-     * @param BoolOperator $boolOperator
-     * @param bool $useBoost
-     * @param float $boost
+     * @param string $fieldName
      * @param Node $node
-     * @param Range $range
-     * @param Subquery $subquery
+     * @param BoolOperator|null $boolOperator
+     * @param bool $useBoost
+     * @param float|mixed $boost
      */
     public function __construct(
-        $value,
+        $fieldName,
+        Node $node,
         BoolOperator $boolOperator = null,
         $useBoost = false,
-        $boost = self::DEFAULT_BOOST,
-        Node $node = null,
-        Range $range = null,
-        Subquery $subquery = null
+        $boost = self::DEFAULT_BOOST
     ) {
-        parent::__construct($value, $boolOperator, $useBoost, $boost);
-
-        if (null !== $node) {
-            $this->node = $node;
-            $this->fieldType = FieldType::SIMPLE();
-        } elseif (null !== $range) {
-            $this->range = $range;
-            $this->fieldType = FieldType::RANGE();
-        } elseif (null !== $subquery) {
-            $this->subquery = $subquery;
-            $this->fieldType = FieldType::SUBQUERY();
-        }
+        parent::__construct($fieldName, $boolOperator, $useBoost, $boost);
+        $this->node = $node;
     }
 
     /**
@@ -72,19 +48,10 @@ final class Field extends Node
             $boolOperator = null;
         }
 
-        $node = null;
-        $range = null;
-        $subquery = null;
+        /** @var Node $node */
+        $node = isset($data['node']) ? self::factory($data['node']) : null;
 
-        if (isset($data['node'])) {
-            $node = static::factory($data['node']);
-        } elseif (isset($data['range'])) {
-            $range = static::factory($data['range']);
-        } elseif (isset($data['subquery'])) {
-            $subquery = static::factory($data['subquery']);
-        }
-
-        return new self($value, $boolOperator, $useBoost, $boost, $node, $range, $subquery);
+        return new self($value, $node, $boolOperator, $useBoost, $boost);
     }
 
     /**
@@ -93,15 +60,7 @@ final class Field extends Node
     public function toArray()
     {
         $array = parent::toArray();
-
-        if (null !== $this->node) {
-            $array['node'] = $this->node->toArray();
-        } elseif (null !== $this->range) {
-            $array['range'] = $this->range->toArray();
-        } elseif (null !== $this->subquery) {
-            $array['subquery'] = $this->subquery->toArray();
-        }
-
+        $array['node'] = $this->node->toArray();
         return $array;
     }
 
@@ -114,38 +73,6 @@ final class Field extends Node
     }
 
     /**
-     * @return FieldType
-     */
-    public function getFieldType()
-    {
-        return $this->fieldType;
-    }
-
-    /**
-     * @return bool
-     */
-    public function hasSimpleValue()
-    {
-        return $this->fieldType->equals(FieldType::SIMPLE());
-    }
-
-    /**
-     * @return bool
-     */
-    public function hasRangeValue()
-    {
-        return $this->fieldType->equals(FieldType::RANGE());
-    }
-
-    /**
-     * @return bool
-     */
-    public function hasSubqueryValue()
-    {
-        return $this->fieldType->equals(FieldType::SUBQUERY());
-    }
-
-    /**
      * @return Node
      */
     public function getNode()
@@ -154,19 +81,11 @@ final class Field extends Node
     }
 
     /**
-     * @return Range
+     * @return bool
      */
-    public function getRange()
+    public function hasCompoundNode()
     {
-        return $this->range;
-    }
-
-    /**
-     * @return Subquery
-     */
-    public function getSubquery()
-    {
-        return $this->subquery;
+        return $this->node instanceof Range || $this->node instanceof Subquery;
     }
 
     /**

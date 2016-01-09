@@ -41,6 +41,6 @@ final class DateRange extends Range
      */
     public function acceptBuilder(QueryBuilder $builder)
     {
-        $builder->addDateRange($this);
+        $builder->addRange($this);
     }
 }

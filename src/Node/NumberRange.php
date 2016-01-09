@@ -41,6 +41,6 @@ final class NumberRange extends Range
      */
     public function acceptBuilder(QueryBuilder $builder)
     {
-        $builder->addNumberRange($this);
+        $builder->addRange($this);
     }
 }

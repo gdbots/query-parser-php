@@ -41,6 +41,6 @@ final class WordRange extends Range
      */
     public function acceptBuilder(QueryBuilder $builder)
     {
-        $builder->addWordRange($this);
+        $builder->addRange($this);
     }
 }

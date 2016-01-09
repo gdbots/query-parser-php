@@ -2,9 +2,7 @@
 
 namespace Gdbots\QueryParser\Builder;
 
-use Gdbots\QueryParser\Enum\FieldType;
 use Gdbots\QueryParser\Node\Date;
-use Gdbots\QueryParser\Node\DateRange;
 use Gdbots\QueryParser\Node\Emoji;
 use Gdbots\QueryParser\Node\Emoticon;
 use Gdbots\QueryParser\Node\Field;
@@ -12,15 +10,36 @@ use Gdbots\QueryParser\Node\Hashtag;
 use Gdbots\QueryParser\Node\Mention;
 use Gdbots\QueryParser\Node\Node;
 use Gdbots\QueryParser\Node\Number;
-use Gdbots\QueryParser\Node\NumberRange;
 use Gdbots\QueryParser\Node\Phrase;
 use Gdbots\QueryParser\Node\Range;
 use Gdbots\QueryParser\Node\Subquery;
 use Gdbots\QueryParser\Node\Url;
 use Gdbots\QueryParser\Node\Word;
-use Gdbots\QueryParser\Node\WordRange;
 use Gdbots\QueryParser\ParsedQuery;
 
+/*
+ * DEV NOTES...
+ *
+ * When is it a term? (exact value)
+ * - if it's a Date, Emoji, Emoticon, Hashtag, Mention, Number, Url
+ * - if it's in a field and the field does not support full text search. i.e. "+status:active"
+ *
+ *
+ * When should "filter" be used?
+ * - when a "term" is required or prohibited.
+ *
+ *
+ * When should "should match" be used?
+ * - when a word or phrase is not required or prohibited.
+ * - when a word that is required is a stop word (possible/likely it's not even in the index).
+ * - when a word that is required uses fuzzy or trailing wildcard
+ *
+ *
+ * When should "should match term" be used?
+ * - when a term is not in a field node and is not required.
+ *
+ *
+ */
 abstract class AbstractQueryBuilder implements QueryBuilder
 {
     /** @var ParsedQuery */
@@ -38,6 +57,27 @@ abstract class AbstractQueryBuilder implements QueryBuilder
     /** @var bool */
     protected $inSubquery = false;
 
+    /** @var string */
+    protected $defaultField;
+
+    /**
+     * The field that Hashtag nodes will be searched in unless already
+     * within a Field object.  If null the Hashtag will be handled
+     * as a term and queried in the default field.
+     *
+     * @var string
+     */
+    protected $hashtagField;
+
+    /**
+     * The field that Mention nodes will be searched in unless already
+     * within a Field object.  If null the Mention will be handled
+     * as a term and queried in the default field.
+     *
+     * @var string
+     */
+    protected $mentionField;
+
     /**
      * Array of field names which support full text queries.  This value is
      * just a default set of common full text fields.
@@ -51,6 +91,8 @@ abstract class AbstractQueryBuilder implements QueryBuilder
         'short_title' => true,
         'excerpt' => true,
         'description' => true,
+        'overview' => true,
+        'summary' => true,
         'abstract' => true,
         'search_text' => true,
         'bio' => true,
@@ -87,12 +129,17 @@ abstract class AbstractQueryBuilder implements QueryBuilder
      */
     final public function supportsFullTextSearch($field)
     {
-        $field = trim(strtolower($field));
-        if (empty($field)) {
-            return false;
-        }
+        return isset($this->fullTextSearchFields[trim(strtolower($field))]);
+    }
 
-        return isset($this->fullTextSearchFields[$field]);
+    /**
+     * @param string $field
+     * @return static
+     */
+    final public function setDefaultField($field)
+    {
+        $this->defaultField = $field;
+        return $this;
     }
 
     /**
@@ -104,7 +151,6 @@ abstract class AbstractQueryBuilder implements QueryBuilder
         $this->parsedQuery = $parsedQuery;
         $this->beforeAddParsedQuery($parsedQuery);
 
-        /** @var QueryBuilder $this */
         foreach ($parsedQuery->getNodes() as $node) {
             $node->acceptBuilder($this);
         }
@@ -126,19 +172,6 @@ abstract class AbstractQueryBuilder implements QueryBuilder
     final public function addDate(Date $date)
     {
         $this->handleTerm($date);
-        return $this;
-    }
-
-    /**
-     * @param DateRange $dateRange
-     * @return static
-     */
-    final public function addDateRange(DateRange $dateRange)
-    {
-        $this->inRange = true;
-        $this->startRange($dateRange);
-        $this->endRange($dateRange);
-        $this->inRange = false;
         return $this;
     }
 
@@ -171,33 +204,10 @@ abstract class AbstractQueryBuilder implements QueryBuilder
         $this->inField = true;
         $this->currentField = $field;
         $this->startField($field);
-
-        switch ($field->getFieldType()->getValue()) {
-            case FieldType::SIMPLE:
-                $node = $field->getNode();
-                break;
-
-            case FieldType::RANGE:
-                $node = $field->getRange();
-                break;
-
-            case FieldType::SUBQUERY:
-                $node = $field->getSubquery();
-                break;
-
-            default:
-                $node = null;
-                break;
-        }
-
-        if ($node instanceof Node) {
-            $node->acceptBuilder($this);
-        }
-
+        $field->getNode()->acceptBuilder($this);
         $this->endField($field);
         $this->inField = false;
         $this->currentField = null;
-
         return $this;
     }
 
@@ -232,24 +242,6 @@ abstract class AbstractQueryBuilder implements QueryBuilder
     }
 
     /**
-     * @param NumberRange $numberRange
-     * @return static
-     */
-    final public function addNumberRange(NumberRange $numberRange)
-    {
-        // todo: exception for range not in filter or in subquery
-        if ($this->inField && !$this->inRange && !$this->inSubquery) {
-            $this->inRange = true;
-            $this->startRange($numberRange);
-            $this->endRange($numberRange);
-            $this->inRange = false;
-            return $this;
-        }
-
-        throw new \LogicException('A NumberRange can only be used within a filter.  e.g. rating:[1..5]');
-    }
-
-    /**
      * @param Phrase $phrase
      * @return static
      */
@@ -260,15 +252,34 @@ abstract class AbstractQueryBuilder implements QueryBuilder
     }
 
     /**
+     * @param Range $range
+     * @return static
+     */
+    final public function addRange(Range $range)
+    {
+        if ($this->inField && !$this->inRange && !$this->inSubquery) {
+            $this->inRange = true;
+            $this->handleRange($range);
+            $this->inRange = false;
+            return $this;
+        }
+
+        throw new \LogicException('A Range can only be used within a filter.  e.g. rating:[1..5]');
+    }
+
+    /**
      * @param Subquery $subquery
      * @return static
      */
     final public function addSubquery(Subquery $subquery)
     {
+        if ($this->inRange || $this->inSubquery) {
+            throw new \LogicException('A Subquery cannot be nested or within a Range.');
+        }
+
         $this->inSubquery = true;
         $this->startSubquery($subquery);
 
-        /** @var QueryBuilder|self $this */
         foreach ($subquery->getNodes() as $node) {
             $node->acceptBuilder($this);
         }
@@ -295,31 +306,7 @@ abstract class AbstractQueryBuilder implements QueryBuilder
      */
     final public function addWord(Word $word)
     {
-        /*
-         * if is a stop word, then always handle as optional term (should match)
-         * if in filter...
-         * - pass field name and value to "isFieldAnalyzed"?
-         *      - if true use "should match"
-         *      - if false, use handle explicit
-         * -
-         *
-         */
         $this->handleText($word);
-        return $this;
-    }
-
-    /**
-     * @param WordRange $wordRange
-     * @return static
-     */
-    final public function addWordRange(WordRange $wordRange)
-    {
-        $this->inRange = true;
-        $this->startRange($wordRange);
-        $this->endRange($wordRange);
-        $this->inRange = false;
-        $this->currentRange = null;
-
         return $this;
     }
 
@@ -357,7 +344,7 @@ abstract class AbstractQueryBuilder implements QueryBuilder
              * When in a simple field, the bool operator is based on
              * the field, not the node in the field.
              */
-            if ($this->currentField->hasSimpleValue()) {
+            if (!$this->currentField->hasCompoundNode()) {
                 if ($this->currentField->isOptional()) {
                     $this->shouldMatchTerm($node);
                     return;
@@ -394,12 +381,7 @@ abstract class AbstractQueryBuilder implements QueryBuilder
     /**
      * @param Range $range
      */
-    protected function startRange(Range $range) {}
-
-    /**
-     * @param Range $range
-     */
-    protected function endRange(Range $range) {}
+    protected function handleRange(Range $range) {}
 
     /**
      * @param Subquery $subquery

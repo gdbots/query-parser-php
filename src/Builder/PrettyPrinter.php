@@ -157,7 +157,7 @@ class PrettyPrinter extends AbstractQueryBuilder
     /**
      * @param Range $range
      */
-    protected function startRange(Range $range)
+    protected function handleRange(Range $range)
     {
         $this->printPrefix($range);
         $this->result .= $range->isExclusive() ? '{' : '[';
@@ -175,13 +175,7 @@ class PrettyPrinter extends AbstractQueryBuilder
         } else {
             $this->result .= '*';
         }
-    }
 
-    /**
-     * @param Range $range
-     */
-    protected function endRange(Range $range)
-    {
         $this->result .= $range->isExclusive() ? '}' : ']';
         $this->printPostfix($range);
     }
@@ -209,6 +203,7 @@ class PrettyPrinter extends AbstractQueryBuilder
      */
     protected function mustMatchText(Node $node)
     {
+        $this->result .= $node->getValue().' ';
     }
 
     /**
@@ -216,6 +211,7 @@ class PrettyPrinter extends AbstractQueryBuilder
      */
     protected function shouldMatchText(Node $node)
     {
+        $this->result .= $node->getValue().' ';
     }
 
     /**
@@ -223,6 +219,7 @@ class PrettyPrinter extends AbstractQueryBuilder
      */
     protected function mustNotMatchText(Node $node)
     {
+        $this->result .= $node->getValue().' ';
     }
 
     /**

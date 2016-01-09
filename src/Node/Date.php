@@ -9,8 +9,11 @@ use Gdbots\QueryParser\Enum\ComparisonOperator;
 final class Date extends Node
 {
     const NODE_TYPE = 'date';
+    // todo: enable "fuzzy" aka "proximity" for date fields?  technically a range accomplishes this already.
+    /*
     const SUPPORTS_FUZZY = true;
     const MAX_FUZZY = 5;
+    */
 
     /** @var \DateTimeZone */
     protected static $utc;
