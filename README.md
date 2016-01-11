@@ -50,7 +50,7 @@ class Token implements \JsonSerializable
     const T_EMOTICON         = 29; // see https://en.wikipedia.org/wiki/Emoticon
     const T_EMOJI            = 30; // see https://en.wikipedia.org/wiki/Emoji
 ```
-The `T_WHITE_SPACE` and `T_IGNORED` are stripped from the tokens in before returned by the scan process.
+The `T_WHITE_SPACE` and `T_IGNORED` tokens are removed before the output is returned by the scan process.
 
 
 ## QueryParser
@@ -59,7 +59,7 @@ The default query parser produces a `ParsedQuery` object which can be used with 
 for a given search service.
 
 
-## Basic Usage
+#### Basic Usage
 
 ``` php
 <?php
@@ -72,6 +72,22 @@ $builder = (new XmlQueryBuilder())->setHashtagFieldName('tags');
 
 $result = $parser->parse('hello^5 planet:earth +date:2015-12-25 #omg');
 echo $builder->addParsedQuery($result)->toXmlString();
+```
+Produces the following xml:
+``` xml
+<?xml version="1.0"?>
+<query>
+  <word boost="5" rule="should_match">hello</word>
+  <field name="planet">
+    <word rule="should_match_term">earth</word>
+  </field>
+  <field name="date" bool_operator="required" cacheable="true">
+    <date rule="must_not_match_term">2015-12-25</date>
+  </field>
+  <field name="tags" bool_operator="required" cacheable="true">
+    <hashtag rule="must_match_term">omg</hashtag>
+  </field>
+</query>
 ```
 
 To pull list of `Node` objects by type, use:

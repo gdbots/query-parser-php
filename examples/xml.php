@@ -15,10 +15,6 @@ $builder
     ->setMentionFieldName('mentions')
 ;
 
-$tests = [
-    ['input' => 'hello^5 planet:earth +date:2015-12-25 #omg'],
-];
-
 $header = str_repeat(PHP_EOL, 4).'#### %s'.PHP_EOL;
 
 foreach ($tests as $test) {
