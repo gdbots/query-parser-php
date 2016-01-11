@@ -12,6 +12,7 @@ use Gdbots\QueryParser\Enum\BoolOperator;
 abstract class Node implements FromArray, ToArray, \JsonSerializable
 {
     const NODE_TYPE = 'node';
+    const COMPOUND_NODE = false;
 
     // "^" BOOST refers to scoring parts of the query.
     const SUPPORTS_BOOST = true;
@@ -180,6 +181,14 @@ abstract class Node implements FromArray, ToArray, \JsonSerializable
     final public function isProhibited()
     {
         return $this->boolOperator->equals(BoolOperator::PROHIBITED());
+    }
+
+    /**
+     * @return bool
+     */
+    final public function isCompoundNode()
+    {
+        return static::COMPOUND_NODE;
     }
 
     /**

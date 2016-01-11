@@ -89,7 +89,7 @@ class ParsedQuery implements FromArray, ToArray, \JsonSerializable
 
     /**
      * Returns true if the parsed query contains at least one request for an item
-     * matching the query.  If all of the nodes where "prohibited" values it
+     * matching the query.  If all of the nodes are "prohibited" values it
      * can easily review your entire index.
      *
      * @return bool

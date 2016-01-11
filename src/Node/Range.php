@@ -2,9 +2,12 @@
 
 namespace Gdbots\QueryParser\Node;
 
+use Gdbots\QueryParser\Builder\QueryBuilder;
+
 abstract class Range extends Node
 {
     const SUPPORTS_BOOST = false;
+    const COMPOUND_NODE = true;
 
     /** @var Node */
     private $lowerNode;
@@ -22,7 +25,7 @@ abstract class Range extends Node
      * @param Node|null $upperNode
      * @param bool $exclusive
      *
-     * @throws \InvalidArgumentException
+     * @throws \LogicException
      */
     public function __construct(Node $lowerNode = null, Node $upperNode = null, $exclusive = false)
     {
@@ -32,7 +35,7 @@ abstract class Range extends Node
         $this->exclusive = (bool)$exclusive;
 
         if (null === $this->lowerNode && null === $this->upperNode) {
-            throw new \InvalidArgumentException('Range requires at least a lower or upper node.');
+            throw new \LogicException('Range requires at least a lower or upper node.');
         }
     }
 
@@ -116,5 +119,13 @@ abstract class Range extends Node
     final public function isExclusive()
     {
         return $this->exclusive;
+    }
+
+    /**
+     * @param QueryBuilder $builder
+     */
+    final public function acceptBuilder(QueryBuilder $builder)
+    {
+        $builder->addRange($this);
     }
 }

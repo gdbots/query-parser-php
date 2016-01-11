@@ -4,9 +4,10 @@ namespace Gdbots\QueryParser\Node;
 
 use Gdbots\QueryParser\Builder\QueryBuilder;
 
-class Subquery extends Node
+final class Subquery extends Node
 {
     const NODE_TYPE = 'subquery';
+    const COMPOUND_NODE = true;
 
     /** @var Node[] */
     private $nodes = [];
@@ -17,11 +18,19 @@ class Subquery extends Node
      * @param Node[] $nodes
      * @param bool $useBoost
      * @param float|mixed $boost
+     *
+     * @throws \LogicException
      */
     public function __construct(array $nodes, $useBoost = false, $boost = self::DEFAULT_BOOST)
     {
         parent::__construct(null, null, $useBoost, $boost);
         $this->nodes = $nodes;
+
+        foreach ($this->nodes as $node) {
+            if ($node->isCompoundNode()) {
+                throw new \LogicException('A Subquery cannot contain compound nodes.  (Field, Range, Subquery)');
+            }
+        }
     }
 
     /**

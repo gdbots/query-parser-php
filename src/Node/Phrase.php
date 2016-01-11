@@ -5,7 +5,7 @@ namespace Gdbots\QueryParser\Node;
 use Gdbots\QueryParser\Builder\QueryBuilder;
 use Gdbots\QueryParser\Enum\BoolOperator;
 
-class Phrase extends Node
+final class Phrase extends Node
 {
     const NODE_TYPE = 'phrase';
     const SUPPORTS_FUZZY = true;

@@ -19,6 +19,15 @@ use Gdbots\QueryParser\ParsedQuery;
 interface QueryBuilder
 {
     /**
+     * Resets the builder so any nodes added are cleared and
+     * you can build a new query.  Any builder options/settings
+     * should be maintained after a clear.
+     *
+     * @return static
+     */
+    public function clear();
+
+    /**
      * Sets the fields that this builder will enable for full text search.
      *
      * @param array $fields
@@ -36,10 +45,43 @@ interface QueryBuilder
     /**
      * Returns true if the given field supports full text searching.
      *
-     * @param string $field
+     * @param string $fieldName
      * @return bool
      */
-    public function supportsFullTextSearch($field);
+    public function supportsFullTextSearch($fieldName);
+
+    /**
+     * Sets the default field that will be searched when a query
+     * doesn't explicitly set it.
+     *
+     * @param string $fieldName
+     * @return static
+     */
+    public function setDefaultFieldName($fieldName);
+
+    /**
+     * @param string $fieldName
+     * @return static
+     */
+    public function setEmojiFieldName($fieldName);
+
+    /**
+     * @param string $fieldName
+     * @return static
+     */
+    public function setEmoticonFieldName($fieldName);
+
+    /**
+     * @param string $fieldName
+     * @return static
+     */
+    public function setHashtagFieldName($fieldName);
+
+    /**
+     * @param string $fieldName
+     * @return static
+     */
+    public function setMentionFieldName($fieldName);
 
     /**
      * @param ParsedQuery $parsedQuery
@@ -68,6 +110,8 @@ interface QueryBuilder
     /**
      * @param Field $field
      * @return static
+     *
+     * @throws \LogicException
      */
     public function addField(Field $field);
 
@@ -98,12 +142,16 @@ interface QueryBuilder
     /**
      * @param Range $range
      * @return static
+     *
+     * @throws \LogicException
      */
     public function addRange(Range $range);
 
     /**
      * @param Subquery $subquery
      * @return static
+     *
+     * @throws \LogicException
      */
     public function addSubquery(Subquery $subquery);
 

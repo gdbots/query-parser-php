@@ -5,12 +5,12 @@ namespace Gdbots\QueryParser\Node;
 use Gdbots\QueryParser\Builder\QueryBuilder;
 use Gdbots\QueryParser\Enum\ComparisonOperator;
 
-class Number extends Node
+final class Number extends Node
 {
     const NODE_TYPE = 'number';
 
     /** @var ComparisonOperator */
-    protected $comparisonOperator;
+    private $comparisonOperator;
 
     /**
      * Number constructor.

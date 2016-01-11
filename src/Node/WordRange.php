@@ -2,11 +2,10 @@
 
 namespace Gdbots\QueryParser\Node;
 
-use Gdbots\QueryParser\Builder\QueryBuilder;
-
 final class WordRange extends Range
 {
     const NODE_TYPE = 'word_range';
+    const COMPOUND_NODE = true;
 
     /**
      * WordRange constructor.
@@ -34,13 +33,5 @@ final class WordRange extends Range
     public function getUpperNode()
     {
         return parent::getUpperNode();
-    }
-
-    /**
-     * @param QueryBuilder $builder
-     */
-    public function acceptBuilder(QueryBuilder $builder)
-    {
-        $builder->addRange($this);
     }
 }

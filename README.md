@@ -7,21 +7,56 @@ query-parser-php
 
 Php library that converts search queries into words, phrases, hashtags, mentions, etc.
 
+This library supports a simple search query standard. It is meant to support the most common search combinations that a
+user would likely enter into your website search box or dashboard application.  It intentionally limits the more complex nested capabilities
+that you might expect from SQL builders, Lucene, etc.
 
-## Query Syntax
 
-The query parser supports a fairly universal search query standard. It is
-meant to support the most common search combinations while be fairly simple to
-use by non-technical users.
+## Tokenizer
+Tokens are split on whitespace unless enclosed in double quotes.  The following tokens are extracted by the `Tokenizer`:
 
-It supports the following features:
-* Keywords are split on whitespace, ex. `word1 word2` contains two keywords.
-* Keywords can be grouped using quotation marks, ex. `"word1 word2"` only contains one keyword.
-* Keywords can be combined using boolean and, ex. `word1 AND word2`. This is also the default combination, so `word1 word2` is the same as `word1 AND word2`.
-* Keywords can be combined using boolean or, ex. `word1 OR word2`.
-* Keywords can be exclude or include using "-" or "+", ex. `-excludedWord +mandatoryWord`.
-* Combinational logic can be specified using parentheses, ex. `word1 OR (word2 AND word3)`.
-* A keyword can be explicitly marked as belonging to a certain domain, ex. `people:Michael`.
+``` php
+class Token implements \JsonSerializable
+{
+    const T_EOI              = 0;  // end of input
+    const T_WHITE_SPACE      = 1;
+    const T_IGNORED          = 2;  // an ignored token, e.g. #, !, etc.  when found by themselves, don't do anything with them.
+    const T_NUMBER           = 3;  // 10, 0.8, .64, 6.022e23
+    const T_REQUIRED         = 4;  // '+'
+    const T_PROHIBITED       = 5;  // '-'
+    const T_GREATER_THAN     = 6;  // '>'
+    const T_LESS_THAN        = 7;  // '<'
+    const T_EQUALS           = 8;  // '='
+    const T_FUZZY            = 9;  // '~'
+    const T_BOOST            = 10; // '^'
+    const T_RANGE_INCL_START = 11; // '['
+    const T_RANGE_INCL_END   = 12; // ']'
+    const T_RANGE_EXCL_START = 13; // '{'
+    const T_RANGE_EXCL_END   = 14; // '}'
+    const T_SUBQUERY_START   = 15; // '('
+    const T_SUBQUERY_END     = 16; // ')'
+    const T_WILDCARD         = 17; // '*'
+    const T_AND              = 18; // 'AND' or '&&'
+    const T_OR               = 19; // 'OR' or '||'
+    const T_TO               = 20; // 'TO' or '..'
+    const T_WORD             = 21;
+    const T_FIELD_START      = 22; // The "field:" portion of "field:value".
+    const T_FIELD_END        = 23; // when a field lexeme ends, i.e. "field:value". This token has no value.
+    const T_PHRASE           = 24; // Phrase (one or more quoted words)
+    const T_URL              = 25; // a valid url
+    const T_DATE             = 26; // date in the format YYYY-MM-DD
+    const T_HASHTAG          = 27; // #hashtag
+    const T_MENTION          = 28; // @mention
+    const T_EMOTICON         = 29; // see https://en.wikipedia.org/wiki/Emoticon
+    const T_EMOJI            = 30; // see https://en.wikipedia.org/wiki/Emoji
+```
+The `T_WHITE_SPACE` and `T_IGNORED` are stripped from the tokens in before returned by the scan process.
+
+
+## QueryParser
+
+The default query parser produces a `ParsedQuery` object which can be used with a builder to produce a query
+for a given search service.
 
 
 ## Basic Usage
@@ -30,23 +65,20 @@ It supports the following features:
 <?php
 
 use Gdbots\QueryParser\QueryParser;
-use Gdbots\QueryParser\Builder\PrettyPrinter;
+use Gdbots\QueryParser\Builder\XmlQueryBuilder;
 
 $parser  = new QueryParser();
-$printer = new PrettyPrinter();
+$builder = (new XmlQueryBuilder())->setHashtagFieldName('tags');
 
-/** @var \Gdbots\QueryParser\ParsedQuery */
-$result = $parser->parse('+mandatoryWord AND -excludedWord fieldName:"value"');
-
-echo $printer->fromParsedQuery($result)->getResult();
+$result = $parser->parse('hello^5 planet:earth +date:2015-12-25 #omg');
+echo $builder->addParsedQuery($result)->toXmlString();
 ```
 
-To pull list of `Node` by type, use:
+To pull list of `Node` objects by type, use:
 
 ``` php
 <?php
 
 $result = $parser->parse('#hashtag1 AND #hashtag2');
-
 $hashtags = $result->getNodesOfType(\Gdbots\QueryParser\Node\Hashtag::NODE_TYPE);
 ```

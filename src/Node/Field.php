@@ -8,6 +8,7 @@ use Gdbots\QueryParser\Enum\BoolOperator;
 final class Field extends Node
 {
     const NODE_TYPE = 'field';
+    const COMPOUND_NODE = true;
 
     /** @var Node */
     private $node;
@@ -20,6 +21,8 @@ final class Field extends Node
      * @param BoolOperator|null $boolOperator
      * @param bool $useBoost
      * @param float|mixed $boost
+     *
+     * @throws \LogicException
      */
     public function __construct(
         $fieldName,
@@ -30,6 +33,10 @@ final class Field extends Node
     ) {
         parent::__construct($fieldName, $boolOperator, $useBoost, $boost);
         $this->node = $node;
+
+        if ($this->node instanceof Field) {
+            throw new \LogicException('A Field cannot contain another field.');
+        }
     }
 
     /**
@@ -85,7 +92,7 @@ final class Field extends Node
      */
     public function hasCompoundNode()
     {
-        return $this->node instanceof Range || $this->node instanceof Subquery;
+        return $this->node->isCompoundNode();
     }
 
     /**

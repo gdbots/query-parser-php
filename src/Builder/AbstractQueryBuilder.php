@@ -15,6 +15,7 @@ use Gdbots\QueryParser\Node\Range;
 use Gdbots\QueryParser\Node\Subquery;
 use Gdbots\QueryParser\Node\Url;
 use Gdbots\QueryParser\Node\Word;
+use Gdbots\QueryParser\Node\WordRange;
 use Gdbots\QueryParser\ParsedQuery;
 
 /*
@@ -26,7 +27,7 @@ use Gdbots\QueryParser\ParsedQuery;
  *
  *
  * When should "filter" be used?
- * - when a "term" is required or prohibited.
+ * - when a "term" is required or prohibited. and is "inField"
  *
  *
  * When should "should match" be used?
@@ -42,41 +43,20 @@ use Gdbots\QueryParser\ParsedQuery;
  */
 abstract class AbstractQueryBuilder implements QueryBuilder
 {
-    /** @var ParsedQuery */
-    protected $parsedQuery;
-
     /** @var Field */
-    protected $currentField;
+    private $currentField;
 
     /** @var bool */
-    protected $inField = false;
+    private $queryOnFieldIsCacheable = false;
 
     /** @var bool */
-    protected $inRange = false;
+    private $inField = false;
 
     /** @var bool */
-    protected $inSubquery = false;
+    private $inRange = false;
 
-    /** @var string */
-    protected $defaultField;
-
-    /**
-     * The field that Hashtag nodes will be searched in unless already
-     * within a Field object.  If null the Hashtag will be handled
-     * as a term and queried in the default field.
-     *
-     * @var string
-     */
-    protected $hashtagField;
-
-    /**
-     * The field that Mention nodes will be searched in unless already
-     * within a Field object.  If null the Mention will be handled
-     * as a term and queried in the default field.
-     *
-     * @var string
-     */
-    protected $mentionField;
+    /** @var bool */
+    private $inSubquery = false;
 
     /**
      * Array of field names which support full text queries.  This value is
@@ -105,6 +85,29 @@ abstract class AbstractQueryBuilder implements QueryBuilder
         'caption' => true,
     ];
 
+    /** @var string */
+    protected $defaultFieldName;
+
+    /** @var string */
+    protected $emojiFieldName;
+
+    /** @var string */
+    protected $emoticonFieldName;
+
+    /** @var string */
+    protected $hashtagFieldName;
+
+    /** @var string */
+    protected $mentionFieldName;
+
+    /**
+     * @return static
+     */
+    public function clear()
+    {
+        return $this;
+    }
+
     /**
      * @param array $fields
      * @return static
@@ -124,21 +127,61 @@ abstract class AbstractQueryBuilder implements QueryBuilder
     }
 
     /**
-     * @param string $field
+     * @param string $fieldName
      * @return bool
      */
-    final public function supportsFullTextSearch($field)
+    final public function supportsFullTextSearch($fieldName)
     {
-        return isset($this->fullTextSearchFields[trim(strtolower($field))]);
+        return isset($this->fullTextSearchFields[trim(strtolower($fieldName))]);
     }
 
     /**
-     * @param string $field
+     * @param string $fieldName
      * @return static
      */
-    final public function setDefaultField($field)
+    final public function setDefaultFieldName($fieldName)
     {
-        $this->defaultField = $field;
+        $this->defaultFieldName = $fieldName;
+        return $this;
+    }
+
+    /**
+     * @param string $fieldName
+     * @return static
+     */
+    final public function setEmojiFieldName($fieldName)
+    {
+        $this->emojiFieldName = $fieldName;
+        return $this;
+    }
+
+    /**
+     * @param string $fieldName
+     * @return static
+     */
+    final public function setEmoticonFieldName($fieldName)
+    {
+        $this->emoticonFieldName = $fieldName;
+        return $this;
+    }
+
+    /**
+     * @param string $fieldName
+     * @return static
+     */
+    final public function setHashtagFieldName($fieldName)
+    {
+        $this->hashtagFieldName = $fieldName;
+        return $this;
+    }
+
+    /**
+     * @param string $fieldName
+     * @return static
+     */
+    final public function setMentionFieldName($fieldName)
+    {
+        $this->mentionFieldName = $fieldName;
         return $this;
     }
 
@@ -148,21 +191,11 @@ abstract class AbstractQueryBuilder implements QueryBuilder
      */
     final public function addParsedQuery(ParsedQuery $parsedQuery)
     {
-        $this->parsedQuery = $parsedQuery;
-        $this->beforeAddParsedQuery($parsedQuery);
-
         foreach ($parsedQuery->getNodes() as $node) {
             $node->acceptBuilder($this);
         }
 
         return $this;
-    }
-
-    /**
-     * @param ParsedQuery $parsedQuery
-     */
-    protected function beforeAddParsedQuery(ParsedQuery $parsedQuery)
-    {
     }
 
     /**
@@ -181,8 +214,20 @@ abstract class AbstractQueryBuilder implements QueryBuilder
      */
     final public function addEmoji(Emoji $emoji)
     {
-        $this->handleTerm($emoji);
-        return $this;
+        if ($this->inField || null === $this->emojiFieldName) {
+            $this->handleTerm($emoji);
+            return $this;
+        }
+
+        $field = new Field(
+            $this->emojiFieldName,
+            $emoji,
+            $emoji->getBoolOperator(),
+            $emoji->useBoost(),
+            $emoji->getBoost()
+        );
+
+        return $this->addField($field);
     }
 
     /**
@@ -191,23 +236,43 @@ abstract class AbstractQueryBuilder implements QueryBuilder
      */
     final public function addEmoticon(Emoticon $emoticon)
     {
-        $this->handleTerm($emoticon);
-        return $this;
+        if ($this->inField || null === $this->emoticonFieldName) {
+            $this->handleTerm($emoticon);
+            return $this;
+        }
+
+        $field = new Field(
+            $this->emoticonFieldName,
+            $emoticon,
+            $emoticon->getBoolOperator(),
+            $emoticon->useBoost(),
+            $emoticon->getBoost()
+        );
+
+        return $this->addField($field);
     }
 
     /**
      * @param Field $field
      * @return static
+     *
+     * @throws \LogicException
      */
     final public function addField(Field $field)
     {
+        if ($this->inField || $this->inRange) {
+            throw new \LogicException('A Field cannot be nested in another Field or Range.');
+        }
+
         $this->inField = true;
         $this->currentField = $field;
-        $this->startField($field);
+        $this->queryOnFieldIsCacheable = $this->queryOnFieldIsCacheable($field);
+        $this->startField($field, $this->queryOnFieldIsCacheable);
         $field->getNode()->acceptBuilder($this);
-        $this->endField($field);
+        $this->endField($field, $this->queryOnFieldIsCacheable);
         $this->inField = false;
         $this->currentField = null;
+        $this->queryOnFieldIsCacheable = false;
         return $this;
     }
 
@@ -217,8 +282,20 @@ abstract class AbstractQueryBuilder implements QueryBuilder
      */
     final public function addHashtag(Hashtag $hashtag)
     {
-        $this->handleTerm($hashtag);
-        return $this;
+        if ($this->inField || null === $this->hashtagFieldName) {
+            $this->handleTerm($hashtag);
+            return $this;
+        }
+
+        $field = new Field(
+            $this->hashtagFieldName,
+            $hashtag,
+            $hashtag->getBoolOperator(),
+            $hashtag->useBoost(),
+            $hashtag->getBoost()
+        );
+
+        return $this->addField($field);
     }
 
     /**
@@ -227,8 +304,20 @@ abstract class AbstractQueryBuilder implements QueryBuilder
      */
     final public function addMention(Mention $mention)
     {
-        $this->handleTerm($mention);
-        return $this;
+        if ($this->inField || null === $this->mentionFieldName) {
+            $this->handleTerm($mention);
+            return $this;
+        }
+
+        $field = new Field(
+            $this->mentionFieldName,
+            $mention,
+            $mention->getBoolOperator(),
+            $mention->useBoost(),
+            $mention->getBoost()
+        );
+
+        return $this->addField($field);
     }
 
     /**
@@ -254,17 +343,19 @@ abstract class AbstractQueryBuilder implements QueryBuilder
     /**
      * @param Range $range
      * @return static
+     *
+     * @throws \LogicException
      */
     final public function addRange(Range $range)
     {
-        if ($this->inField && !$this->inRange && !$this->inSubquery) {
-            $this->inRange = true;
-            $this->handleRange($range);
-            $this->inRange = false;
-            return $this;
+        if (!$this->inField || $this->inRange || $this->inSubquery) {
+            throw new \LogicException('A Range can only be used within a field.  e.g. rating:[1..5]');
         }
 
-        throw new \LogicException('A Range can only be used within a filter.  e.g. rating:[1..5]');
+        $this->inRange = true;
+        $this->handleRange($range, $this->currentField, $this->queryOnFieldIsCacheable);
+        $this->inRange = false;
+        return $this;
     }
 
     /**
@@ -278,13 +369,13 @@ abstract class AbstractQueryBuilder implements QueryBuilder
         }
 
         $this->inSubquery = true;
-        $this->startSubquery($subquery);
+        $this->startSubquery($subquery, $this->currentField);
 
         foreach ($subquery->getNodes() as $node) {
             $node->acceptBuilder($this);
         }
 
-        $this->endSubquery($subquery);
+        $this->endSubquery($subquery, $this->currentField);
         $this->inSubquery = false;
 
         return $this;
@@ -311,115 +402,179 @@ abstract class AbstractQueryBuilder implements QueryBuilder
     }
 
     /**
+     * @return bool
+     */
+    final protected function inRange()
+    {
+        return $this->inRange;
+    }
+
+    /**
+     * @return bool
+     */
+    final protected function inSubquery()
+    {
+        return $this->inSubquery;
+    }
+
+    /**
      * @param Node $node
      */
-    protected function handleText(Node $node)
+    private function handleText(Node $node)
     {
-        if ($node instanceof Word && $node->isStopWord()) {
-            $this->shouldMatchText($node);
-            return;
-        }
-
         if ($this->inField && !$this->supportsFullTextSearch($this->currentField->getName())) {
             $this->handleTerm($node);
             return;
         }
 
-        if ($node->isOptional()) {
-            $this->shouldMatchText($node);
+        if ($node instanceof Word && $node->isStopWord()) {
+            $this->shouldMatch($node, $this->currentField);
+            return;
+        } elseif ($node->isOptional()) {
+            $this->shouldMatch($node, $this->currentField);
+            return;
         } elseif ($node->isRequired()) {
-            $this->mustMatchText($node);
-        } elseif ($node->isProhibited()) {
-            $this->mustNotMatchText($node);
+            $this->mustMatch($node, $this->currentField);
+            return;
         }
+
+        $this->mustNotMatch($node, $this->currentField);
     }
 
     /**
      * @param Node $node
      */
-    protected function handleTerm(Node $node)
+    private function handleTerm(Node $node)
     {
-        if ($this->inField) {
-            /*
-             * When in a simple field, the bool operator is based on
-             * the field, not the node in the field.
-             */
-            if (!$this->currentField->hasCompoundNode()) {
-                if ($this->currentField->isOptional()) {
-                    $this->shouldMatchTerm($node);
-                    return;
-                } elseif ($node->isRequired()) {
-                    $this->mustMatchTerm($node);
-                    return;
-                }
-
-                $this->mustNotMatchTerm($node);
+        /*
+         * When in a simple field, the bool operator is based on
+         * the field, not the node in the field.
+         * +field:value vs. field:+value
+         */
+        if ($this->inField && !$this->currentField->hasCompoundNode()) {
+            if ($this->currentField->isOptional()) {
+                $this->shouldMatchTerm($node, $this->currentField);
+                return;
+            } elseif ($node->isRequired()) {
+                $this->mustMatchTerm($node, $this->currentField, $this->queryOnFieldIsCacheable);
+                return;
             }
+
+            $this->mustNotMatchTerm($node, $this->currentField, $this->queryOnFieldIsCacheable);
+            return;
         }
 
         if ($node->isOptional()) {
-            $this->shouldMatchTerm($node);
+            $this->shouldMatchTerm($node, $this->currentField);
             return;
         } elseif ($node->isRequired()) {
-            $this->mustMatchTerm($node);
+            $this->mustMatchTerm($node, $this->currentField, $this->queryOnFieldIsCacheable);
             return;
         }
 
-        $this->mustNotMatchTerm($node);
+        $this->mustNotMatchTerm($node, $this->currentField, $this->queryOnFieldIsCacheable);
+    }
+
+    /**
+     * If the query on this particular field could be cached because it contains
+     * only exact values, is not optional or boosted then the storage/search
+     * provider might be able to cache the resultset or optimize the query
+     * against this field.
+     *
+     * This is typically used on required fields that will prefilter the
+     * results that will be searched on.  For example, find all videos
+     * with "cats" in them that are "status:active".  It makes no sense
+     * to even search for cats in a video when status is not active.
+     *
+     * @param Field $field
+     * @return bool
+     */
+    protected function queryOnFieldIsCacheable(Field $field)
+    {
+        if ($field->isOptional() || $field->useBoost()) {
+            return false;
+        }
+
+        $node = $field->getNode();
+        if ($node->useFuzzy()
+            || $this->supportsFullTextSearch($field->getName())
+            || $node instanceof Subquery
+            || $node instanceof WordRange
+            || $node instanceof Phrase
+            || ($node instanceof Word && $node->hasTrailingWildcard())
+        ) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
      * @param Field $field
+     * @param bool $cacheable
      */
-    protected function startField(Field $field) {}
+    protected function startField(Field $field, $cacheable = false) {}
 
     /**
      * @param Field $field
+     * @param bool $cacheable
      */
-    protected function endField(Field $field) {}
+    protected function endField(Field $field, $cacheable = false) {}
+
+    /**
+     * @param Subquery $subquery
+     * @param Field|null $field
+     */
+    protected function startSubquery(Subquery $subquery, Field $field = null) {}
+
+    /**
+     * @param Subquery $subquery
+     * @param Field|null $field
+     */
+    protected function endSubquery(Subquery $subquery, Field $field = null) {}
 
     /**
      * @param Range $range
+     * @param Field $field
+     * @param bool $cacheable
      */
-    protected function handleRange(Range $range) {}
-
-    /**
-     * @param Subquery $subquery
-     */
-    protected function startSubquery(Subquery $subquery) {}
-
-    /**
-     * @param Subquery $subquery
-     */
-    protected function endSubquery(Subquery $subquery) {}
+    abstract protected function handleRange(Range $range, Field $field, $cacheable = false);
 
     /**
      * @param Node $node
+     * @param Field|null $field
      */
-    abstract protected function mustMatchText(Node $node);
+    abstract protected function mustMatch(Node $node, Field $field = null);
 
     /**
      * @param Node $node
+     * @param Field|null $field
      */
-    abstract protected function shouldMatchText(Node $node);
+    abstract protected function shouldMatch(Node $node, Field $field = null);
 
     /**
      * @param Node $node
+     * @param Field|null $field
      */
-    abstract protected function mustNotMatchText(Node $node);
+    abstract protected function mustNotMatch(Node $node, Field $field = null);
 
     /**
      * @param Node $node
+     * @param Field|null $field
+     * @param bool $cacheable
      */
-    abstract protected function mustMatchTerm(Node $node);
+    abstract protected function mustMatchTerm(Node $node, Field $field = null, $cacheable = false);
 
     /**
      * @param Node $node
+     * @param Field|null $field
      */
-    abstract protected function shouldMatchTerm(Node $node);
+    abstract protected function shouldMatchTerm(Node $node, Field $field = null);
 
     /**
      * @param Node $node
+     * @param Field|null $field
+     * @param bool $cacheable
      */
-    abstract protected function mustNotMatchTerm(Node $node);
+    abstract protected function mustNotMatchTerm(Node $node, Field $field = null, $cacheable = false);
 }
