@@ -82,7 +82,7 @@ Produces the following xml:
     <word rule="should_match_term">earth</word>
   </field>
   <field name="date" bool_operator="required" cacheable="true">
-    <date rule="must_not_match_term">2015-12-25</date>
+    <date rule="must_match_term">2015-12-25</date>
   </field>
   <field name="tags" bool_operator="required" cacheable="true">
     <hashtag rule="must_match_term">omg</hashtag>
@@ -90,7 +90,7 @@ Produces the following xml:
 </query>
 ```
 
-To pull list of `Node` objects by type, use:
+To get a list of `Node` objects by type, use:
 
 ``` php
 <?php

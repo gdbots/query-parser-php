@@ -404,6 +404,14 @@ abstract class AbstractQueryBuilder implements QueryBuilder
     /**
      * @return bool
      */
+    final protected function inField()
+    {
+        return $this->inField;
+    }
+
+    /**
+     * @return bool
+     */
     final protected function inRange()
     {
         return $this->inRange;
@@ -455,7 +463,7 @@ abstract class AbstractQueryBuilder implements QueryBuilder
             if ($this->currentField->isOptional()) {
                 $this->shouldMatchTerm($node, $this->currentField);
                 return;
-            } elseif ($node->isRequired()) {
+            } elseif ($this->currentField->isRequired()) {
                 $this->mustMatchTerm($node, $this->currentField, $this->queryOnFieldIsCacheable);
                 return;
             }

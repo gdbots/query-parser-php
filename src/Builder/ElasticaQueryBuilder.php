@@ -2,43 +2,92 @@
 
 namespace Gdbots\QueryParser\Builder;
 
+use Elastica\Filter;
+use Elastica\Query;
+use Elastica\QueryBuilder;
+use Gdbots\QueryParser\Enum\BoolOperator;
+use Gdbots\QueryParser\Enum\ComparisonOperator;
+use Gdbots\QueryParser\Node\Date;
 use Gdbots\QueryParser\Node\Field;
 use Gdbots\QueryParser\Node\Node;
+use Gdbots\QueryParser\Node\Number;
 use Gdbots\QueryParser\Node\Range;
 use Gdbots\QueryParser\Node\Subquery;
+use Gdbots\QueryParser\Node\Word;
 
 class ElasticaQueryBuilder extends AbstractQueryBuilder
 {
+    /** @var QueryBuilder */
+    protected $qb;
+
+    /** @var Query\Bool */
+    protected $boolQuery;
+
+    /**
+     * When a subquery is entered we'll take the current query
+     * and save it here.  After the subquery completes we inject
+     * the query back into the outer query.
+     *
+     * @var Query\Bool
+     */
+    protected $outerBoolQuery;
+
+    /** @var Filter\Bool */
+    protected $boolFilter;
+
+    /** @var bool */
+    protected $lowerCaseTerms = true;
+
+    /** @var bool */
+    protected $ignoreStopWords = true;
+
+    /**
+     * ElasticaQueryBuilder constructor.
+     */
+    public function __construct()
+    {
+        $this->qb = new QueryBuilder();
+        $this->clear();
+    }
+
     /**
      * @return static
      */
     public function clear()
     {
+        $this->boolQuery = $this->qb->query()->bool();
+        $this->outerBoolQuery = $this->boolQuery;
+        $this->boolFilter = $this->qb->filter()->bool();
         return $this;
     }
 
     /**
-     * @return string
+     * @param bool $lowerCaseTerms
+     * @return static
      */
-    public function toQuery()
+    public function lowerCaseTerms($lowerCaseTerms = true)
     {
-        return '';
+        $this->lowerCaseTerms = (bool)$lowerCaseTerms;
+        return $this;
     }
 
     /**
-     * @param Field $field
-     * @param bool $cacheable
+     * @param bool $ignoreStopWords
+     * @return static
      */
-    protected function startField(Field $field, $cacheable = false)
+    public function ignoreStopWords($ignoreStopWords = true)
     {
+        $this->ignoreStopWords = (bool)$ignoreStopWords;
+        return $this;
     }
 
     /**
-     * @param Field $field
-     * @param bool $cacheable
+     * @return Query\Filtered
      */
-    protected function endField(Field $field, $cacheable = false)
+    public function getQuery()
     {
+        $this->boolQuery->setMinimumNumberShouldMatch(1);
+        return $this->qb->query()->filtered($this->boolQuery, $this->boolFilter);
     }
 
     /**
@@ -48,7 +97,6 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
      */
     protected function handleRange(Range $range, Field $field, $cacheable = false)
     {
-
     }
 
     /**
@@ -57,6 +105,8 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
      */
     protected function startSubquery(Subquery $subquery, Field $field = null)
     {
+        $this->outerBoolQuery = $this->boolQuery;
+        $this->boolQuery = $this->qb->query()->bool();
     }
 
     /**
@@ -65,6 +115,33 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
      */
     protected function endSubquery(Subquery $subquery, Field $field = null)
     {
+        if (!empty($this->boolQuery->getParams())) {
+            $this->boolQuery->setMinimumNumberShouldMatch(1);
+
+            if ($this->inField()) {
+                $useBoost = $field->useBoost();
+                $boost    = $field->getBoost();
+                $boolOp   = $field->getBoolOperator();
+            } else {
+                $useBoost = $subquery->useBoost();
+                $boost    = $subquery->getBoost();
+                $boolOp   = $subquery->getBoolOperator();
+            }
+
+            if ($useBoost) {
+                $this->boolQuery->setBoost($boost);
+            }
+
+            if ($boolOp->equals(BoolOperator::REQUIRED())) {
+                $this->outerBoolQuery->addMust($this->boolQuery);
+            } elseif ($boolOp->equals(BoolOperator::PROHIBITED())) {
+                $this->outerBoolQuery->addMustNot($this->boolQuery);
+            } else {
+                $this->outerBoolQuery->addShould($this->boolQuery);
+            }
+        }
+
+        $this->boolQuery = $this->outerBoolQuery;
     }
 
     /**
@@ -73,6 +150,22 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
      */
     protected function mustMatch(Node $node, Field $field = null)
     {
+        $query = $this->qb->query()->match();
+
+        if ($this->inField()) {
+            $query->setField($field->getName(), $node->getValue());
+            if ($field->useBoost()) {
+                $query->setFieldBoost($field->getBoost());
+            }
+
+        } else {
+            $query->setField($this->defaultFieldName, $node->getValue());
+            if ($node->useBoost()) {
+                $query->setFieldBoost($node->getBoost());
+            }
+        }
+
+        $this->boolQuery->addMust($query);
     }
 
     /**
@@ -81,6 +174,46 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
      */
     protected function shouldMatch(Node $node, Field $field = null)
     {
+        if ($this->ignoreStopWords && $node instanceof Word && $node->isStopWord()) {
+            return;
+        }
+
+        if ($this->inField()) {
+            $fieldName = $field->getName();
+            $useBoost  = $field->useBoost();
+            $boost     = $field->getBoost();
+            $useFuzzy  = $field->useFuzzy();
+            $fuzzy     = $field->getFuzzy();
+        } else {
+            $fieldName = $this->defaultFieldName;
+            $useBoost  = $node->useBoost();
+            $boost     = $node->getBoost();
+            $useFuzzy  = $node->useFuzzy();
+            $fuzzy     = $node->getFuzzy();
+        }
+
+        if ($useFuzzy) {
+            $query = $this->qb->query()->fuzzy();
+            $query->setField($fieldName, $node->getValue());
+            $query->setFieldOption('fuzziness', $fuzzy);
+            if ($useBoost) {
+                $query->setFieldOption('boost', $boost);
+            }
+        } else {
+            $data = [
+                'query' => $node->getValue(),
+                'lenient' => true,
+            ];
+
+            if ($useBoost) {
+                $data['boost'] = $boost;
+            }
+
+            $query = $this->qb->query()->match();
+            $query->setField($fieldName, $data);
+        }
+
+        $this->boolQuery->addShould($query);
     }
 
     /**
@@ -98,6 +231,7 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
      */
     protected function mustMatchTerm(Node $node, Field $field = null, $cacheable = false)
     {
+        $this->addTermToBuilder('addMust', $node, $field, $cacheable);
     }
 
     /**
@@ -106,6 +240,7 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
      */
     protected function shouldMatchTerm(Node $node, Field $field = null)
     {
+        $this->addTermToBuilder('addShould', $node, $field);
     }
 
     /**
@@ -115,5 +250,103 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
      */
     protected function mustNotMatchTerm(Node $node, Field $field = null, $cacheable = false)
     {
+        $this->addTermToBuilder('addMustNot', $node, $field, $cacheable);
+    }
+
+    /**
+     * Adds a term to either the active query or filters.  Filters are used when
+     * the request for that item could be cached, like documents with hashtag of cats.
+     *
+     * @param string $method
+     * @param Node $node
+     * @param Field|null $field
+     * @param bool $cacheable
+     */
+    protected function addTermToBuilder($method, Node $node, Field $field = null, $cacheable = false)
+    {
+        $value = $this->lowerCaseTerms ? strtolower($node->getValue()) : $node->getValue();
+        $fieldName = $this->inField() ? $field->getName() : $this->defaultFieldName;
+
+        if ($this->inField() && !$this->inSubquery()) {
+            $useBoost = $field->useBoost();
+            $boost    = $field->getBoost();
+        } else {
+            $useBoost = $node->useBoost();
+            $boost    = $node->getBoost();
+        }
+
+        if ($node instanceof Date) {
+            $term = $this->createDateRangeForSingleNode(
+                $fieldName,
+                $node,
+                $cacheable,
+                $useBoost ? $boost : Date::DEFAULT_BOOST
+            );
+
+        } elseif ($node instanceof Number && $node->useComparisonOperator()) {
+            $data = [$node->getComparisonOperator()->getValue() => $value];
+
+            if ($cacheable) {
+                $term = $this->qb->filter()->range($fieldName, $data);
+            } else {
+                if ($useBoost) {
+                    $data['boost'] = $boost;
+                }
+                $term = $this->qb->query()->range($fieldName, $data);
+            }
+
+        } else {
+            if ($cacheable) {
+                $term = $this->qb->filter()->term();
+                $term->setTerm($fieldName, $value);
+            } else {
+                $term = $this->qb->query()->term();
+                $term->setTerm($fieldName, $value, $boost);
+            }
+        }
+
+        if ($cacheable) {
+            $this->boolFilter->$method($term);
+        } else {
+            $this->boolQuery->$method($term);
+        }
+    }
+
+    /**
+     * When dealing with dates we have to create a range, even when the user provides
+     * an exact date.  This is because a user asking for documents on date 2015-12-01
+     * but the value is stored as a timestamp (for example).
+     * So we ask for documents >=2015-12-01 and <=2015-12-02
+     *
+     * The Date node is always a UTC date with no time component. @see Date::toDateTime
+     *
+     * @param string $fieldName
+     * @param Date $node
+     * @param bool $cacheable
+     * @param float $boost
+     *
+     * @return Filter\Range|Query\Range
+     */
+    protected function createDateRangeForSingleNode(
+        $fieldName,
+        Date $node,
+        $cacheable = false,
+        $boost = Date::DEFAULT_BOOST
+    ) {
+        $operator = $node->getComparisonOperator()->getValue();
+        $date = $node->toDateTime();
+
+        if ($operator === ComparisonOperator::EQ) {
+            $data = ['gte' => $date->format('U'), 'lt' => $date->modify('+1 day')->format('U')];
+        } else {
+            $data = [$operator => $node->toDateTime()->format('U')];
+        }
+
+        if ($cacheable) {
+            return $this->qb->filter()->range($fieldName, $data);
+        }
+
+        $data['boost'] = $boost;
+        return $this->qb->query()->range($fieldName, $data);
     }
 }

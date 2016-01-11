@@ -194,6 +194,14 @@ abstract class Node implements FromArray, ToArray, \JsonSerializable
     /**
      * @return bool
      */
+    public function useComparisonOperator()
+    {
+        return false;
+    }
+
+    /**
+     * @return bool
+     */
     final public function useBoost()
     {
         return $this->useBoost;

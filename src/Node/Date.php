@@ -88,6 +88,14 @@ final class Date extends Node
     }
 
     /**
+     * @return bool
+     */
+    public function useComparisonOperator()
+    {
+        return !$this->comparisonOperator->equals(ComparisonOperator::EQ());
+    }
+
+    /**
      * @return ComparisonOperator
      */
     public function getComparisonOperator()
