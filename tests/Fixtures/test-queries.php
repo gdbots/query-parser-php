@@ -1583,7 +1583,6 @@ return [
             T::T_PROHIBITED,
             [T::T_WORD, 'gj%'],
             T::T_SUBQUERY_START,
-            T::T_REQUIRED,
             T::T_PROHIBITED,
             [T::T_WORD, 'a'],
             [T::T_WORD, 'onclick'],
@@ -1598,7 +1597,12 @@ return [
             new Phrase('[[shortcode]]'),
             new Word('akd_'),
             new Word('gj%', BoolOperator::PROHIBITED()),
-            new Subquery([new Word('a'), new Word('onclick'), new Word('javascript:alert'), new Word('test')]),
+            new Subquery([
+                new Word('a', BoolOperator::PROHIBITED()),
+                new Word('onclick'),
+                new Word('javascript:alert'),
+                new Word('test')
+            ]),
             new Word('click'),
             new Word('a'),
         ]
@@ -1616,7 +1620,6 @@ return [
             T::T_PROHIBITED,
             [T::T_WORD, 'gj%'],
             T::T_SUBQUERY_START,
-            T::T_REQUIRED,
             T::T_PROHIBITED,
             [T::T_WORD, 'gt'],
             [T::T_WORD, 'lt;a'],
@@ -1634,7 +1637,7 @@ return [
             new Word('akd_'),
             new Word('gj%', BoolOperator::PROHIBITED()),
             new Subquery([
-                new Word('gt'),
+                new Word('gt', BoolOperator::PROHIBITED()),
                 new Word('lt;a'),
                 new Word('onclick'),
                 new Word('quot;javascript:alert'),
@@ -1673,6 +1676,47 @@ return [
             new Word('SRC'),
             new Word('j&#X41vascript:alert'),
             new Word('test2'),
+        ]
+    ],
+
+    [
+        'name' => 'should not be required',
+        'input' => 'token + token',
+        'expected_tokens' => [
+            [T::T_WORD, 'token'],
+            [T::T_WORD, 'token'],
+        ],
+        'expected_nodes' => [
+            new Word('token'),
+            new Word('token'),
+        ]
+    ],
+
+    [
+        'name' => 'should not be prohibited',
+        'input' => 'token - token',
+        'expected_tokens' => [
+            [T::T_WORD, 'token'],
+            [T::T_WORD, 'token'],
+        ],
+        'expected_nodes' => [
+            new Word('token'),
+            new Word('token'),
+        ]
+    ],
+
+    [
+        'name' => 'should not be boosted',
+        'input' => 'token ^5 token',
+        'expected_tokens' => [
+            [T::T_WORD, 'token'],
+            [T::T_NUMBER, 5.0],
+            [T::T_WORD, 'token'],
+        ],
+        'expected_nodes' => [
+            new Word('token'),
+            new Number(5.0),
+            new Word('token'),
         ]
     ],
     /*
