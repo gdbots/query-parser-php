@@ -95,6 +95,8 @@ To get a list of `Node` objects by type, use:
 ``` php
 <?php
 
+use Gdbots\QueryParser\Node\Hashtag;
+
 $result = $parser->parse('#hashtag1 AND #hashtag2');
-$hashtags = $result->getNodesOfType(\Gdbots\QueryParser\Node\Hashtag::NODE_TYPE);
+$hashtags = $result->getNodesOfType(Hashtag::NODE_TYPE);
 ```
