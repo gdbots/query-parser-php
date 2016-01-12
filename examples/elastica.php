@@ -62,11 +62,13 @@ $query = (new FunctionScore())
     ], null, 0.4);
 */
 $query = \Elastica\Query::create($query);
+//$query->setExplain(true);
 //$query->setSort(['published_at' => 'desc']);
 $results = $client->getIndex($index)->search($query, $options);
 
 echo 'Total Time (ms) / Records Found:' . PHP_EOL;
 echo $results->getTotalTime() . 'ms / ' . $results->getTotalHits() . ' records' . str_repeat(PHP_EOL, 3);
+//echo json_encode($results->getResponse()->getData(), JSON_PRETTY_PRINT);
 
 foreach ($results as $result) {
     fgets(STDIN);

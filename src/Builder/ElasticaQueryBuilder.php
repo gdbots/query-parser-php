@@ -116,7 +116,7 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
      */
     public function getFilteredQuery()
     {
-        $this->boolQuery->setMinimumNumberShouldMatch(1);
+        $this->boolQuery->setMinimumNumberShouldMatch('1<50%');
         return $this->qb->query()->filtered($this->boolQuery, $this->boolFilter);
     }
 
@@ -281,6 +281,15 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
             $boost     = $node->getBoost();
             $useFuzzy  = $node->useFuzzy();
             $fuzzy     = $node->getFuzzy();
+        }
+
+        /*
+         * Look for special chars and if found, enforce fuzzy.
+         * todo: review this with more test cases
+         */
+        if (!$useFuzzy && 'addShould' === $method && preg_match('/[^a-zA-Z0-9\s\._-]+/', $node->getValue())) {
+            $useFuzzy = true;
+            $fuzzy = 1;
         }
 
         if ($useFuzzy && $node instanceof Phrase) {
