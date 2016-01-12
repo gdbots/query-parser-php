@@ -198,7 +198,8 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
      */
     protected function endSubquery(Subquery $subquery, Field $field = null)
     {
-        if (!empty($this->boolQuery->getParams())) {
+        $params = $this->boolQuery->getParams();
+        if (!empty($params)) {
             $this->boolQuery->setMinimumNumberShouldMatch(1);
 
             if ($this->inField()) {
