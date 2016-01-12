@@ -287,7 +287,11 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
          * Look for special chars and if found, enforce fuzzy.
          * todo: review this with more test cases
          */
-        if (!$useFuzzy && 'addShould' === $method && preg_match('/[^a-zA-Z0-9\s\._-]+/', $node->getValue())) {
+        if (!$useFuzzy
+            && $node instanceof Phrase
+            && 'addShould' === $method
+            && preg_match('/[^a-zA-Z0-9\s\._-]+/', $node->getValue())
+        ) {
             $useFuzzy = true;
             $fuzzy = 1;
         }
