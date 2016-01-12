@@ -10,6 +10,14 @@ final class Field extends Node
     const NODE_TYPE = 'field';
     const COMPOUND_NODE = true;
 
+    /**
+     * Associative array of ['aliased_field_name' => 'real_field_name'].
+     * For example: plays:>100 should actually be: plays_count:>100.
+     *
+     * @var array
+     */
+    public static $aliases = [];
+
     /** @var Node */
     private $node;
 
@@ -31,6 +39,10 @@ final class Field extends Node
         $useBoost = false,
         $boost = self::DEFAULT_BOOST
     ) {
+        if (isset(self::$aliases[$fieldName])) {
+            $fieldName = self::$aliases[$fieldName];
+        }
+
         parent::__construct($fieldName, $boolOperator, $useBoost, $boost);
         $this->node = $node;
 

@@ -9,7 +9,6 @@ final class Phrase extends Node
 {
     const NODE_TYPE = 'phrase';
     const SUPPORTS_FUZZY = true;
-    const MAX_FUZZY = 5;
 
     /**
      * Phrase constructor.
