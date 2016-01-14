@@ -116,7 +116,7 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
      */
     public function getFilteredQuery()
     {
-        $this->boolQuery->setMinimumNumberShouldMatch('1<50%');
+        $this->boolQuery->setMinimumNumberShouldMatch('2<80%');
         return $this->qb->query()->filtered($this->boolQuery, $this->boolFilter);
     }
 
