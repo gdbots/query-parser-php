@@ -9,7 +9,7 @@ use Gdbots\QueryParser\Node\Field;
 use Gdbots\QueryParser\Node\Hashtag;
 use Gdbots\QueryParser\Node\Mention;
 use Gdbots\QueryParser\Node\Node;
-use Gdbots\QueryParser\Node\Number;
+use Gdbots\QueryParser\Node\Numbr;
 use Gdbots\QueryParser\Node\Phrase;
 use Gdbots\QueryParser\Node\Range;
 use Gdbots\QueryParser\Node\Subquery;
@@ -18,29 +18,6 @@ use Gdbots\QueryParser\Node\Word;
 use Gdbots\QueryParser\Node\WordRange;
 use Gdbots\QueryParser\ParsedQuery;
 
-/*
- * DEV NOTES...
- *
- * When is it a term? (exact value)
- * - if it's a Date, Emoji, Emoticon, Hashtag, Mention, Number, Url
- * - if it's in a field and the field does not support full text search. i.e. "+status:active"
- *
- *
- * When should "filter" be used?
- * - when a "term" is required or prohibited. and is "inField"
- *
- *
- * When should "should match" be used?
- * - when a word or phrase is not required or prohibited.
- * - when a word that is required is a stop word (possible/likely it's not even in the index).
- * - when a word that is required uses fuzzy or trailing wildcard
- *
- *
- * When should "should match term" be used?
- * - when a term is not in a field node and is not required.
- *
- *
- */
 abstract class AbstractQueryBuilder implements QueryBuilder
 {
     /** @var Field */
@@ -99,6 +76,9 @@ abstract class AbstractQueryBuilder implements QueryBuilder
 
     /** @var string */
     protected $mentionFieldName;
+
+    /** @var \DateTimeZone */
+    protected $localTimeZone;
 
     /**
      * @return static
@@ -182,6 +162,16 @@ abstract class AbstractQueryBuilder implements QueryBuilder
     final public function setMentionFieldName($fieldName)
     {
         $this->mentionFieldName = $fieldName;
+        return $this;
+    }
+
+    /**
+     * @param \DateTimeZone $timeZone
+     * @return static
+     */
+    final public function setLocalTimeZone(\DateTimeZone $timeZone)
+    {
+        $this->localTimeZone = $timeZone;
         return $this;
     }
 
@@ -321,10 +311,10 @@ abstract class AbstractQueryBuilder implements QueryBuilder
     }
 
     /**
-     * @param \Gdbots\QueryParser\Node\Number $number
+     * @param Numbr $number
      * @return static
      */
-    final public function addNumber(Number $number)
+    final public function addNumber(Numbr $number)
     {
         $this->handleTerm($number);
         return $this;

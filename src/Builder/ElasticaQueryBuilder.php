@@ -13,7 +13,7 @@ use Gdbots\QueryParser\Node\Emoji;
 use Gdbots\QueryParser\Node\Emoticon;
 use Gdbots\QueryParser\Node\Field;
 use Gdbots\QueryParser\Node\Node;
-use Gdbots\QueryParser\Node\Number;
+use Gdbots\QueryParser\Node\Numbr;
 use Gdbots\QueryParser\Node\Phrase;
 use Gdbots\QueryParser\Node\Range;
 use Gdbots\QueryParser\Node\Subquery;
@@ -35,9 +35,6 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
      * @var Query\Bool
      */
     protected $outerBoolQuery;
-
-    /** @var Filter\Bool */
-    protected $boolFilter;
 
     /** @var bool */
     protected $ignoreEmojis = true;
@@ -67,7 +64,6 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
     {
         $this->boolQuery = $this->qb->query()->bool();
         $this->outerBoolQuery = $this->boolQuery;
-        $this->boolFilter = $this->qb->filter()->bool();
         return $this;
     }
 
@@ -112,12 +108,11 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
     }
 
     /**
-     * @return Query\Filtered
+     * @return Query\Bool
      */
-    public function getFilteredQuery()
+    public function getBoolQuery()
     {
-        $this->boolQuery->setMinimumNumberShouldMatch('2<80%');
-        return $this->qb->query()->filtered($this->boolQuery, $this->boolFilter);
+        return $this->boolQuery->setMinimumNumberShouldMatch('2<80%');
     }
 
     /**
@@ -131,11 +126,6 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
         $boost    = $field->getBoost();
         $boolOp   = $field->getBoolOperator();
 
-        /*
-         * Determine the method that will be used to add the range query
-         * to the elastica query (bool or filter).  lucky for us, elastica
-         * uses the same method names for both objects.
-         */
         if ($boolOp->equals(BoolOperator::REQUIRED())) {
             $method = 'addMust';
         } elseif ($boolOp->equals(BoolOperator::PROHIBITED())) {
@@ -156,10 +146,10 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
 
         if ($range instanceof DateRange) {
             if ($range->hasLowerNode()) {
-                $data[$lowerOperator] = $range->getLowerNode()->toDateTime()->format('U');
+                $data[$lowerOperator] = $range->getLowerNode()->toDateTime($this->localTimeZone)->format('U');
             }
             if ($range->hasUpperNode()) {
-                $data[$upperOperator] = $range->getUpperNode()->toDateTime()->modify('+1 day')->format('U');
+                $data[$upperOperator] = $range->getUpperNode()->toDateTime($this->localTimeZone)->modify('+1 day')->format('U');
             }
         } else {
             if ($range->hasLowerNode()) {
@@ -171,7 +161,12 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
         }
 
         if ($cacheable) {
-            $this->boolFilter->$method($this->qb->filter()->range($field->getName(), $data));
+            if ('addMustNot' === $method) {
+                $this->boolQuery->addMustNot($this->qb->query()->range($field->getName(), $data));
+            } else {
+                $this->boolQuery->addFilter($this->qb->query()->range($field->getName(), $data));
+            }
+
             return;
         }
 
@@ -372,8 +367,8 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
     }
 
     /**
-     * Adds a term to either the active query or filters.  Filters are used when
-     * the request for that item could be cached, like documents with hashtag of cats.
+     * Adds a term to the bool query or filter context.  Filter context is used when the
+     * request for that item could be cached, like documents with hashtag of cats.
      *
      * @param string $method
      * @param Node $node
@@ -409,29 +404,24 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
                 $useBoost ? $boost : Date::DEFAULT_BOOST
             );
 
-        } elseif ($node instanceof Number && $node->useComparisonOperator()) {
+        } elseif ($node instanceof Numbr && $node->useComparisonOperator()) {
             $data = [$node->getComparisonOperator()->getValue() => $value];
-            if ($cacheable) {
-                $term = $this->qb->filter()->range($fieldName, $data);
-            } else {
-                if ($useBoost) {
-                    $data['boost'] = $boost;
-                }
-                $term = $this->qb->query()->range($fieldName, $data);
+            if ($useBoost) {
+                $data['boost'] = $boost;
             }
+            $term = $this->qb->query()->range($fieldName, $data);
 
         } else {
-            if ($cacheable) {
-                $term = $this->qb->filter()->term();
-                $term->setTerm($fieldName, $value);
-            } else {
-                $term = $this->qb->query()->term();
-                $term->setTerm($fieldName, $value, $boost);
-            }
+            $term = $this->qb->query()->term();
+            $term->setTerm($fieldName, $value, $boost);
         }
 
         if ($cacheable) {
-            $this->boolFilter->$method($term);
+            if ('addMustNot' === $method) {
+                $this->boolQuery->addMustNot($term);
+            } else {
+                $this->boolQuery->addFilter($term);
+            }
         } else {
             $this->boolQuery->$method($term);
         }
@@ -443,7 +433,7 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
      * but the value is stored as a timestamp (for example).
      * So we ask for documents >=2015-12-01 and <=2015-12-02
      *
-     * The Date node is always a UTC date with no time component. @see Date::toDateTime
+     * The Date node is a date with no time component. @see Date::toDateTime
      *
      * @param string $fieldName
      * @param Date $node
@@ -459,16 +449,16 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
         $boost = Date::DEFAULT_BOOST
     ) {
         $operator = $node->getComparisonOperator()->getValue();
-        $date = $node->toDateTime();
 
         if ($operator === ComparisonOperator::EQ) {
+            $date = $node->toDateTime($this->localTimeZone);
             $data = ['gte' => $date->format('U'), 'lt' => $date->modify('+1 day')->format('U')];
         } else {
-            $data = [$operator => $node->toDateTime()->format('U')];
+            $data = [$operator => $node->toDateTime($this->localTimeZone)->format('U')];
         }
 
         if ($cacheable) {
-            return $this->qb->filter()->range($fieldName, $data);
+            return $this->qb->query()->range($fieldName, $data);
         }
 
         $data['boost'] = $boost;

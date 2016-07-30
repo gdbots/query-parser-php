@@ -12,7 +12,7 @@ use Gdbots\QueryParser\Node\Field;
 use Gdbots\QueryParser\Node\Hashtag;
 use Gdbots\QueryParser\Node\Mention;
 use Gdbots\QueryParser\Node\Node;
-use Gdbots\QueryParser\Node\Number;
+use Gdbots\QueryParser\Node\Numbr;
 use Gdbots\QueryParser\Node\NumberRange;
 use Gdbots\QueryParser\Node\Phrase;
 use Gdbots\QueryParser\Node\Subquery;
@@ -270,7 +270,7 @@ class QueryParser
 
         $m = $this->getModifiers();
 
-        if ($lowerNode instanceof Number || $upperNode instanceof Number) {
+        if ($lowerNode instanceof Numbr || $upperNode instanceof Numbr) {
             $range = new NumberRange($lowerNode, $upperNode, $exclusive);
             return new Field($fieldName, $range, $boolOperator, $m['use_boost'], $m['boost']);
         } elseif ($lowerNode instanceof Date || $upperNode instanceof Date) {
@@ -454,13 +454,13 @@ class QueryParser
      * @param float $value
      * @param ComparisonOperator $comparisonOperator
      *
-     * @return Number
+     * @return Numbr
      */
     protected function createNumber($value, ComparisonOperator $comparisonOperator = null)
     {
         // move the stream and ignore them if they exist
         $this->getModifiers();
-        return new Number($value, $comparisonOperator);
+        return new Numbr($value, $comparisonOperator);
     }
 
     /**

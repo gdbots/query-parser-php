@@ -8,7 +8,7 @@ use Gdbots\QueryParser\Node\Emoticon;
 use Gdbots\QueryParser\Node\Field;
 use Gdbots\QueryParser\Node\Hashtag;
 use Gdbots\QueryParser\Node\Mention;
-use Gdbots\QueryParser\Node\Number;
+use Gdbots\QueryParser\Node\Numbr;
 use Gdbots\QueryParser\Node\NumberRange;
 use Gdbots\QueryParser\Node\Phrase;
 use Gdbots\QueryParser\Node\Subquery;
@@ -213,8 +213,8 @@ return [
             new Field(
                 'f',
                 new NumberRange(
-                    new Number(1.0),
-                    new Number(5.0)
+                    new Numbr(1.0),
+                    new Numbr(5.0)
                 ),
                 null,
                 true,
@@ -223,8 +223,8 @@ return [
             new Field(
                 'f',
                 new NumberRange(
-                    new Number(1.0),
-                    new Number(5.0)
+                    new Numbr(1.0),
+                    new Numbr(5.0)
                 ),
                 null,
                 false,
@@ -624,9 +624,9 @@ return [
             [T::T_NUMBER, 2.2E-5],
         ],
         'expected_nodes' => [
-            new Number(100.0),
-            new Number(3.1415926535898),
-            new Number(2.2E-5),
+            new Numbr(100.0),
+            new Numbr(3.1415926535898),
+            new Numbr(2.2E-5),
         ]
     ],
 
@@ -639,9 +639,9 @@ return [
             [T::T_NUMBER, -2.2E-5],
         ],
         'expected_nodes' => [
-            new Number(-100.0),
-            new Number(-3.1415926535898),
-            new Number(-2.2E-5),
+            new Numbr(-100.0),
+            new Numbr(-3.1415926535898),
+            new Numbr(-2.2E-5),
         ]
     ],
 
@@ -832,10 +832,10 @@ return [
             T::T_FIELD_END,
         ],
         'expected_nodes' => [
-            new Field('field', new Number(100, ComparisonOperator::GT()), null, false, Field::DEFAULT_BOOST),
-            new Field('field', new Number(100.1, ComparisonOperator::GTE()), null, false, Field::DEFAULT_BOOST),
-            new Field('field', new Number(100, ComparisonOperator::LT()), null, false, Field::DEFAULT_BOOST),
-            new Field('field', new Number(100.1, ComparisonOperator::LTE()), null, false, Field::DEFAULT_BOOST),
+            new Field('field', new Numbr(100, ComparisonOperator::GT()), null, false, Field::DEFAULT_BOOST),
+            new Field('field', new Numbr(100.1, ComparisonOperator::GTE()), null, false, Field::DEFAULT_BOOST),
+            new Field('field', new Numbr(100, ComparisonOperator::LT()), null, false, Field::DEFAULT_BOOST),
+            new Field('field', new Numbr(100.1, ComparisonOperator::LTE()), null, false, Field::DEFAULT_BOOST),
         ]
     ],
 
@@ -880,8 +880,8 @@ return [
             new Field(
                 'field',
                 new NumberRange(
-                    new Number(1),
-                    new Number(5)
+                    new Numbr(1),
+                    new Numbr(5)
                 ),
                 null,
                 false,
@@ -890,8 +890,8 @@ return [
             new Field(
                 'field',
                 new NumberRange(
-                    new Number(1),
-                    new Number(5)
+                    new Numbr(1),
+                    new Numbr(5)
                 ),
                 BoolOperator::REQUIRED(),
                 false,
@@ -924,8 +924,8 @@ return [
             new Field(
                 'field',
                 new NumberRange(
-                    new Number(1.1),
-                    new Number(5.5),
+                    new Numbr(1.1),
+                    new Numbr(5.5),
                     true
                 ),
                 null,
@@ -935,8 +935,8 @@ return [
             new Field(
                 'field',
                 new NumberRange(
-                    new Number(1.1),
-                    new Number(5.5),
+                    new Numbr(1.1),
+                    new Numbr(5.5),
                     true
                 ),
                 BoolOperator::REQUIRED(),
@@ -992,8 +992,8 @@ return [
                 'field',
                 new Subquery([
                     new Word('cat'),
-                    new Number(1.0),
-                    new Number(5.0)
+                    new Numbr(1.0),
+                    new Numbr(5.0)
                 ]),
                 null,
                 false,
@@ -1407,7 +1407,7 @@ return [
         ],
         'expected_nodes' => [
             new Word('test'),
-            new Subquery([new Number(123.0), new Word('abc'), new Word('f:a')]),
+            new Subquery([new Numbr(123.0), new Word('abc'), new Word('f:a')]),
         ]
     ],
 
@@ -1518,14 +1518,14 @@ return [
         ],
         'expected_nodes' => [
             new Word('test'),
-            new Number(1),
-            new Number(2),
-            new Number(3.14),
+            new Numbr(1),
+            new Numbr(2),
+            new Numbr(3.14),
             new Word('a'),
             new Word('b', BoolOperator::REQUIRED()),
             new Field(
                 'field',
-                new Number(1.0, ComparisonOperator::GT()),
+                new Numbr(1.0, ComparisonOperator::GT()),
                 BoolOperator::REQUIRED(),
                 false,
                 Field::DEFAULT_BOOST
@@ -1715,7 +1715,7 @@ return [
         ],
         'expected_nodes' => [
             new Word('token'),
-            new Number(5.0),
+            new Numbr(5.0),
             new Word('token'),
         ]
     ],

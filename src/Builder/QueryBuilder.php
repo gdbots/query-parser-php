@@ -8,7 +8,7 @@ use Gdbots\QueryParser\Node\Emoticon;
 use Gdbots\QueryParser\Node\Field;
 use Gdbots\QueryParser\Node\Hashtag;
 use Gdbots\QueryParser\Node\Mention;
-use Gdbots\QueryParser\Node\Number;
+use Gdbots\QueryParser\Node\Numbr;
 use Gdbots\QueryParser\Node\Phrase;
 use Gdbots\QueryParser\Node\Range;
 use Gdbots\QueryParser\Node\Subquery;
@@ -84,6 +84,12 @@ interface QueryBuilder
     public function setMentionFieldName($fieldName);
 
     /**
+     * @param \DateTimeZone $timeZone
+     * @return static
+     */
+    public function setLocalTimeZone(\DateTimeZone $timeZone);
+
+    /**
      * @param ParsedQuery $parsedQuery
      * @return static
      */
@@ -128,10 +134,10 @@ interface QueryBuilder
     public function addMention(Mention $mention);
 
     /**
-     * @param \Gdbots\QueryParser\Node\Number $number
+     * @param Numbr $number
      * @return static
      */
-    public function addNumber(Number $number);
+    public function addNumber(Numbr $number);
 
     /**
      * @param Phrase $phrase

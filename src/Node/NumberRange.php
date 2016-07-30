@@ -10,17 +10,17 @@ final class NumberRange extends Range
     /**
      * NumberRange constructor.
      *
-     * @param \Gdbots\QueryParser\Node\Number|null $lowerNode
-     * @param \Gdbots\QueryParser\Node\Number|null $upperNode
+     * @param Numbr|null $lowerNode
+     * @param Numbr|null $upperNode
      * @param bool $exclusive
      */
-    public function __construct(Number $lowerNode = null, Number $upperNode = null, $exclusive = false)
+    public function __construct(Numbr $lowerNode = null, Numbr $upperNode = null, $exclusive = false)
     {
         parent::__construct($lowerNode, $upperNode, $exclusive);
     }
 
     /**
-     * @return Number
+     * @return Numbr
      */
     public function getLowerNode()
     {
@@ -28,7 +28,7 @@ final class NumberRange extends Range
     }
 
     /**
-     * @return Number
+     * @return Numbr
      */
     public function getUpperNode()
     {
