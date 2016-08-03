@@ -112,6 +112,11 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
      */
     public function getBoolQuery()
     {
+        if ($this->boolQuery->hasParam('must')) {
+            // if a "must" is used we assume they wanted everything else optional
+            return $this->boolQuery;
+        }
+
         return $this->boolQuery->setMinimumNumberShouldMatch('2<80%');
     }
 
