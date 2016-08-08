@@ -401,7 +401,15 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
             $boost    = $node->getBoost();
         }
 
-        if ($node instanceof Date) {
+        if ('_exists_' === $fieldName) {
+            $term = new Query\Exists($value);
+            $method = 'addMust';
+            $cacheable = true;
+        } elseif ('_missing_' === $fieldName) {
+            $term = new Query\Missing($value);
+            $method = 'addMust';
+            $cacheable = true;
+        } elseif ($node instanceof Date) {
             $term = $this->createDateRangeForSingleNode(
                 $fieldName,
                 $node,
