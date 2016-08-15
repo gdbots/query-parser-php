@@ -36,6 +36,22 @@ interface QueryBuilder
     public function setFullTextSearchFields(array $fields);
 
     /**
+     * Adds a field that this builder will enable for full text search.
+     *
+     * @param string $fieldName
+     * @return static
+     */
+    public function addFullTextSearchField($fieldName);
+
+    /**
+     * Removes a field that was previously enabled for full text search.
+     *
+     * @param string $fieldName
+     * @return static
+     */
+    public function removeFullTextSearchField($fieldName);
+
+    /**
      * Gets the fields enabled for full text search.
      *
      * @return array

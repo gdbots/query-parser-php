@@ -137,6 +137,26 @@ abstract class AbstractQueryBuilder implements QueryBuilder
     }
 
     /**
+     * @param string $fieldName
+     * @return static
+     */
+    final public function addFullTextSearchField($fieldName)
+    {
+        $this->fullTextSearchFields[$fieldName] = true;
+        return $this;
+    }
+
+    /**
+     * @param string $fieldName
+     * @return static
+     */
+    final public function removeFullTextSearchField($fieldName)
+    {
+        unset($this->fullTextSearchFields[$fieldName]);
+        return $this;
+    }
+
+    /**
      * @return array
      */
     final public function getFullTextSearchFields()

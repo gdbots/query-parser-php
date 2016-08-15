@@ -30,7 +30,7 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
     /**
      * When a subquery is entered we'll take the current query
      * and save it here.  After the subquery completes we inject
-     * the query back into the outer query.
+     * the query back into the bool query.
      *
      * @var Query\Bool
      */
@@ -49,6 +49,27 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
     protected $lowerCaseTerms = true;
 
     /**
+     * Array of field names which are nested objects in ElasticSearch and
+     * must be queried using a nested query.
+     *
+     * @link https://www.elastic.co/guide/en/elasticsearch/reference/current/nested.html
+     *
+     * @var string[]
+     */
+    protected $nestedFields = [];
+
+    /**
+     * Any fields encountered that are nested are stored as a nested query
+     * keyed by the nested field path and query method. e.g. "comments-addMust"
+     *
+     * The nested query contains a bool query and works exactly like the bool
+     * query non-nested queries are added to.
+     *
+     * @var Query\Nested[]
+     */
+    protected $nestedQueries = [];
+
+    /**
      * ElasticaQueryBuilder constructor.
      */
     public function __construct()
@@ -64,6 +85,7 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
     {
         $this->boolQuery = $this->qb->query()->bool();
         $this->outerBoolQuery = $this->boolQuery;
+        $this->nestedQueries = [];
         return $this;
     }
 
@@ -105,6 +127,44 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
     {
         $this->lowerCaseTerms = (bool)$lowerCaseTerms;
         return $this;
+    }
+
+    /**
+     * @param array $fields
+     * @return static
+     */
+    public function setNestedFields(array $fields)
+    {
+        $this->nestedFields = array_flip($fields);
+        return $this;
+    }
+
+    /**
+     * @param string $fieldName
+     * @return static
+     */
+    public function addNestedField($fieldName)
+    {
+        $this->nestedFields[$fieldName] = true;
+        return $this;
+    }
+
+    /**
+     * @param string $fieldName
+     * @return static
+     */
+    public function removeNestedField($fieldName)
+    {
+        unset($this->nestedFields[$fieldName]);
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getNestedFields()
+    {
+        return array_keys($this->nestedFields);
     }
 
     /**
@@ -167,9 +227,9 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
 
         if ($cacheable) {
             if ('addMustNot' === $method) {
-                $this->boolQuery->addMustNot($this->qb->query()->range($field->getName(), $data));
+                $this->addToBoolQuery($method, $field->getName(), $this->qb->query()->range($field->getName(), $data));
             } else {
-                $this->boolQuery->addFilter($this->qb->query()->range($field->getName(), $data));
+                $this->addToBoolQuery('addFilter', $field->getName(), $this->qb->query()->range($field->getName(), $data));
             }
 
             return;
@@ -179,7 +239,7 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
             $data['boost'] = $boost;
         }
 
-        $this->boolQuery->$method($this->qb->query()->range($field->getName(), $data));
+        $this->addToBoolQuery($method, $field->getName(), $this->qb->query()->range($field->getName(), $data));
     }
 
     /**
@@ -339,7 +399,7 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
             $query->setField($fieldName, $data);
         }
 
-        $this->boolQuery->$method($query);
+        $this->addToBoolQuery($method, $fieldName, $query);
     }
 
     /**
@@ -431,12 +491,12 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
 
         if ($cacheable) {
             if ('addMustNot' === $method) {
-                $this->boolQuery->addMustNot($term);
+                $this->addToBoolQuery('addMustNot', $fieldName, $term);
             } else {
-                $this->boolQuery->addFilter($term);
+                $this->addToBoolQuery('addFilter', $fieldName, $term);
             }
         } else {
-            $this->boolQuery->$method($term);
+            $this->addToBoolQuery($method, $fieldName, $term);
         }
     }
 
@@ -476,5 +536,35 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
 
         $data['boost'] = $boost;
         return $this->qb->query()->range($fieldName, $data);
+    }
+
+    /**
+     * @param string $method
+     * @param string $fieldName
+     * @param Query\AbstractQuery $query
+     */
+    protected function addToBoolQuery($method, $fieldName, Query\AbstractQuery $query)
+    {
+        if (false === strpos($fieldName, '.')) {
+            $this->boolQuery->$method($query);
+            return;
+        }
+
+        $nestedPath = substr($fieldName, 0, strrpos($fieldName, '.'));
+
+        if (!isset($this->nestedFields[$nestedPath])) {
+            $this->boolQuery->$method($query);
+            return;
+        }
+
+        $nestedQuery = $nestedPath . '-' . $method;
+        if (!isset($this->nestedQueries[$nestedQuery])) {
+            $this->nestedQueries[$nestedQuery] = (new Query\Nested())
+                ->setQuery($this->qb->query()->bool()->setMinimumNumberShouldMatch('2<80%'))
+                ->setPath($nestedPath);
+            $this->boolQuery->$method($this->nestedQueries[$nestedQuery]);
+        }
+
+        $this->nestedQueries[$nestedQuery]->getParam('query')->$method($query);
     }
 }
