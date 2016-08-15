@@ -39,6 +39,7 @@ $builder = (new ElasticaQueryBuilder())
     ->setEmoticonFieldName('emoticons')
     ->setHashtagFieldName('hashtags')
     ->setMentionFieldName('mentions')
+    ->setLocalTimeZone(new DateTimeZone('America/Los_Angeles'))
 ;
 
 $qs = isset($argv[1]) ? $argv[1] : 'test';
@@ -51,7 +52,7 @@ if (!$parsedQuery->hasAMatchableNode()) {
 $builder->addParsedQuery($parsedQuery);
 
 $options = [Search::OPTION_FROM => 0, Search::OPTION_SIZE => 5];
-$query = $builder->getFilteredQuery();
+$query = $builder->getBoolQuery();
 /*
 $query = (new FunctionScore())
     ->setQuery($query)

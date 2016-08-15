@@ -5,7 +5,10 @@ namespace Gdbots\QueryParser\Node;
 use Gdbots\QueryParser\Builder\QueryBuilder;
 use Gdbots\QueryParser\Enum\ComparisonOperator;
 
-final class Number extends Node
+/**
+ * Class is intentionally misspelled so it doesn't conflict with PHP7 scalar type hints.
+ */
+final class Numbr extends Node
 {
     const NODE_TYPE = 'number';
 
@@ -13,7 +16,7 @@ final class Number extends Node
     private $comparisonOperator;
 
     /**
-     * Number constructor.
+     * Numbr constructor.
      *
      * @param float $value
      * @param ComparisonOperator $comparisonOperator

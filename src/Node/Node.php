@@ -90,10 +90,16 @@ abstract class Node implements FromArray, ToArray, \JsonSerializable
      */
     public static function factory(array $data = [])
     {
+        $type = $data['type'];
+        // fix for php7 reserved name (scalar type hint)
+        if ('number' === $type) {
+            $type = 'numbr';
+        }
+
         /** @var Node $class */
-        $class = 'Gdbots\QueryParser\Node\\' . StringUtils::toCamelFromSnake($data['type']);
+        $class = 'Gdbots\QueryParser\Node\\' . StringUtils::toCamelFromSnake($type);
         if (!class_exists($class)) {
-            throw new \InvalidArgumentException(sprintf('Node type [%s] does not exist.', $data['type']));
+            throw new \InvalidArgumentException(sprintf('Node type [%s] does not exist.', $type));
         }
 
         return $class::fromArray($data);

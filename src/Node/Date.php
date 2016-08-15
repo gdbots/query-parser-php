@@ -104,17 +104,25 @@ final class Date extends Node
     }
 
     /**
+     * Always returns a DateTime in UTC.  Use the time zone option to inform this class
+     * that the value it holds is localized and should be converted to UTC.
+     *
+     * @param \DateTimeZone $timeZone
      * @return \DateTime
      */
-    public function toDateTime()
+    public function toDateTime(\DateTimeZone $timeZone = null)
     {
         if (null === self::$utc) {
             self::$utc = new \DateTimeZone('UTC');
         }
 
-        $date = \DateTime::createFromFormat('!Y-m-d', $this->getValue(), self::$utc);
+        $date = \DateTime::createFromFormat('!Y-m-d', $this->getValue(), $timeZone ?: self::$utc);
         if (!$date instanceof \DateTime) {
-            $date = \DateTime::createFromFormat('!Y-m-d', (new \DateTime())->format('Y-m-d'), self::$utc);
+            $date = \DateTime::createFromFormat('!Y-m-d', (new \DateTime())->format('Y-m-d'), $timeZone ?: self::$utc);
+        }
+
+        if ($date->getOffset() !== 0) {
+            $date->setTimezone(self::$utc);
         }
 
         return $date;

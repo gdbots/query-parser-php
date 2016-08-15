@@ -7,7 +7,7 @@ use Gdbots\QueryParser\Enum\ComparisonOperator;
 use Gdbots\QueryParser\Node\Date;
 use Gdbots\QueryParser\Node\Field;
 use Gdbots\QueryParser\Node\Node;
-use Gdbots\QueryParser\Node\Number;
+use Gdbots\QueryParser\Node\Numbr;
 use Gdbots\QueryParser\Node\Range;
 use Gdbots\QueryParser\Node\Subquery;
 use Gdbots\QueryParser\Node\Word;
@@ -250,7 +250,7 @@ class XmlQueryBuilder extends AbstractQueryBuilder
 
         $tag .= sprintf(' rule="%s"', StringUtils::toSnakeFromCamel($rule));
 
-        if ($node instanceof Number || $node instanceof Date) {
+        if ($node instanceof Numbr || $node instanceof Date) {
             switch ($node->getComparisonOperator()->getValue()) {
                 case ComparisonOperator::GT:
                     $comparisonOperator = 'gt';
