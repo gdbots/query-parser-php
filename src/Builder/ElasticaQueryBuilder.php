@@ -30,7 +30,7 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
     /**
      * When a subquery is entered we'll take the current query
      * and save it here.  After the subquery completes we inject
-     * the query back into the bool query.
+     * the query back into the outer query.
      *
      * @var Query\Bool
      */
@@ -491,7 +491,7 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
 
         if ($cacheable) {
             if ('addMustNot' === $method) {
-                $this->addToBoolQuery('addMustNot', $fieldName, $term);
+                $this->addToBoolQuery($method, $fieldName, $term);
             } else {
                 $this->addToBoolQuery('addFilter', $fieldName, $term);
             }
