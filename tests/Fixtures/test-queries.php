@@ -1428,7 +1428,7 @@ return [
     ],
 
     [
-        'name' => 'booleans in subqueries',
+        'name' => 'booleans before and in subqueries',
         'input' => '"ipad pro" AND (gold OR silver)',
         'expected_tokens' => [
             [T::T_PHRASE, 'ipad pro'],
@@ -1442,6 +1442,24 @@ return [
         'expected_nodes' => [
             new Phrase('ipad pro', BoolOperator::REQUIRED()),
             new Subquery([new Word('gold'), new Word('silver')], BoolOperator::REQUIRED()),
+        ]
+    ],
+
+    [
+        'name' => 'booleans before and in subqueries 2',
+        'input' => '"iphone 7" -(16gb OR 32gb)',
+        'expected_tokens' => [
+            [T::T_PHRASE, 'iphone 7'],
+            T::T_PROHIBITED,
+            T::T_SUBQUERY_START,
+            [T::T_WORD, '16gb'],
+            T::T_OR,
+            [T::T_WORD, '32gb'],
+            T::T_SUBQUERY_END,
+        ],
+        'expected_nodes' => [
+            new Phrase('iphone 7'),
+            new Subquery([new Word('16gb'), new Word('32gb')], BoolOperator::PROHIBITED()),
         ]
     ],
     /*
