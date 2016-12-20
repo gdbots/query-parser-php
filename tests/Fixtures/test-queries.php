@@ -1426,6 +1426,24 @@ return [
             new Subquery([new Word('word:a'), new Word('hashtag:b')]),
         ]
     ],
+
+    [
+        'name' => 'booleans in subqueries',
+        'input' => '"ipad pro" AND (gold OR silver)',
+        'expected_tokens' => [
+            [T::T_PHRASE, 'ipad pro'],
+            T::T_AND,
+            T::T_SUBQUERY_START,
+            [T::T_WORD, 'gold'],
+            T::T_OR,
+            [T::T_WORD, 'silver'],
+            T::T_SUBQUERY_END,
+        ],
+        'expected_nodes' => [
+            new Phrase('ipad pro', BoolOperator::REQUIRED()),
+            new Subquery([new Word('gold'), new Word('silver')], BoolOperator::REQUIRED()),
+        ]
+    ],
     /*
      * END: SUBQUERIES
      */
@@ -1569,7 +1587,7 @@ return [
         ],
         'expected_nodes' => [
             new Phrase('john smith', null, true, 2.0),
-            new Subquery([new Word('foo'), new Word('bar')], true, 4.0),
+            new Subquery([new Word('foo'), new Word('bar')], null, true, 4.0),
         ]
     ],
 
