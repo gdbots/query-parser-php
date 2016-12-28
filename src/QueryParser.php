@@ -264,7 +264,7 @@ class QueryParser
                 return new Field($fieldName, $nodes[0], $boolOperator, $m['use_boost'], $m['boost']);
             }
 
-            $subquery = new Subquery($nodes, $m['use_boost'], $m['boost']);
+            $subquery = new Subquery($nodes, null, $m['use_boost'], $m['boost']);
             return new Field($fieldName, $subquery, $boolOperator, $m['use_boost'], $m['boost']);
         }
 
@@ -374,7 +374,7 @@ class QueryParser
             return $nodes[0]::fromArray($data);
         }
 
-        return new Subquery($nodes, $m['use_boost'], $m['boost']);
+        return new Subquery($nodes, $queryBoolOperator, $m['use_boost'], $m['boost']);
     }
 
     /**

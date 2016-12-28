@@ -1426,6 +1426,42 @@ return [
             new Subquery([new Word('word:a'), new Word('hashtag:b')]),
         ]
     ],
+
+    [
+        'name' => 'booleans before and in subqueries',
+        'input' => '"ipad pro" AND (gold OR silver)',
+        'expected_tokens' => [
+            [T::T_PHRASE, 'ipad pro'],
+            T::T_AND,
+            T::T_SUBQUERY_START,
+            [T::T_WORD, 'gold'],
+            T::T_OR,
+            [T::T_WORD, 'silver'],
+            T::T_SUBQUERY_END,
+        ],
+        'expected_nodes' => [
+            new Phrase('ipad pro', BoolOperator::REQUIRED()),
+            new Subquery([new Word('gold'), new Word('silver')], BoolOperator::REQUIRED()),
+        ]
+    ],
+
+    [
+        'name' => 'booleans before and in subqueries 2',
+        'input' => '"iphone 7" -(16gb OR 32gb)',
+        'expected_tokens' => [
+            [T::T_PHRASE, 'iphone 7'],
+            T::T_PROHIBITED,
+            T::T_SUBQUERY_START,
+            [T::T_WORD, '16gb'],
+            T::T_OR,
+            [T::T_WORD, '32gb'],
+            T::T_SUBQUERY_END,
+        ],
+        'expected_nodes' => [
+            new Phrase('iphone 7'),
+            new Subquery([new Word('16gb'), new Word('32gb')], BoolOperator::PROHIBITED()),
+        ]
+    ],
     /*
      * END: SUBQUERIES
      */
@@ -1569,7 +1605,7 @@ return [
         ],
         'expected_nodes' => [
             new Phrase('john smith', null, true, 2.0),
-            new Subquery([new Word('foo'), new Word('bar')], true, 4.0),
+            new Subquery([new Word('foo'), new Word('bar')], null, true, 4.0),
         ]
     ],
 

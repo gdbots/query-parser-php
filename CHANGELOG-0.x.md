@@ -2,6 +2,10 @@
 This changelog references the relevant changes done in 0.x versions.
 
 
+## v0.2.1
+* pull #9: Respect boolean operator preceding subquery.
+
+
 ## v0.2.0
 __BREAKING CHANGES__
 

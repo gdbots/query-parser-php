@@ -3,6 +3,7 @@
 namespace Gdbots\QueryParser\Node;
 
 use Gdbots\QueryParser\Builder\QueryBuilder;
+use Gdbots\QueryParser\Enum\BoolOperator;
 
 final class Subquery extends Node
 {
@@ -16,14 +17,19 @@ final class Subquery extends Node
      * Subquery constructor.
      *
      * @param Node[] $nodes
+     * @param BoolOperator $boolOperator
      * @param bool $useBoost
      * @param float|mixed $boost
      *
      * @throws \LogicException
      */
-    public function __construct(array $nodes, $useBoost = false, $boost = self::DEFAULT_BOOST)
-    {
-        parent::__construct(null, null, $useBoost, $boost);
+    public function __construct(
+        array $nodes,
+        BoolOperator $boolOperator = null,
+        $useBoost = false,
+        $boost = self::DEFAULT_BOOST
+    ) {
+        parent::__construct(null, $boolOperator, $useBoost, $boost);
         $this->nodes = $nodes;
 
         foreach ($this->nodes as $node) {
@@ -49,7 +55,13 @@ final class Subquery extends Node
             }
         }
 
-        return new self($nodes, $useBoost, $boost);
+        try {
+            $boolOperator = isset($data['bool_operator']) ? BoolOperator::create($data['bool_operator']) : null;
+        } catch (\Exception $e) {
+            $boolOperator = null;
+        }
+
+        return new self($nodes, $boolOperator, $useBoost, $boost);
     }
 
     /**
