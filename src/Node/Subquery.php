@@ -17,6 +17,7 @@ final class Subquery extends Node
      * Subquery constructor.
      *
      * @param Node[] $nodes
+     * @param BoolOperator $boolOperator
      * @param bool $useBoost
      * @param float|mixed $boost
      *
@@ -54,7 +55,13 @@ final class Subquery extends Node
             }
         }
 
-        return new self($nodes, $useBoost, $boost);
+        try {
+            $boolOperator = isset($data['bool_operator']) ? BoolOperator::create($data['bool_operator']) : null;
+        } catch (\Exception $e) {
+            $boolOperator = null;
+        }
+
+        return new self($nodes, $boolOperator, $useBoost, $boost);
     }
 
     /**
