@@ -30,7 +30,7 @@ class Token implements \JsonSerializable
     const T_FIELD_END        = 23; // when a field lexeme ends, i.e. "field:value". This token has no value.
     const T_PHRASE           = 24; // Phrase (one or more quoted words)
     const T_URL              = 25; // a valid url
-    const T_DATE             = 26; // date in the format YYYY-MM-DD
+    const T_DATE             = 26; // date in the format YYYY-MM-DD or datetime in the format YYYY-MM-DDTHH:ii:ss
     const T_HASHTAG          = 27; // #hashtag
     const T_MENTION          = 28; // @mention
     const T_EMOTICON         = 29; // see https://en.wikipedia.org/wiki/Emoticon
