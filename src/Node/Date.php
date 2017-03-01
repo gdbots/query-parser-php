@@ -42,6 +42,9 @@ final class Date extends Node
         $fuzzy = self::DEFAULT_FUZZY,
         ComparisonOperator $comparisonOperator = null
     ) {
+        if (strlen($value)<11) {
+            $value .= 'T00:00:00';
+        }
         parent::__construct($value, $boolOperator, $useBoost, $boost, $useFuzzy, $fuzzy);
         $this->comparisonOperator = $comparisonOperator ?: ComparisonOperator::EQ();
     }
@@ -116,9 +119,9 @@ final class Date extends Node
             self::$utc = new \DateTimeZone('UTC');
         }
 
-        $date = \DateTime::createFromFormat('!Y-m-d', $this->getValue(), $timeZone ?: self::$utc);
+        $date = \DateTime::createFromFormat('!Y-m-d\TH:i:s', $this->getValue(), $timeZone ?: self::$utc);
         if (!$date instanceof \DateTime) {
-            $date = \DateTime::createFromFormat('!Y-m-d', (new \DateTime())->format('Y-m-d'), $timeZone ?: self::$utc);
+            $date = \DateTime::createFromFormat('!Y-m-d H:i:s', (new \DateTime())->format('Y-m-d H:i:s'), $timeZone ?: self::$utc);
         }
 
         if ($date->getOffset() !== 0) {
