@@ -3,6 +3,7 @@
 namespace Gdbots\QueryParser\Builder;
 
 use Gdbots\QueryParser\Node\Date;
+use Gdbots\QueryParser\Node\Datetime;
 use Gdbots\QueryParser\Node\Emoji;
 use Gdbots\QueryParser\Node\Emoticon;
 use Gdbots\QueryParser\Node\Field;
@@ -116,6 +117,12 @@ interface QueryBuilder
      * @return static
      */
     public function addDate(Date $date);
+
+    /**
+     * @param Datetime $datetime
+     * @return static
+     */
+    public function addDatetime(Datetime $datetime);
 
     /**
      * @param Emoji $emoji

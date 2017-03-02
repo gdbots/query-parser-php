@@ -6,6 +6,8 @@ use Gdbots\QueryParser\Enum\BoolOperator;
 use Gdbots\QueryParser\Enum\ComparisonOperator;
 use Gdbots\QueryParser\Node\Date;
 use Gdbots\QueryParser\Node\DateRange;
+use Gdbots\QueryParser\Node\Datetime;
+use Gdbots\QueryParser\Node\DatetimeRange;
 use Gdbots\QueryParser\Node\Emoji;
 use Gdbots\QueryParser\Node\Emoticon;
 use Gdbots\QueryParser\Node\Field;
@@ -85,6 +87,10 @@ class QueryParser
 
             case Token::T_DATE:
                 $nodes = $this->createDate($token->getValue(), $boolOperator, $comparisonOperator);
+                break;
+
+            case Token::T_DATETIME:
+                $nodes = $this->createDatetime($token->getValue(), $boolOperator, $comparisonOperator);
                 break;
 
             case Token::T_EMOJI:
@@ -207,6 +213,10 @@ class QueryParser
                 $lowerNode = $this->createDate($this->stream->getCurrent()->getValue(), BoolOperator::OPTIONAL());
                 break;
 
+            case Token::T_DATETIME:
+                $lowerNode = $this->createDatetime($this->stream->getCurrent()->getValue(), BoolOperator::OPTIONAL());
+                break;
+
             case Token::T_WORD:
                 $lowerNode = $this->createWord($this->stream->getCurrent()->getValue(), BoolOperator::OPTIONAL());
                 break;
@@ -227,6 +237,10 @@ class QueryParser
 
             case Token::T_DATE:
                 $upperNode = $this->createDate($this->stream->getCurrent()->getValue(), BoolOperator::OPTIONAL());
+                break;
+
+            case Token::T_DATETIME:
+                $upperNode = $this->createDatetime($this->stream->getCurrent()->getValue(), BoolOperator::OPTIONAL());
                 break;
 
             case Token::T_WORD:
@@ -275,6 +289,9 @@ class QueryParser
             return new Field($fieldName, $range, $boolOperator, $m['use_boost'], $m['boost']);
         } elseif ($lowerNode instanceof Date || $upperNode instanceof Date) {
             $range = new DateRange($lowerNode, $upperNode, $exclusive);
+            return new Field($fieldName, $range, $boolOperator, $m['use_boost'], $m['boost']);
+        } elseif ($lowerNode instanceof Datetime || $upperNode instanceof Datetime) {
+            $range = new DatetimeRange($lowerNode, $upperNode, $exclusive);
             return new Field($fieldName, $range, $boolOperator, $m['use_boost'], $m['boost']);
         } elseif ($lowerNode instanceof Word || $upperNode instanceof Word) {
             $range = new WordRange($lowerNode, $upperNode, $exclusive);
@@ -388,6 +405,27 @@ class QueryParser
     {
         $m = $this->getModifiers();
         return new Date(
+            $value,
+            $boolOperator,
+            $m['use_boost'],
+            $m['boost'],
+            $m['use_fuzzy'],
+            $m['fuzzy'],
+            $comparisonOperator
+        );
+    }
+
+    /**
+     * @param string $value
+     * @param BoolOperator $boolOperator
+     * @param ComparisonOperator $comparisonOperator
+     *
+     * @return Datetime
+     */
+    protected function createDatetime($value, BoolOperator $boolOperator, ComparisonOperator $comparisonOperator = null)
+    {
+        $m = $this->getModifiers();
+        return new Datetime(
             $value,
             $boolOperator,
             $m['use_boost'],
