@@ -20,7 +20,7 @@ final class DatetimeRange extends Range
     }
 
     /**
-     * @return Date
+     * @return Datetime
      */
     public function getLowerNode()
     {
@@ -28,7 +28,7 @@ final class DatetimeRange extends Range
     }
 
     /**
-     * @return Date
+     * @return Datetime
      */
     public function getUpperNode()
     {
