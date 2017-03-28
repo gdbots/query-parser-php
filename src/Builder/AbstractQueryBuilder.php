@@ -3,6 +3,7 @@
 namespace Gdbots\QueryParser\Builder;
 
 use Gdbots\QueryParser\Node\Date;
+use Gdbots\QueryParser\Node\Datetime;
 use Gdbots\QueryParser\Node\Emoji;
 use Gdbots\QueryParser\Node\Emoticon;
 use Gdbots\QueryParser\Node\Field;
@@ -253,6 +254,16 @@ abstract class AbstractQueryBuilder implements QueryBuilder
     final public function addDate(Date $date)
     {
         $this->handleTerm($date);
+        return $this;
+    }
+
+    /**
+     * @param Datetime $datetime
+     * @return static
+     */
+    final public function addDatetime(Datetime $datetime)
+    {
+        $this->handleTerm($datetime);
         return $this;
     }
 

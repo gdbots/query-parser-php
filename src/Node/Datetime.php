@@ -4,9 +4,9 @@ namespace Gdbots\QueryParser\Node;
 
 use Gdbots\QueryParser\Builder\QueryBuilder;
 
-final class Date extends AbstractDatetime
+final class Datetime extends AbstractDatetime
 {
-    const NODE_TYPE = 'date';
+    const NODE_TYPE = 'datetime';
 
     /**
      * Always returns a DateTime in UTC.  Use the time zone option to inform this class
@@ -21,9 +21,9 @@ final class Date extends AbstractDatetime
             self::$utc = new \DateTimeZone('UTC');
         }
 
-        $date = \DateTime::createFromFormat('!Y-m-d', $this->getValue(), $timeZone ?: self::$utc);
+        $date = \DateTime::createFromFormat('!Y-m-d\TH:i:s', $this->getValue(), $timeZone ?: self::$utc);
         if (!$date instanceof \DateTime) {
-            $date = \DateTime::createFromFormat('!Y-m-d', (new \DateTime())->format('Y-m-d'), $timeZone ?: self::$utc);
+            $date = \DateTime::createFromFormat('!Y-m-d H:i:s', (new \DateTime())->format('Y-m-d H:i:s'), $timeZone ?: self::$utc);
         }
 
         if ($date->getOffset() !== 0) {
@@ -38,6 +38,6 @@ final class Date extends AbstractDatetime
      */
     public function acceptBuilder(QueryBuilder $builder)
     {
-        $builder->addDate($this);
+        $builder->addDatetime($this);
     }
 }

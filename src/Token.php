@@ -35,6 +35,7 @@ class Token implements \JsonSerializable
     const T_MENTION          = 28; // @mention
     const T_EMOTICON         = 29; // see https://en.wikipedia.org/wiki/Emoticon
     const T_EMOJI            = 30; // see https://en.wikipedia.org/wiki/Emoji
+    const T_DATETIME         = 31; // datetime in the format YYYY-MM-DDTHH:II:SS
 
     /**
      * Array of the type names by id (constants flipped)
