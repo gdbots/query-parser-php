@@ -1,11 +1,13 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Tests\QueryParser;
 
 use Gdbots\QueryParser\Token as T;
 use Gdbots\QueryParser\Tokenizer;
+use PHPUnit\Framework\TestCase;
 
-class TokenizerTest extends \PHPUnit_Framework_TestCase
+class TokenizerTest extends TestCase
 {
     /** @var Tokenizer */
     protected $tokenizer;
@@ -15,7 +17,7 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
         $this->tokenizer = new Tokenizer();
     }
 
-    public function testOnlyWhitespace()
+    public function testOnlyWhitespace(): void
     {
         $this->assertEquals([], $this->tokenizer->scan('      ')->getTokens());
     }
@@ -25,9 +27,9 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
      *
      * @param string $name
      * @param string $input
-     * @param array $expectedTokens
+     * @param array  $expectedTokens
      */
-    public function testScan($name, $input, array $expectedTokens)
+    public function testScan(string $name, string $input, array $expectedTokens): void
     {
         // convert the sample 'expected' into token objects.
         foreach ($expectedTokens as $k => $v) {
@@ -46,8 +48,8 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
     /**
      * @return array
      */
-    public function getTestQueries()
+    public function getTestQueries(): array
     {
-        return require __DIR__.'/Fixtures/test-queries.php';
+        return require __DIR__ . '/Fixtures/test-queries.php';
     }
 }

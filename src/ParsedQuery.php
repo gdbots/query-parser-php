@@ -17,6 +17,7 @@ class ParsedQuery implements FromArray, ToArray, \JsonSerializable
 
     /**
      * @param array $data
+     *
      * @return static
      */
     public static function fromArray(array $data = [])
@@ -48,6 +49,7 @@ class ParsedQuery implements FromArray, ToArray, \JsonSerializable
 
     /**
      * @param Node[] $nodes
+     *
      * @return static
      */
     public function addNodes(array $nodes)
@@ -61,6 +63,7 @@ class ParsedQuery implements FromArray, ToArray, \JsonSerializable
 
     /**
      * @param Node $node
+     *
      * @return static
      */
     public function addNode(Node $node)
@@ -80,6 +83,7 @@ class ParsedQuery implements FromArray, ToArray, \JsonSerializable
 
     /**
      * @param string $type
+     *
      * @return Node[]
      */
     public function getNodesOfType($type)
