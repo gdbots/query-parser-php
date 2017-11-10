@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\QueryParser\Builder;
 
@@ -30,9 +31,9 @@ class XmlQueryBuilder extends AbstractQueryBuilder
     protected $indent = 2;
 
     /**
-     * @return static
+     * {@inheritdoc}
      */
-    public function clear()
+    public function clear(): QueryBuilder
     {
         $this->result = '';
         $this->indent = 2;
@@ -42,15 +43,15 @@ class XmlQueryBuilder extends AbstractQueryBuilder
     /**
      * @return string
      */
-    public function toXmlString()
+    public function toXmlString(): string
     {
-        return '<?xml version="1.0"?>'.PHP_EOL.'<query>'.PHP_EOL.rtrim($this->result).PHP_EOL.'</query>';
+        return '<?xml version="1.0"?>' . PHP_EOL . '<query>' . PHP_EOL . rtrim((string)$this->result) . PHP_EOL . '</query>';
     }
 
     /**
      * @return \SimpleXMLElement
      */
-    public function toSimpleXmlElement()
+    public function toSimpleXmlElement(): \SimpleXMLElement
     {
         try {
             $xml = new \SimpleXMLElement($this->toXmlString());
@@ -66,10 +67,9 @@ class XmlQueryBuilder extends AbstractQueryBuilder
     }
 
     /**
-     * @param Field $field
-     * @param bool $cacheable
+     * {@inheritdoc}
      */
-    protected function startField(Field $field, $cacheable = false)
+    protected function startField(Field $field, bool $cacheable = false): void
     {
         $tag = sprintf('field name="%s"', $field->getName());
 
@@ -90,24 +90,21 @@ class XmlQueryBuilder extends AbstractQueryBuilder
     }
 
     /**
-     * @param Field $field
-     * @param bool $cacheable
+     * {@inheritdoc}
      */
-    protected function endField(Field $field, $cacheable = false)
+    protected function endField(Field $field, bool $cacheable = false): void
     {
         $this->outdent();
         $this->printLine('</field>');
     }
 
     /**
-     * @param Range $range
-     * @param Field $field
-     * @param bool $cacheable
+     * {@inheritdoc}
      */
-    protected function handleRange(Range $range, Field $field, $cacheable = false)
+    protected function handleRange(Range $range, Field $field, bool $cacheable = false): void
     {
         $this->printLine(
-            $range->isExclusive() ? '<'.$range::NODE_TYPE.' exclusive="true">' : '<'.$range::NODE_TYPE.'>'
+            $range->isExclusive() ? '<' . $range::NODE_TYPE . ' exclusive="true">' : '<' . $range::NODE_TYPE . '>'
         );
         $this->indent();
         $this->printLine('<lower_node>');
@@ -134,14 +131,13 @@ class XmlQueryBuilder extends AbstractQueryBuilder
         $this->printLine('</upper_node>');
         $this->outdent();
 
-        $this->printLine('</'.$range::NODE_TYPE.'>');
+        $this->printLine('</' . $range::NODE_TYPE . '>');
     }
 
     /**
-     * @param Subquery $subquery
-     * @param Field|null $field
+     * {@inheritdoc}
      */
-    protected function startSubquery(Subquery $subquery, Field $field = null)
+    protected function startSubquery(Subquery $subquery, ?Field $field = null): void
     {
         $tag = $subquery::NODE_TYPE;
         $inField = $field instanceof Field;
@@ -155,77 +151,68 @@ class XmlQueryBuilder extends AbstractQueryBuilder
     }
 
     /**
-     * @param Subquery $subquery
-     * @param Field|null $field
+     * {@inheritdoc}
      */
-    protected function endSubquery(Subquery $subquery, Field $field = null)
+    protected function endSubquery(Subquery $subquery, ?Field $field = null): void
     {
         $this->outdent();
         $this->printLine('</subquery>');
     }
 
     /**
-     * @param Node $node
-     * @param Field|null $field
+     * {@inheritdoc}
      */
-    protected function mustMatch(Node $node, Field $field = null)
+    protected function mustMatch(Node $node, ?Field $field = null): void
     {
         $this->printSimpleNode(__FUNCTION__, $node, $field);
     }
 
     /**
-     * @param Node $node
-     * @param Field|null $field
+     * {@inheritdoc}
      */
-    protected function shouldMatch(Node $node, Field $field = null)
+    protected function shouldMatch(Node $node, ?Field $field = null): void
     {
         $this->printSimpleNode(__FUNCTION__, $node, $field);
     }
 
     /**
-     * @param Node $node
-     * @param Field|null $field
+     * {@inheritdoc}
      */
-    protected function mustNotMatch(Node $node, Field $field = null)
+    protected function mustNotMatch(Node $node, ?Field $field = null): void
     {
         $this->printSimpleNode(__FUNCTION__, $node, $field);
     }
 
     /**
-     * @param Node $node
-     * @param Field|null $field
-     * @param bool $cacheable
+     * {@inheritdoc}
      */
-    protected function mustMatchTerm(Node $node, Field $field = null, $cacheable = false)
+    protected function mustMatchTerm(Node $node, ?Field $field = null, bool $cacheable = false): void
     {
         $this->printSimpleNode(__FUNCTION__, $node, $field);
     }
 
     /**
-     * @param Node $node
-     * @param Field|null $field
+     * {@inheritdoc}
      */
-    protected function shouldMatchTerm(Node $node, Field $field = null)
+    protected function shouldMatchTerm(Node $node, ?Field $field = null): void
     {
         $this->printSimpleNode(__FUNCTION__, $node, $field);
     }
 
     /**
-     * @param Node $node
-     * @param Field|null $field
-     * @param bool $cacheable
+     * {@inheritdoc}
      */
-    protected function mustNotMatchTerm(Node $node, Field $field = null, $cacheable = false)
+    protected function mustNotMatchTerm(Node $node, ?Field $field = null, bool $cacheable = false): void
     {
         $this->printSimpleNode(__FUNCTION__, $node, $field);
     }
 
     /**
      * @param string $rule
-     * @param Node $node
-     * @param Field|null $field
+     * @param Node   $node
+     * @param Field  $field
      */
-    protected function printSimpleNode($rule, Node $node, Field $field = null)
+    protected function printSimpleNode(string $rule, Node $node, ?Field $field = null): void
     {
         if ($this->inRange()) {
             $this->printLine(sprintf('<%s>%s</%s>', $node::NODE_TYPE, $node->getValue(), $node::NODE_TYPE));
@@ -278,7 +265,7 @@ class XmlQueryBuilder extends AbstractQueryBuilder
             }
         }
 
-        $value = $node->getValue();
+        $value = (string)$node->getValue();
         if (preg_match('/[^a-zA-Z0-9\s!@#$%\^\*\(\)_\-+"\'\\{\}:;\?\.]+/', $value)) {
             $value = '<![CDATA[' . $value . ']]>';
         }
@@ -288,9 +275,9 @@ class XmlQueryBuilder extends AbstractQueryBuilder
 
     /**
      * @param string $line
-     * @param bool $newLine
+     * @param bool   $newLine
      */
-    protected function printLine($line, $newLine = true)
+    protected function printLine(string $line, bool $newLine = true): void
     {
         $this->result .= str_repeat(' ', $this->indent) . $line . ($newLine ? PHP_EOL : '');
     }
@@ -298,7 +285,7 @@ class XmlQueryBuilder extends AbstractQueryBuilder
     /**
      * @param int $step
      */
-    protected function indent($step = 2)
+    protected function indent(int $step = 2): void
     {
         $this->indent += $step;
     }
@@ -306,7 +293,7 @@ class XmlQueryBuilder extends AbstractQueryBuilder
     /**
      * @param int $step
      */
-    protected function outdent($step = 2)
+    protected function outdent(int $step = 2): void
     {
         $this->indent -= $step;
     }

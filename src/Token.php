@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\QueryParser;
 
@@ -50,12 +51,12 @@ class Token implements \JsonSerializable
     private $value;
 
     /**
-     * @param int $type
+     * @param int               $type
      * @param string|float|null $value
      */
-    public function __construct($type, $value = null)
+    public function __construct(int $type, $value = null)
     {
-        $this->type = (int)$type;
+        $this->type = $type;
         $this->value = $value;
     }
 
@@ -66,13 +67,13 @@ class Token implements \JsonSerializable
      *
      * @return string
      */
-    public static function name($type)
+    public static function name(int $type): string
     {
         if (null === self::$typeNames) {
             static::$typeNames = array_flip((new \ReflectionClass(__CLASS__))->getConstants());
         }
 
-        return isset(self::$typeNames[$type]) ? self::$typeNames[$type] : $type;
+        return isset(self::$typeNames[$type]) ? self::$typeNames[$type] : (string)$type;
     }
 
     /**
@@ -86,7 +87,7 @@ class Token implements \JsonSerializable
     /**
      * @return string
      */
-    public function getTypeName()
+    public function getTypeName(): string
     {
         return self::name($this->type);
     }
@@ -94,7 +95,7 @@ class Token implements \JsonSerializable
     /**
      * @return int
      */
-    public function getType()
+    public function getType(): int
     {
         return $this->type;
     }
@@ -112,9 +113,9 @@ class Token implements \JsonSerializable
      *
      * @return bool
      */
-    public function typeEquals($type)
+    public function typeEquals(int $type): bool
     {
-        return (int)$type === $this->type;
+        return $type === $this->type;
     }
 
     /**
@@ -122,7 +123,7 @@ class Token implements \JsonSerializable
      *
      * @return bool
      */
-    public function typeEqualsAnyOf(array $types)
+    public function typeEqualsAnyOf(array $types): bool
     {
         return in_array($this->type, $types, true);
     }
@@ -130,7 +131,7 @@ class Token implements \JsonSerializable
     /**
      * @return bool
      */
-    public function isWhiteSpace()
+    public function isWhiteSpace(): bool
     {
         return self::T_WHITE_SPACE === $this->type;
     }
@@ -138,7 +139,7 @@ class Token implements \JsonSerializable
     /**
      * @return bool
      */
-    public function isIgnored()
+    public function isIgnored(): bool
     {
         return self::T_IGNORED === $this->type;
     }
@@ -146,7 +147,7 @@ class Token implements \JsonSerializable
     /**
      * @return bool
      */
-    public function isEndOfInput()
+    public function isEndOfInput(): bool
     {
         return self::T_EOI === $this->type;
     }

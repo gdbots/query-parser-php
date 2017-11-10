@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\QueryParser\Node;
 
@@ -10,27 +11,27 @@ final class WordRange extends Range
     /**
      * WordRange constructor.
      *
-     * @param Word|null $lowerNode
-     * @param Word|null $upperNode
+     * @param Word $lowerNode
+     * @param Word $upperNode
      * @param bool $exclusive
      */
-    public function __construct(Word $lowerNode = null, Word $upperNode = null, $exclusive = false)
+    public function __construct(?Word $lowerNode = null, ?Word $upperNode = null, bool $exclusive = false)
     {
         parent::__construct($lowerNode, $upperNode, $exclusive);
     }
 
     /**
-     * @return Word
+     * @return Word|Node
      */
-    public function getLowerNode()
+    public function getLowerNode(): ?Node
     {
         return parent::getLowerNode();
     }
 
     /**
-     * @return Word
+     * @return Word|Node
      */
-    public function getUpperNode()
+    public function getUpperNode(): ?Node
     {
         return parent::getUpperNode();
     }

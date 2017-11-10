@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\QueryParser\Node;
 
@@ -47,20 +48,20 @@ abstract class Node implements FromArray, ToArray, \JsonSerializable
     /**
      * Node constructor.
      *
-     * @param mixed $value
+     * @param mixed        $value
      * @param BoolOperator $boolOperator
-     * @param bool $useBoost
-     * @param float $boost
-     * @param bool $useFuzzy
-     * @param int $fuzzy
+     * @param bool         $useBoost
+     * @param float        $boost
+     * @param bool         $useFuzzy
+     * @param int          $fuzzy
      */
     public function __construct(
         $value,
-        BoolOperator $boolOperator = null,
-        $useBoost = false,
-        $boost = self::DEFAULT_BOOST,
-        $useFuzzy = false,
-        $fuzzy = self::DEFAULT_FUZZY
+        ?BoolOperator $boolOperator = null,
+        bool $useBoost = false,
+        float $boost = self::DEFAULT_BOOST,
+        bool $useFuzzy = false,
+        int $fuzzy = self::DEFAULT_FUZZY
     ) {
         $this->value = $value;
         $this->boolOperator = $boolOperator ?: BoolOperator::OPTIONAL();
@@ -85,10 +86,11 @@ abstract class Node implements FromArray, ToArray, \JsonSerializable
 
     /**
      * @param array $data
+     *
      * @return static
      * @throws \InvalidArgumentException
      */
-    public static function factory(array $data = [])
+    public static function factory(array $data = []): self
     {
         $type = $data['type'];
         // fix for php7 reserved name (scalar type hint)
@@ -144,13 +146,13 @@ abstract class Node implements FromArray, ToArray, \JsonSerializable
     /**
      * @return bool
      */
-    final public function hasValue()
+    final public function hasValue(): bool
     {
         return null !== $this->value;
     }
 
     /**
-     * @return mixed|null
+     * @return mixed
      */
     final public function getValue()
     {
@@ -160,7 +162,7 @@ abstract class Node implements FromArray, ToArray, \JsonSerializable
     /**
      * @return BoolOperator
      */
-    final public function getBoolOperator()
+    final public function getBoolOperator(): BoolOperator
     {
         return $this->boolOperator;
     }
@@ -168,7 +170,7 @@ abstract class Node implements FromArray, ToArray, \JsonSerializable
     /**
      * @return bool
      */
-    final public function isOptional()
+    final public function isOptional(): bool
     {
         return $this->boolOperator->equals(BoolOperator::OPTIONAL());
     }
@@ -176,7 +178,7 @@ abstract class Node implements FromArray, ToArray, \JsonSerializable
     /**
      * @return bool
      */
-    final public function isRequired()
+    final public function isRequired(): bool
     {
         return $this->boolOperator->equals(BoolOperator::REQUIRED());
     }
@@ -184,7 +186,7 @@ abstract class Node implements FromArray, ToArray, \JsonSerializable
     /**
      * @return bool
      */
-    final public function isProhibited()
+    final public function isProhibited(): bool
     {
         return $this->boolOperator->equals(BoolOperator::PROHIBITED());
     }
@@ -192,7 +194,7 @@ abstract class Node implements FromArray, ToArray, \JsonSerializable
     /**
      * @return bool
      */
-    final public function isCompoundNode()
+    final public function isCompoundNode(): bool
     {
         return static::COMPOUND_NODE;
     }
@@ -200,7 +202,7 @@ abstract class Node implements FromArray, ToArray, \JsonSerializable
     /**
      * @return bool
      */
-    public function useComparisonOperator()
+    public function useComparisonOperator(): bool
     {
         return false;
     }
@@ -208,7 +210,7 @@ abstract class Node implements FromArray, ToArray, \JsonSerializable
     /**
      * @return bool
      */
-    final public function useBoost()
+    final public function useBoost(): bool
     {
         return $this->useBoost;
     }
@@ -216,7 +218,7 @@ abstract class Node implements FromArray, ToArray, \JsonSerializable
     /**
      * @return float
      */
-    final public function getBoost()
+    final public function getBoost(): float
     {
         return $this->boost;
     }
@@ -224,7 +226,7 @@ abstract class Node implements FromArray, ToArray, \JsonSerializable
     /**
      * @return bool
      */
-    final public function useFuzzy()
+    final public function useFuzzy(): bool
     {
         return $this->useFuzzy;
     }
@@ -232,7 +234,7 @@ abstract class Node implements FromArray, ToArray, \JsonSerializable
     /**
      * @return int
      */
-    final public function getFuzzy()
+    final public function getFuzzy(): int
     {
         return $this->fuzzy;
     }
@@ -240,7 +242,7 @@ abstract class Node implements FromArray, ToArray, \JsonSerializable
     /**
      * @param QueryBuilder $builder
      */
-    public function acceptBuilder(QueryBuilder $builder)
+    public function acceptBuilder(QueryBuilder $builder): void
     {
         // do nothing
     }

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\QueryParser\Node;
 
@@ -14,7 +15,7 @@ final class Word extends Node
     public static $stopWords = [
         'a', 'an', 'and', 'are', 'as', 'at', 'be', 'but', 'by', 'for', 'if', 'in', 'into', 'is',
         'it', 'no', 'not', 'of', 'on', 'or', 'such', 'that', 'the', 'their', 'then', 'there',
-        'these', 'they', 'this', 'to', 'was', 'will', 'with'
+        'these', 'they', 'this', 'to', 'was', 'will', 'with',
     ];
 
     /** @var bool */
@@ -23,38 +24,39 @@ final class Word extends Node
     /**
      * Word constructor.
      *
-     * @param string $value
+     * @param string       $value
      * @param BoolOperator $boolOperator
-     * @param bool $useBoost
-     * @param float $boost
-     * @param bool $useFuzzy
-     * @param int $fuzzy
-     * @param bool $trailingWildcard
+     * @param bool         $useBoost
+     * @param float        $boost
+     * @param bool         $useFuzzy
+     * @param int          $fuzzy
+     * @param bool         $trailingWildcard
      */
     public function __construct(
-        $value,
-        BoolOperator $boolOperator = null,
-        $useBoost = false,
-        $boost = self::DEFAULT_BOOST,
-        $useFuzzy = false,
-        $fuzzy = self::DEFAULT_FUZZY,
-        $trailingWildcard = false
+        string $value,
+        ?BoolOperator $boolOperator = null,
+        bool $useBoost = false,
+        float $boost = self::DEFAULT_BOOST,
+        bool $useFuzzy = false,
+        int $fuzzy = self::DEFAULT_FUZZY,
+        bool $trailingWildcard = false
     ) {
         parent::__construct($value, $boolOperator, $useBoost, $boost, $useFuzzy, $fuzzy);
-        $this->trailingWildcard = (bool)$trailingWildcard;
+        $this->trailingWildcard = $trailingWildcard;
     }
 
     /**
      * @param array $data
+     *
      * @return self
      */
     public static function fromArray(array $data = [])
     {
-        $value    = isset($data['value']) ? $data['value'] : null;
+        $value = isset($data['value']) ? $data['value'] : '';
         $useBoost = isset($data['use_boost']) ? (bool)$data['use_boost'] : false;
-        $boost    = isset($data['boost']) ? (float)$data['boost'] : self::DEFAULT_BOOST;
+        $boost = isset($data['boost']) ? (float)$data['boost'] : self::DEFAULT_BOOST;
         $useFuzzy = isset($data['use_fuzzy']) ? (bool)$data['use_fuzzy'] : false;
-        $fuzzy    = isset($data['fuzzy']) ? (int)$data['fuzzy'] : self::DEFAULT_FUZZY;
+        $fuzzy = isset($data['fuzzy']) ? (int)$data['fuzzy'] : self::DEFAULT_FUZZY;
         $trailingWildcard = isset($data['trailing_wildcard']) ? (bool)$data['trailing_wildcard'] : false;
 
         try {
@@ -83,7 +85,7 @@ final class Word extends Node
     /**
      * @return bool
      */
-    public function hasTrailingWildcard()
+    public function hasTrailingWildcard(): bool
     {
         return $this->trailingWildcard;
     }
@@ -91,7 +93,7 @@ final class Word extends Node
     /**
      * @return bool
      */
-    public function isStopWord()
+    public function isStopWord(): bool
     {
         return in_array(strtolower($this->getValue()), self::$stopWords);
     }
@@ -99,7 +101,7 @@ final class Word extends Node
     /**
      * @param QueryBuilder $builder
      */
-    public function acceptBuilder(QueryBuilder $builder)
+    public function acceptBuilder(QueryBuilder $builder): void
     {
         $builder->addWord($this);
     }

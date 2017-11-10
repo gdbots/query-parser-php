@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\QueryParser\Node;
 
@@ -16,18 +17,18 @@ final class Subquery extends Node
     /**
      * Subquery constructor.
      *
-     * @param Node[] $nodes
+     * @param Node[]       $nodes
      * @param BoolOperator $boolOperator
-     * @param bool $useBoost
-     * @param float|mixed $boost
+     * @param bool         $useBoost
+     * @param float        $boost
      *
      * @throws \LogicException
      */
     public function __construct(
         array $nodes,
-        BoolOperator $boolOperator = null,
-        $useBoost = false,
-        $boost = self::DEFAULT_BOOST
+        ?BoolOperator $boolOperator = null,
+        bool $useBoost = false,
+        float $boost = self::DEFAULT_BOOST
     ) {
         parent::__construct(null, $boolOperator, $useBoost, $boost);
         $this->nodes = $nodes;
@@ -41,12 +42,13 @@ final class Subquery extends Node
 
     /**
      * @param array $data
+     *
      * @return self
      */
     public static function fromArray(array $data = [])
     {
         $useBoost = isset($data['use_boost']) ? (bool)$data['use_boost'] : false;
-        $boost    = isset($data['boost']) ? (float)$data['boost'] : self::DEFAULT_BOOST;
+        $boost = isset($data['boost']) ? (float)$data['boost'] : self::DEFAULT_BOOST;
 
         $nodes = [];
         if (isset($data['nodes'])) {
@@ -82,7 +84,7 @@ final class Subquery extends Node
     /**
      * @return Node[]
      */
-    public function getNodes()
+    public function getNodes(): array
     {
         return $this->nodes;
     }
@@ -90,7 +92,7 @@ final class Subquery extends Node
     /**
      * @param QueryBuilder $builder
      */
-    public function acceptBuilder(QueryBuilder $builder)
+    public function acceptBuilder(QueryBuilder $builder): void
     {
         $builder->addSubquery($this);
     }

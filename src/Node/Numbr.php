@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\QueryParser\Node;
 
@@ -18,10 +19,10 @@ final class Numbr extends Node
     /**
      * Numbr constructor.
      *
-     * @param float $value
+     * @param float              $value
      * @param ComparisonOperator $comparisonOperator
      */
-    public function __construct($value, ComparisonOperator $comparisonOperator = null)
+    public function __construct(float $value, ?ComparisonOperator $comparisonOperator = null)
     {
         parent::__construct($value, null);
         $this->comparisonOperator = $comparisonOperator ?: ComparisonOperator::EQ();
@@ -29,11 +30,12 @@ final class Numbr extends Node
 
     /**
      * @param array $data
+     *
      * @return self
      */
     public static function fromArray(array $data = [])
     {
-        $value = isset($data['value']) ? (float)$data['value'] : null;
+        $value = isset($data['value']) ? (float)$data['value'] : 0.0;
 
         try {
             $comparisonOperator = isset($data['comparison_operator']) ? ComparisonOperator::create($data['comparison_operator']) : null;
@@ -61,7 +63,7 @@ final class Numbr extends Node
     /**
      * @return bool
      */
-    public function useComparisonOperator()
+    public function useComparisonOperator(): bool
     {
         return !$this->comparisonOperator->equals(ComparisonOperator::EQ());
     }
@@ -69,7 +71,7 @@ final class Numbr extends Node
     /**
      * @return ComparisonOperator
      */
-    public function getComparisonOperator()
+    public function getComparisonOperator(): ComparisonOperator
     {
         return $this->comparisonOperator;
     }
@@ -77,7 +79,7 @@ final class Numbr extends Node
     /**
      * @param QueryBuilder $builder
      */
-    public function acceptBuilder(QueryBuilder $builder)
+    public function acceptBuilder(QueryBuilder $builder): void
     {
         $builder->addNumber($this);
     }

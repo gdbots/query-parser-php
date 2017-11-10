@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\QueryParser\Builder;
 
@@ -42,62 +43,62 @@ abstract class AbstractQueryBuilder implements QueryBuilder
      * @var array
      */
     private $fullTextSearchFields = [
-        '_all' => true,
-        'title' => true,
-        'tiny_title' => true,
-        'short_title' => true,
-        'excerpt' => true,
-        'description' => true,
-        'overview' => true,
-        'summary' => true,
-        'story' => true,
-        'html' => true,
-        'text' => true,
-        'markdown' => true,
-        'content' => true,
-        'contents' => true,
+        '_all'               => true,
+        'title'              => true,
+        'tiny_title'         => true,
+        'short_title'        => true,
+        'excerpt'            => true,
+        'description'        => true,
+        'overview'           => true,
+        'summary'            => true,
+        'story'              => true,
+        'html'               => true,
+        'text'               => true,
+        'markdown'           => true,
+        'content'            => true,
+        'contents'           => true,
         'contents-continued' => true,
-        'contents-md' => true,
-        'contents-mobile' => true,
-        'mobile-contents' => true,
-        'txt-contents' => true,
-        'text-contents' => true,
-        'abstract' => true,
-        'search_text' => true,
-        'cover' => true,
-        'bio' => true,
-        'mini_bio' => true,
-        'meta_title' => true,
-        'meta_description' => true,
-        'meta_keywords' => true,
-        'og_title' => true,
-        'og_description' => true,
-        'og_keywords' => true,
-        'seo_title' => true,
-        'seo_description' => true,
-        'seo_keywords' => true,
-        'img_credit' => true,
-        'img_caption' => true,
-        'credit' => true,
-        'caption' => true,
-        'img_credits' => true,
-        'img_captions' => true,
-        'image_credits' => true,
-        'image_captions' => true,
-        'credits' => true,
-        'captions' => true,
-        'full_name' => true,
-        'first_name' => true,
-        'last_name' => true,
-        'street1' => true,
-        'street2' => true,
-        'city' => true,
-        'address.street1' => true,
-        'address.street2' => true,
-        'address.city' => true,
+        'contents-md'        => true,
+        'contents-mobile'    => true,
+        'mobile-contents'    => true,
+        'txt-contents'       => true,
+        'text-contents'      => true,
+        'abstract'           => true,
+        'search_text'        => true,
+        'cover'              => true,
+        'bio'                => true,
+        'mini_bio'           => true,
+        'meta_title'         => true,
+        'meta_description'   => true,
+        'meta_keywords'      => true,
+        'og_title'           => true,
+        'og_description'     => true,
+        'og_keywords'        => true,
+        'seo_title'          => true,
+        'seo_description'    => true,
+        'seo_keywords'       => true,
+        'img_credit'         => true,
+        'img_caption'        => true,
+        'credit'             => true,
+        'caption'            => true,
+        'img_credits'        => true,
+        'img_captions'       => true,
+        'image_credits'      => true,
+        'image_captions'     => true,
+        'credits'            => true,
+        'captions'           => true,
+        'full_name'          => true,
+        'first_name'         => true,
+        'last_name'          => true,
+        'street1'            => true,
+        'street2'            => true,
+        'city'               => true,
+        'address.street1'    => true,
+        'address.street2'    => true,
+        'address.city'       => true,
         'ctx_ip_geo.street1' => true,
         'ctx_ip_geo.street2' => true,
-        'ctx_ip_geo.city' => true,
+        'ctx_ip_geo.city'    => true,
     ];
 
     /** @var string */
@@ -119,125 +120,114 @@ abstract class AbstractQueryBuilder implements QueryBuilder
     protected $localTimeZone;
 
     /**
-     * @return static
+     * {@inheritdoc}
      */
-    public function clear()
+    public function clear(): QueryBuilder
     {
         return $this;
     }
 
     /**
-     * @param array $fields
-     * @return static
+     * {@inheritdoc}
      */
-    final public function setFullTextSearchFields(array $fields)
+    final public function setFullTextSearchFields(array $fields): QueryBuilder
     {
         $this->fullTextSearchFields = array_flip($fields);
         return $this;
     }
 
     /**
-     * @param string $fieldName
-     * @return static
+     * {@inheritdoc}
      */
-    final public function addFullTextSearchField($fieldName)
+    final public function addFullTextSearchField(string $fieldName): QueryBuilder
     {
         $this->fullTextSearchFields[$fieldName] = true;
         return $this;
     }
 
     /**
-     * @param string $fieldName
-     * @return static
+     * {@inheritdoc}
      */
-    final public function removeFullTextSearchField($fieldName)
+    final public function removeFullTextSearchField(string $fieldName): QueryBuilder
     {
         unset($this->fullTextSearchFields[$fieldName]);
         return $this;
     }
 
     /**
-     * @return array
+     * {@inheritdoc}
      */
-    final public function getFullTextSearchFields()
+    final public function getFullTextSearchFields(): array
     {
         return array_keys($this->fullTextSearchFields);
     }
 
     /**
-     * @param string $fieldName
-     * @return bool
+     * {@inheritdoc}
      */
-    final public function supportsFullTextSearch($fieldName)
+    final public function supportsFullTextSearch(string $fieldName): bool
     {
         return isset($this->fullTextSearchFields[trim(strtolower($fieldName))]);
     }
 
     /**
-     * @param string $fieldName
-     * @return static
+     * {@inheritdoc}
      */
-    final public function setDefaultFieldName($fieldName)
+    final public function setDefaultFieldName(string $fieldName): QueryBuilder
     {
         $this->defaultFieldName = $fieldName;
         return $this;
     }
 
     /**
-     * @param string $fieldName
-     * @return static
+     * {@inheritdoc}
      */
-    final public function setEmojiFieldName($fieldName)
+    final public function setEmojiFieldName(string $fieldName): QueryBuilder
     {
         $this->emojiFieldName = $fieldName;
         return $this;
     }
 
     /**
-     * @param string $fieldName
-     * @return static
+     * {@inheritdoc}
      */
-    final public function setEmoticonFieldName($fieldName)
+    final public function setEmoticonFieldName(string $fieldName): QueryBuilder
     {
         $this->emoticonFieldName = $fieldName;
         return $this;
     }
 
     /**
-     * @param string $fieldName
-     * @return static
+     * {@inheritdoc}
      */
-    final public function setHashtagFieldName($fieldName)
+    final public function setHashtagFieldName(string $fieldName): QueryBuilder
     {
         $this->hashtagFieldName = $fieldName;
         return $this;
     }
 
     /**
-     * @param string $fieldName
-     * @return static
+     * {@inheritdoc}
      */
-    final public function setMentionFieldName($fieldName)
+    final public function setMentionFieldName(string $fieldName): QueryBuilder
     {
         $this->mentionFieldName = $fieldName;
         return $this;
     }
 
     /**
-     * @param \DateTimeZone $timeZone
-     * @return static
+     * {@inheritdoc}
      */
-    final public function setLocalTimeZone(\DateTimeZone $timeZone)
+    final public function setLocalTimeZone(\DateTimeZone $timeZone): QueryBuilder
     {
         $this->localTimeZone = $timeZone;
         return $this;
     }
 
     /**
-     * @param ParsedQuery $parsedQuery
-     * @return static
+     * {@inheritdoc}
      */
-    final public function addParsedQuery(ParsedQuery $parsedQuery)
+    final public function addParsedQuery(ParsedQuery $parsedQuery): QueryBuilder
     {
         foreach ($parsedQuery->getNodes() as $node) {
             $node->acceptBuilder($this);
@@ -247,20 +237,18 @@ abstract class AbstractQueryBuilder implements QueryBuilder
     }
 
     /**
-     * @param Date $date
-     * @return static
+     * {@inheritdoc}
      */
-    final public function addDate(Date $date)
+    final public function addDate(Date $date): QueryBuilder
     {
         $this->handleTerm($date);
         return $this;
     }
 
     /**
-     * @param Emoji $emoji
-     * @return static
+     * {@inheritdoc}
      */
-    final public function addEmoji(Emoji $emoji)
+    final public function addEmoji(Emoji $emoji): QueryBuilder
     {
         if ($this->inField || null === $this->emojiFieldName) {
             $this->handleTerm($emoji);
@@ -279,10 +267,9 @@ abstract class AbstractQueryBuilder implements QueryBuilder
     }
 
     /**
-     * @param Emoticon $emoticon
-     * @return static
+     * {@inheritdoc}
      */
-    final public function addEmoticon(Emoticon $emoticon)
+    final public function addEmoticon(Emoticon $emoticon): QueryBuilder
     {
         if ($this->inField || null === $this->emoticonFieldName) {
             $this->handleTerm($emoticon);
@@ -301,12 +288,9 @@ abstract class AbstractQueryBuilder implements QueryBuilder
     }
 
     /**
-     * @param Field $field
-     * @return static
-     *
-     * @throws \LogicException
+     * {@inheritdoc}
      */
-    final public function addField(Field $field)
+    final public function addField(Field $field): QueryBuilder
     {
         if ($this->inField || $this->inRange) {
             throw new \LogicException('A Field cannot be nested in another Field or Range.');
@@ -325,10 +309,9 @@ abstract class AbstractQueryBuilder implements QueryBuilder
     }
 
     /**
-     * @param Hashtag $hashtag
-     * @return static
+     * {@inheritdoc}
      */
-    final public function addHashtag(Hashtag $hashtag)
+    final public function addHashtag(Hashtag $hashtag): QueryBuilder
     {
         if ($this->inField || null === $this->hashtagFieldName) {
             $this->handleTerm($hashtag);
@@ -347,10 +330,9 @@ abstract class AbstractQueryBuilder implements QueryBuilder
     }
 
     /**
-     * @param Mention $mention
-     * @return static
+     * {@inheritdoc}
      */
-    final public function addMention(Mention $mention)
+    final public function addMention(Mention $mention): QueryBuilder
     {
         if ($this->inField || null === $this->mentionFieldName) {
             $this->handleTerm($mention);
@@ -369,32 +351,27 @@ abstract class AbstractQueryBuilder implements QueryBuilder
     }
 
     /**
-     * @param Numbr $number
-     * @return static
+     * {@inheritdoc}
      */
-    final public function addNumber(Numbr $number)
+    final public function addNumber(Numbr $number): QueryBuilder
     {
         $this->handleTerm($number);
         return $this;
     }
 
     /**
-     * @param Phrase $phrase
-     * @return static
+     * {@inheritdoc}
      */
-    final public function addPhrase(Phrase $phrase)
+    final public function addPhrase(Phrase $phrase): QueryBuilder
     {
         $this->handleText($phrase);
         return $this;
     }
 
     /**
-     * @param Range $range
-     * @return static
-     *
-     * @throws \LogicException
+     * {@inheritdoc}
      */
-    final public function addRange(Range $range)
+    final public function addRange(Range $range): QueryBuilder
     {
         if (!$this->inField || $this->inRange || $this->inSubquery) {
             throw new \LogicException('A Range can only be used within a field.  e.g. rating:[1..5]');
@@ -407,10 +384,9 @@ abstract class AbstractQueryBuilder implements QueryBuilder
     }
 
     /**
-     * @param Subquery $subquery
-     * @return static
+     * {@inheritdoc}
      */
-    final public function addSubquery(Subquery $subquery)
+    final public function addSubquery(Subquery $subquery): QueryBuilder
     {
         if ($this->inRange || $this->inSubquery) {
             throw new \LogicException('A Subquery cannot be nested or within a Range.');
@@ -430,20 +406,18 @@ abstract class AbstractQueryBuilder implements QueryBuilder
     }
 
     /**
-     * @param Url $url
-     * @return static
+     * {@inheritdoc}
      */
-    final public function addUrl(Url $url)
+    final public function addUrl(Url $url): QueryBuilder
     {
         $this->handleTerm($url);
         return $this;
     }
 
     /**
-     * @param Word $word
-     * @return static
+     * {@inheritdoc}
      */
-    final public function addWord(Word $word)
+    final public function addWord(Word $word): QueryBuilder
     {
         $this->handleText($word);
         return $this;
@@ -452,7 +426,7 @@ abstract class AbstractQueryBuilder implements QueryBuilder
     /**
      * @return bool
      */
-    final protected function inField()
+    final protected function inField(): bool
     {
         return $this->inField;
     }
@@ -460,7 +434,7 @@ abstract class AbstractQueryBuilder implements QueryBuilder
     /**
      * @return bool
      */
-    final protected function inRange()
+    final protected function inRange(): bool
     {
         return $this->inRange;
     }
@@ -468,7 +442,7 @@ abstract class AbstractQueryBuilder implements QueryBuilder
     /**
      * @return bool
      */
-    final protected function inSubquery()
+    final protected function inSubquery(): bool
     {
         return $this->inSubquery;
     }
@@ -476,7 +450,7 @@ abstract class AbstractQueryBuilder implements QueryBuilder
     /**
      * @param Node $node
      */
-    private function handleText(Node $node)
+    private function handleText(Node $node): void
     {
         if ($this->inField && !$this->supportsFullTextSearch($this->currentField->getName())) {
             $this->handleTerm($node);
@@ -500,7 +474,7 @@ abstract class AbstractQueryBuilder implements QueryBuilder
     /**
      * @param Node $node
      */
-    private function handleTerm(Node $node)
+    private function handleTerm(Node $node): void
     {
         /*
          * When in a simple field, the bool operator is based on
@@ -543,9 +517,10 @@ abstract class AbstractQueryBuilder implements QueryBuilder
      * to even search for cats in a video when status is not active.
      *
      * @param Field $field
+     *
      * @return bool
      */
-    protected function queryOnFieldIsCacheable(Field $field)
+    protected function queryOnFieldIsCacheable(Field $field): bool
     {
         if ($field->isOptional() || $field->useBoost()) {
             return false;
@@ -567,70 +542,78 @@ abstract class AbstractQueryBuilder implements QueryBuilder
 
     /**
      * @param Field $field
-     * @param bool $cacheable
+     * @param bool  $cacheable
      */
-    protected function startField(Field $field, $cacheable = false) {}
+    protected function startField(Field $field, bool $cacheable = false): void
+    {
+    }
 
     /**
      * @param Field $field
-     * @param bool $cacheable
+     * @param bool  $cacheable
      */
-    protected function endField(Field $field, $cacheable = false) {}
+    protected function endField(Field $field, bool $cacheable = false): void
+    {
+    }
 
     /**
      * @param Subquery $subquery
-     * @param Field|null $field
+     * @param Field    $field
      */
-    protected function startSubquery(Subquery $subquery, Field $field = null) {}
+    protected function startSubquery(Subquery $subquery, ?Field $field = null): void
+    {
+    }
 
     /**
      * @param Subquery $subquery
-     * @param Field|null $field
+     * @param Field    $field
      */
-    protected function endSubquery(Subquery $subquery, Field $field = null) {}
+    protected function endSubquery(Subquery $subquery, ?Field $field = null): void
+    {
+    }
 
     /**
      * @param Range $range
      * @param Field $field
-     * @param bool $cacheable
+     * @param bool  $cacheable
      */
-    abstract protected function handleRange(Range $range, Field $field, $cacheable = false);
+    abstract protected function handleRange(Range $range, Field $field, bool $cacheable = false): void;
 
     /**
-     * @param Node $node
-     * @param Field|null $field
+     * @param Node  $node
+     * @param Field $field
      */
-    abstract protected function mustMatch(Node $node, Field $field = null);
+    abstract protected function mustMatch(Node $node, ?Field $field = null): void;
 
     /**
-     * @param Node $node
-     * @param Field|null $field
+     * @param Node  $node
+     * @param Field $field
      */
-    abstract protected function shouldMatch(Node $node, Field $field = null);
+    abstract protected function shouldMatch(Node $node, ?Field $field = null): void;
 
     /**
-     * @param Node $node
-     * @param Field|null $field
+     * @param Node  $node
+     * @param Field $field
      */
-    abstract protected function mustNotMatch(Node $node, Field $field = null);
+    abstract protected function mustNotMatch(Node $node, ?Field $field = null): void;
 
     /**
-     * @param Node $node
-     * @param Field|null $field
-     * @param bool $cacheable
+     * @param Node  $node
+     * @param Field $field
+     * @param bool  $cacheable
      */
-    abstract protected function mustMatchTerm(Node $node, Field $field = null, $cacheable = false);
+    abstract protected function mustMatchTerm(Node $node, ?Field $field = null, bool $cacheable = false): void;
 
     /**
-     * @param Node $node
-     * @param Field|null $field
+     * @param Node  $node
+     * @param Field $field
      */
-    abstract protected function shouldMatchTerm(Node $node, Field $field = null);
+    abstract protected function shouldMatchTerm(Node $node, ?Field $field = null): void;
 
     /**
-     * @param Node $node
-     * @param Field|null $field
-     * @param bool $cacheable
+     * @param Node  $node
+     * @param Field $field
+     * @param bool  $cacheable
      */
-    abstract protected function mustNotMatchTerm(Node $node, Field $field = null, $cacheable = false);
+    abstract protected function mustNotMatchTerm(Node $node, ?Field $field = null, bool $cacheable = false): void;
 }
