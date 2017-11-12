@@ -457,13 +457,26 @@ abstract class AbstractQueryBuilder implements QueryBuilder
             return;
         }
 
+        /*
+         * When in a simple field, the bool operator is based on
+         * the field, not the node in the field.
+         * +field:value vs. field:+value
+         */
+        if ($this->inField && !$this->currentField->hasCompoundNode()) {
+            $isOptional = $this->currentField->isOptional();
+            $isRequired = $this->currentField->isRequired();
+        } else {
+            $isOptional = $node->isOptional();
+            $isRequired = $node->isRequired();
+        }
+
         if ($node instanceof Word && $node->isStopWord()) {
             $this->shouldMatch($node, $this->currentField);
             return;
-        } elseif ($node->isOptional()) {
+        } elseif ($isOptional) {
             $this->shouldMatch($node, $this->currentField);
             return;
-        } elseif ($node->isRequired()) {
+        } elseif ($isRequired) {
             $this->mustMatch($node, $this->currentField);
             return;
         }
@@ -482,22 +495,17 @@ abstract class AbstractQueryBuilder implements QueryBuilder
          * +field:value vs. field:+value
          */
         if ($this->inField && !$this->currentField->hasCompoundNode()) {
-            if ($this->currentField->isOptional()) {
-                $this->shouldMatchTerm($node, $this->currentField);
-                return;
-            } elseif ($this->currentField->isRequired()) {
-                $this->mustMatchTerm($node, $this->currentField, $this->queryOnFieldIsCacheable);
-                return;
-            }
-
-            $this->mustNotMatchTerm($node, $this->currentField, $this->queryOnFieldIsCacheable);
-            return;
+            $isOptional = $this->currentField->isOptional();
+            $isRequired = $this->currentField->isRequired();
+        } else {
+            $isOptional = $node->isOptional();
+            $isRequired = $node->isRequired();
         }
 
-        if ($node->isOptional()) {
+        if ($isOptional) {
             $this->shouldMatchTerm($node, $this->currentField);
             return;
-        } elseif ($node->isRequired()) {
+        } elseif ($isRequired) {
             $this->mustMatchTerm($node, $this->currentField, $this->queryOnFieldIsCacheable);
             return;
         }

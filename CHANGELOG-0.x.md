@@ -3,6 +3,8 @@ This changelog references the relevant changes done in 0.x versions.
 
 
 ## v0.3.0
+__BREAKING CHANGES__
+
 * Update `ElasticaQueryBuilder` to use `"ruflin/elastica": "~5.3"`.
 * Require php `>=7.1` in `composer.json`.
 * Add php7 type hinting and use `declare(strict_types=1);`.
