@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\QueryParser\Node;
 
@@ -10,27 +11,27 @@ final class NumberRange extends Range
     /**
      * NumberRange constructor.
      *
-     * @param Numbr|null $lowerNode
-     * @param Numbr|null $upperNode
-     * @param bool $exclusive
+     * @param Numbr $lowerNode
+     * @param Numbr $upperNode
+     * @param bool  $exclusive
      */
-    public function __construct(Numbr $lowerNode = null, Numbr $upperNode = null, $exclusive = false)
+    public function __construct(?Numbr $lowerNode = null, ?Numbr $upperNode = null, bool $exclusive = false)
     {
         parent::__construct($lowerNode, $upperNode, $exclusive);
     }
 
     /**
-     * @return Numbr
+     * @return Numbr|Node
      */
-    public function getLowerNode()
+    public function getLowerNode(): ?Node
     {
         return parent::getLowerNode();
     }
 
     /**
-     * @return Numbr
+     * @return Numbr|Node
      */
-    public function getUpperNode()
+    public function getUpperNode(): ?Node
     {
         return parent::getUpperNode();
     }

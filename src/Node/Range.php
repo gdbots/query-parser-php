@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\QueryParser\Node;
 
@@ -21,18 +22,18 @@ abstract class Range extends Node
     /**
      * Range constructor.
      *
-     * @param Node|null $lowerNode
-     * @param Node|null $upperNode
+     * @param Node $lowerNode
+     * @param Node $upperNode
      * @param bool $exclusive
      *
      * @throws \LogicException
      */
-    public function __construct(Node $lowerNode = null, Node $upperNode = null, $exclusive = false)
+    public function __construct(?Node $lowerNode = null, ?Node $upperNode = null, bool $exclusive = false)
     {
         parent::__construct(null);
         $this->lowerNode = $lowerNode;
         $this->upperNode = $upperNode;
-        $this->exclusive = (bool)$exclusive;
+        $this->exclusive = $exclusive;
 
         if (null === $this->lowerNode && null === $this->upperNode) {
             throw new \LogicException('Range requires at least a lower or upper node.');
@@ -41,6 +42,7 @@ abstract class Range extends Node
 
     /**
      * @param array $data
+     *
      * @return self
      */
     final public static function fromArray(array $data = [])
@@ -76,7 +78,7 @@ abstract class Range extends Node
     /**
      * @return bool
      */
-    final public function hasLowerNode()
+    final public function hasLowerNode(): bool
     {
         return null !== $this->lowerNode;
     }
@@ -84,7 +86,7 @@ abstract class Range extends Node
     /**
      * @return Node
      */
-    public function getLowerNode()
+    public function getLowerNode(): ?Node
     {
         return $this->lowerNode;
     }
@@ -92,7 +94,7 @@ abstract class Range extends Node
     /**
      * @return bool
      */
-    final public function hasUpperNode()
+    final public function hasUpperNode(): bool
     {
         return null !== $this->upperNode;
     }
@@ -100,7 +102,7 @@ abstract class Range extends Node
     /**
      * @return Node
      */
-    public function getUpperNode()
+    public function getUpperNode(): ?Node
     {
         return $this->upperNode;
     }
@@ -108,7 +110,7 @@ abstract class Range extends Node
     /**
      * @return bool
      */
-    final public function isInclusive()
+    final public function isInclusive(): bool
     {
         return !$this->exclusive;
     }
@@ -116,7 +118,7 @@ abstract class Range extends Node
     /**
      * @return bool
      */
-    final public function isExclusive()
+    final public function isExclusive(): bool
     {
         return $this->exclusive;
     }
@@ -124,7 +126,7 @@ abstract class Range extends Node
     /**
      * @param QueryBuilder $builder
      */
-    final public function acceptBuilder(QueryBuilder $builder)
+    final public function acceptBuilder(QueryBuilder $builder): void
     {
         $builder->addRange($this);
     }

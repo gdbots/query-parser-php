@@ -1,8 +1,9 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\QueryParser;
 
-class TokenStream implements \JsonSerializable
+final class TokenStream implements \JsonSerializable
 {
     /** @var Token */
     private static $eoi;
@@ -34,7 +35,7 @@ class TokenStream implements \JsonSerializable
      *
      * @return self
      */
-    public function reset()
+    public function reset(): self
     {
         $this->position = 0;
         $this->current = isset($this->tokens[$this->position]) ? $this->tokens[$this->position] : self::$eoi;
@@ -47,7 +48,7 @@ class TokenStream implements \JsonSerializable
      *
      * @return bool
      */
-    public function next()
+    public function next(): bool
     {
         $this->current = isset($this->tokens[$this->position]) ? $this->tokens[$this->position++] : self::$eoi;
         return !$this->current->typeEquals(Token::T_EOI);
@@ -58,7 +59,7 @@ class TokenStream implements \JsonSerializable
      *
      * @param int $type
      */
-    public function skipUntil($type)
+    public function skipUntil(int $type): void
     {
         while (!$this->current->typeEquals($type) && !$this->current->typeEquals(Token::T_EOI)) {
             $this->next();
@@ -73,7 +74,7 @@ class TokenStream implements \JsonSerializable
      *
      * @return bool
      */
-    public function nextIf($type)
+    public function nextIf(int $type): bool
     {
         if (!$this->current->typeEquals($type)) {
             return false;
@@ -91,7 +92,7 @@ class TokenStream implements \JsonSerializable
      *
      * @return bool
      */
-    public function nextIfAnyOf(array $types)
+    public function nextIfAnyOf(array $types): bool
     {
         if (!$this->current->typeEqualsAnyOf($types)) {
             return false;
@@ -108,7 +109,7 @@ class TokenStream implements \JsonSerializable
      *
      * @return bool
      */
-    public function nextIfLookahead($type)
+    public function nextIfLookahead(int $type): bool
     {
         if (!isset($this->tokens[$this->position]) || !$this->tokens[$this->position]->typeEquals($type)) {
             return false;
@@ -125,7 +126,7 @@ class TokenStream implements \JsonSerializable
      *
      * @return bool
      */
-    public function nextIfLookaheadAnyOf(array $types)
+    public function nextIfLookaheadAnyOf(array $types): bool
     {
         if (!isset($this->tokens[$this->position]) || !$this->tokens[$this->position]->typeEqualsAnyOf($types)) {
             return false;
@@ -142,7 +143,7 @@ class TokenStream implements \JsonSerializable
      *
      * @return bool
      */
-    public function typeIs($type)
+    public function typeIs(int $type): bool
     {
         return $this->current->typeEquals($type);
     }
@@ -154,7 +155,7 @@ class TokenStream implements \JsonSerializable
      *
      * @return bool
      */
-    public function typeIsAnyOf(array $types)
+    public function typeIsAnyOf(array $types): bool
     {
         return $this->current->typeEqualsAnyOf($types);
     }
@@ -166,7 +167,7 @@ class TokenStream implements \JsonSerializable
      *
      * @return bool
      */
-    public function lookaheadTypeIs($type)
+    public function lookaheadTypeIs(int $type): bool
     {
         return isset($this->tokens[$this->position]) && $this->tokens[$this->position]->typeEquals($type);
     }
@@ -178,7 +179,7 @@ class TokenStream implements \JsonSerializable
      *
      * @return bool
      */
-    public function lookaheadTypeIsAnyOf(array $types)
+    public function lookaheadTypeIsAnyOf(array $types): bool
     {
         return isset($this->tokens[$this->position]) && $this->tokens[$this->position]->typeEqualsAnyOf($types);
     }
@@ -190,7 +191,7 @@ class TokenStream implements \JsonSerializable
      *
      * @return bool
      */
-    public function prevTypeIs($type)
+    public function prevTypeIs(int $type): bool
     {
         return isset($this->tokens[$this->position - 2]) && $this->tokens[$this->position - 2]->typeEquals($type);
     }
@@ -202,7 +203,7 @@ class TokenStream implements \JsonSerializable
      *
      * @return bool
      */
-    public function prevTypeIsAnyOf(array $types)
+    public function prevTypeIsAnyOf(array $types): bool
     {
         return isset($this->tokens[$this->position - 2]) && $this->tokens[$this->position - 2]->typeEqualsAnyOf($types);
     }
@@ -210,7 +211,7 @@ class TokenStream implements \JsonSerializable
     /**
      * @return Token
      */
-    public function getCurrent()
+    public function getCurrent(): Token
     {
         return $this->current;
     }
@@ -218,7 +219,7 @@ class TokenStream implements \JsonSerializable
     /**
      * @return Token|null
      */
-    public function getLookahead()
+    public function getLookahead(): ?Token
     {
         return isset($this->tokens[$this->position]) ? $this->tokens[$this->position] : null;
     }
@@ -228,7 +229,7 @@ class TokenStream implements \JsonSerializable
      *
      * @return Token[]
      */
-    public function getTokens()
+    public function getTokens(): array
     {
         return $this->tokens;
     }

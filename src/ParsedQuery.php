@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\QueryParser;
 
@@ -17,6 +18,7 @@ class ParsedQuery implements FromArray, ToArray, \JsonSerializable
 
     /**
      * @param array $data
+     *
      * @return static
      */
     public static function fromArray(array $data = [])
@@ -48,9 +50,10 @@ class ParsedQuery implements FromArray, ToArray, \JsonSerializable
 
     /**
      * @param Node[] $nodes
+     *
      * @return static
      */
-    public function addNodes(array $nodes)
+    public function addNodes(array $nodes): self
     {
         foreach ($nodes as $node) {
             $this->addNode($node);
@@ -61,9 +64,10 @@ class ParsedQuery implements FromArray, ToArray, \JsonSerializable
 
     /**
      * @param Node $node
+     *
      * @return static
      */
-    public function addNode(Node $node)
+    public function addNode(Node $node): self
     {
         $this->nodes[] = $node;
         $this->nodesByType[$node::NODE_TYPE][] = $node;
@@ -73,16 +77,17 @@ class ParsedQuery implements FromArray, ToArray, \JsonSerializable
     /**
      * @return Node[]
      */
-    public function getNodes()
+    public function getNodes(): array
     {
         return $this->nodes;
     }
 
     /**
      * @param string $type
+     *
      * @return Node[]
      */
-    public function getNodesOfType($type)
+    public function getNodesOfType(string $type): array
     {
         return isset($this->nodesByType[$type]) ? $this->nodesByType[$type] : [];
     }
@@ -94,7 +99,7 @@ class ParsedQuery implements FromArray, ToArray, \JsonSerializable
      *
      * @return bool
      */
-    public function hasAMatchableNode()
+    public function hasAMatchableNode(): bool
     {
         foreach ($this->nodes as $node) {
             if (!$node->isProhibited()) {
@@ -111,7 +116,7 @@ class ParsedQuery implements FromArray, ToArray, \JsonSerializable
      *
      * @return array
      */
-    public function getFieldsUsed()
+    public function getFieldsUsed(): array
     {
         $fields = [];
 

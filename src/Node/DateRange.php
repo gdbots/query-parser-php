@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\QueryParser\Node;
 
@@ -10,27 +11,27 @@ final class DateRange extends Range
     /**
      * DateRange constructor.
      *
-     * @param Date|null $lowerNode
-     * @param Date|null $upperNode
+     * @param Date $lowerNode
+     * @param Date $upperNode
      * @param bool $exclusive
      */
-    public function __construct(Date $lowerNode = null, Date $upperNode = null, $exclusive = false)
+    public function __construct(?Date $lowerNode = null, ?Date $upperNode = null, bool $exclusive = false)
     {
         parent::__construct($lowerNode, $upperNode, $exclusive);
     }
 
     /**
-     * @return Date
+     * @return Date|Node
      */
-    public function getLowerNode()
+    public function getLowerNode(): ?Node
     {
         return parent::getLowerNode();
     }
 
     /**
-     * @return Date
+     * @return Date|Node
      */
-    public function getUpperNode()
+    public function getUpperNode(): ?Node
     {
         return parent::getUpperNode();
     }

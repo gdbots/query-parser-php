@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\QueryParser;
 
@@ -12,8 +13,8 @@ use Gdbots\QueryParser\Node\Field;
 use Gdbots\QueryParser\Node\Hashtag;
 use Gdbots\QueryParser\Node\Mention;
 use Gdbots\QueryParser\Node\Node;
-use Gdbots\QueryParser\Node\Numbr;
 use Gdbots\QueryParser\Node\NumberRange;
+use Gdbots\QueryParser\Node\Numbr;
 use Gdbots\QueryParser\Node\Phrase;
 use Gdbots\QueryParser\Node\Subquery;
 use Gdbots\QueryParser\Node\Url;
@@ -48,7 +49,7 @@ class QueryParser
      *
      * @return ParsedQuery
      */
-    public function parse($input)
+    public function parse(string $input): ParsedQuery
     {
         $this->stream = $this->tokenizer->scan($input);
         $this->query = new ParsedQuery();
@@ -67,8 +68,8 @@ class QueryParser
     }
 
     /**
-     * @param Token $token
-     * @param BoolOperator $boolOperator
+     * @param Token              $token
+     * @param BoolOperator       $boolOperator
      * @param ComparisonOperator $comparisonOperator
      *
      * @return Node[]
@@ -76,8 +77,8 @@ class QueryParser
     protected function createNodes(
         Token $token,
         BoolOperator $boolOperator,
-        ComparisonOperator $comparisonOperator = null
-    ) {
+        ?ComparisonOperator $comparisonOperator = null
+    ): array {
         switch ($token->getType()) {
             case Token::T_WORD:
                 $nodes = $this->createWord($token->getValue(), $boolOperator);
@@ -132,12 +133,12 @@ class QueryParser
     }
 
     /**
-     * @param string $fieldName
+     * @param string       $fieldName
      * @param BoolOperator $boolOperator
      *
      * @return Field|Node[]|Node
      */
-    protected function handleField($fieldName, BoolOperator $boolOperator)
+    protected function handleField(string $fieldName, BoolOperator $boolOperator)
     {
         $lookahead = $this->stream->getLookahead();
         if (!$lookahead instanceof Token) {
@@ -187,12 +188,12 @@ class QueryParser
     }
 
     /**
-     * @param string $fieldName
+     * @param string       $fieldName
      * @param BoolOperator $boolOperator
      *
      * @return Field|Node[]|Node
      */
-    protected function handleFieldWithRange($fieldName, BoolOperator $boolOperator)
+    protected function handleFieldWithRange(string $fieldName, BoolOperator $boolOperator)
     {
         $exclusive = $this->stream->typeIs(Token::T_RANGE_EXCL_START);
         $matchTypes = true;
@@ -285,12 +286,12 @@ class QueryParser
     }
 
     /**
-     * @param string $fieldName
+     * @param string       $fieldName
      * @param BoolOperator $boolOperator
      *
      * @return Field|Node
      */
-    protected function handleFieldWithSubquery($fieldName, BoolOperator $boolOperator)
+    protected function handleFieldWithSubquery(string $fieldName, BoolOperator $boolOperator): Node
     {
         $this->stream->nextIf(Token::T_SUBQUERY_START);
         $subquery = $this->handleSubquery($boolOperator);
@@ -378,14 +379,17 @@ class QueryParser
     }
 
     /**
-     * @param string $value
-     * @param BoolOperator $boolOperator
+     * @param string             $value
+     * @param BoolOperator       $boolOperator
      * @param ComparisonOperator $comparisonOperator
      *
      * @return Date
      */
-    protected function createDate($value, BoolOperator $boolOperator, ComparisonOperator $comparisonOperator = null)
-    {
+    protected function createDate(
+        string $value,
+        BoolOperator $boolOperator,
+        ?ComparisonOperator $comparisonOperator = null
+    ): Date {
         $m = $this->getModifiers();
         return new Date(
             $value,
@@ -399,12 +403,12 @@ class QueryParser
     }
 
     /**
-     * @param string $value
+     * @param string       $value
      * @param BoolOperator $boolOperator
      *
      * @return Emoji
      */
-    protected function createEmoji($value, BoolOperator $boolOperator)
+    protected function createEmoji(string $value, BoolOperator $boolOperator): Emoji
     {
         $boolOperator = $boolOperator->equals(BoolOperator::OPTIONAL()) ? BoolOperator::REQUIRED() : $boolOperator;
         $m = $this->getModifiers();
@@ -412,12 +416,12 @@ class QueryParser
     }
 
     /**
-     * @param string $value
+     * @param string       $value
      * @param BoolOperator $boolOperator
      *
      * @return Emoticon
      */
-    protected function createEmoticon($value, BoolOperator $boolOperator)
+    protected function createEmoticon(string $value, BoolOperator $boolOperator): Emoticon
     {
         $boolOperator = $boolOperator->equals(BoolOperator::OPTIONAL()) ? BoolOperator::REQUIRED() : $boolOperator;
         $m = $this->getModifiers();
@@ -425,12 +429,12 @@ class QueryParser
     }
 
     /**
-     * @param string $value
+     * @param string       $value
      * @param BoolOperator $boolOperator
      *
      * @return Hashtag
      */
-    protected function createHashtag($value, BoolOperator $boolOperator)
+    protected function createHashtag(string $value, BoolOperator $boolOperator): Hashtag
     {
         $boolOperator = $boolOperator->equals(BoolOperator::OPTIONAL()) ? BoolOperator::REQUIRED() : $boolOperator;
         $m = $this->getModifiers();
@@ -438,12 +442,12 @@ class QueryParser
     }
 
     /**
-     * @param string $value
+     * @param string       $value
      * @param BoolOperator $boolOperator
      *
      * @return Mention
      */
-    protected function createMention($value, BoolOperator $boolOperator)
+    protected function createMention(string $value, BoolOperator $boolOperator): Mention
     {
         $boolOperator = $boolOperator->equals(BoolOperator::OPTIONAL()) ? BoolOperator::REQUIRED() : $boolOperator;
         $m = $this->getModifiers();
@@ -451,12 +455,12 @@ class QueryParser
     }
 
     /**
-     * @param float $value
+     * @param float              $value
      * @param ComparisonOperator $comparisonOperator
      *
      * @return Numbr
      */
-    protected function createNumber($value, ComparisonOperator $comparisonOperator = null)
+    protected function createNumber(float $value, ?ComparisonOperator $comparisonOperator = null): Numbr
     {
         // move the stream and ignore them if they exist
         $this->getModifiers();
@@ -464,36 +468,36 @@ class QueryParser
     }
 
     /**
-     * @param string $value
+     * @param string       $value
      * @param BoolOperator $boolOperator
      *
      * @return Phrase
      */
-    protected function createPhrase($value, BoolOperator $boolOperator)
+    protected function createPhrase(string $value, BoolOperator $boolOperator): Phrase
     {
         $m = $this->getModifiers();
         return new Phrase($value, $boolOperator, $m['use_boost'], $m['boost'], $m['use_fuzzy'], $m['fuzzy']);
     }
 
     /**
-     * @param string $value
+     * @param string       $value
      * @param BoolOperator $boolOperator
      *
      * @return Url
      */
-    protected function createUrl($value, BoolOperator $boolOperator)
+    protected function createUrl(string $value, BoolOperator $boolOperator): Url
     {
         $m = $this->getModifiers();
         return new Url($value, $boolOperator, $m['use_boost'], $m['boost']);
     }
 
     /**
-     * @param string $value
+     * @param string       $value
      * @param BoolOperator $boolOperator
      *
      * @return Word
      */
-    protected function createWord($value, BoolOperator $boolOperator)
+    protected function createWord(string $value, BoolOperator $boolOperator): Word
     {
         $m = $this->getModifiers();
         return new Word(
@@ -512,7 +516,7 @@ class QueryParser
      *
      * @return BoolOperator
      */
-    protected function getBoolOperator($default = BoolOperator::OPTIONAL)
+    protected function getBoolOperator(int $default = BoolOperator::OPTIONAL): BoolOperator
     {
         if ($this->stream->nextIf(Token::T_REQUIRED)
             || $this->stream->lookaheadTypeIs(Token::T_AND)
@@ -529,9 +533,9 @@ class QueryParser
     }
 
     /**
-     * @return ComparisonOperator|null
+     * @return ComparisonOperator
      */
-    protected function getComparisonOperator()
+    protected function getComparisonOperator(): ?ComparisonOperator
     {
         if ($this->stream->nextIf(Token::T_GREATER_THAN)) {
             $op = ComparisonOperator::GT;
@@ -551,25 +555,25 @@ class QueryParser
     /**
      * @return array
      */
-    protected function getModifiers()
+    protected function getModifiers(): array
     {
         $array = [
             'trailing_wildcard' => $this->stream->nextIfLookahead(Token::T_WILDCARD),
-            'use_boost' => false,
-            'boost' => Node::DEFAULT_BOOST,
-            'use_fuzzy' => false,
-            'fuzzy' => Node::DEFAULT_FUZZY,
+            'use_boost'         => false,
+            'boost'             => Node::DEFAULT_BOOST,
+            'use_fuzzy'         => false,
+            'fuzzy'             => Node::DEFAULT_FUZZY,
         ];
 
         if ($this->stream->nextIfLookahead(Token::T_BOOST) && $this->stream->nextIfLookahead(Token::T_NUMBER)) {
             $array['use_boost'] = true;
-            $array['boost'] = $this->stream->getCurrent()->getValue();
+            $array['boost'] = (float)$this->stream->getCurrent()->getValue();
         }
 
         if ($this->stream->nextIfLookahead(Token::T_FUZZY)) {
             $array['use_fuzzy'] = true;
             if ($this->stream->nextIfLookahead(Token::T_NUMBER)) {
-                $array['fuzzy'] = $this->stream->getCurrent()->getValue();
+                $array['fuzzy'] = (int)$this->stream->getCurrent()->getValue();
             }
         }
 

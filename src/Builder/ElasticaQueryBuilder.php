@@ -1,10 +1,14 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\QueryParser\Builder;
 
-use Elastica\Filter;
-use Elastica\Query;
-use Elastica\QueryBuilder;
+use Elastica\Query\AbstractQuery;
+use Elastica\Query\BoolQuery;
+use Elastica\Query\Exists;
+use Elastica\Query\Nested;
+use Elastica\Query\Range as RangeQuery;
+use Elastica\QueryBuilder as RuflinQueryBuilder;
 use Gdbots\QueryParser\Enum\BoolOperator;
 use Gdbots\QueryParser\Enum\ComparisonOperator;
 use Gdbots\QueryParser\Node\Date;
@@ -21,10 +25,10 @@ use Gdbots\QueryParser\Node\Word;
 
 class ElasticaQueryBuilder extends AbstractQueryBuilder
 {
-    /** @var QueryBuilder */
+    /** @var RuflinQueryBuilder */
     protected $qb;
 
-    /** @var Query\Bool */
+    /** @var BoolQuery */
     protected $boolQuery;
 
     /**
@@ -32,7 +36,7 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
      * and save it here.  After the subquery completes we inject
      * the query back into the outer query.
      *
-     * @var Query\Bool
+     * @var BoolQuery
      */
     protected $outerBoolQuery;
 
@@ -65,7 +69,7 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
      * The nested query contains a bool query and works exactly like the bool
      * query non-nested queries are added to.
      *
-     * @var Query\Nested[]
+     * @var Nested[]
      */
     protected $nestedQueries = [];
 
@@ -74,14 +78,14 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
      */
     public function __construct()
     {
-        $this->qb = new QueryBuilder();
+        $this->qb = new RuflinQueryBuilder();
         $this->clear();
     }
 
     /**
-     * @return static
+     * {@inheritdoc}
      */
-    public function clear()
+    public function clear(): QueryBuilder
     {
         $this->boolQuery = $this->qb->query()->bool();
         $this->outerBoolQuery = $this->boolQuery;
@@ -91,49 +95,54 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
 
     /**
      * @param bool $ignoreEmojis
+     *
      * @return static
      */
-    public function ignoreEmojis($ignoreEmojis = true)
+    public function ignoreEmojis(bool $ignoreEmojis = true): self
     {
-        $this->ignoreEmojis = (bool)$ignoreEmojis;
+        $this->ignoreEmojis = $ignoreEmojis;
         return $this;
     }
 
     /**
      * @param bool $ignoreEmoticons
+     *
      * @return static
      */
-    public function ignoreEmoticons($ignoreEmoticons = true)
+    public function ignoreEmoticons(bool $ignoreEmoticons = true): self
     {
-        $this->ignoreEmoticons = (bool)$ignoreEmoticons;
+        $this->ignoreEmoticons = $ignoreEmoticons;
         return $this;
     }
 
     /**
      * @param bool $ignoreStopWords
+     *
      * @return static
      */
-    public function ignoreStopWords($ignoreStopWords = true)
+    public function ignoreStopWords(bool $ignoreStopWords = true): self
     {
-        $this->ignoreStopWords = (bool)$ignoreStopWords;
+        $this->ignoreStopWords = $ignoreStopWords;
         return $this;
     }
 
     /**
      * @param bool $lowerCaseTerms
+     *
      * @return static
      */
-    public function lowerCaseTerms($lowerCaseTerms = true)
+    public function lowerCaseTerms(bool $lowerCaseTerms = true): self
     {
-        $this->lowerCaseTerms = (bool)$lowerCaseTerms;
+        $this->lowerCaseTerms = $lowerCaseTerms;
         return $this;
     }
 
     /**
-     * @param array $fields
+     * @param string[] $fields
+     *
      * @return static
      */
-    public function setNestedFields(array $fields)
+    public function setNestedFields(array $fields): self
     {
         $this->nestedFields = array_flip($fields);
         return $this;
@@ -141,9 +150,10 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
 
     /**
      * @param string $fieldName
+     *
      * @return static
      */
-    public function addNestedField($fieldName)
+    public function addNestedField(string $fieldName): self
     {
         $this->nestedFields[$fieldName] = true;
         return $this;
@@ -151,9 +161,10 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
 
     /**
      * @param string $fieldName
+     *
      * @return static
      */
-    public function removeNestedField($fieldName)
+    public function removeNestedField(string $fieldName): self
     {
         unset($this->nestedFields[$fieldName]);
         return $this;
@@ -162,34 +173,32 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
     /**
      * @return array
      */
-    public function getNestedFields()
+    public function getNestedFields(): array
     {
         return array_keys($this->nestedFields);
     }
 
     /**
-     * @return Query\Bool
+     * @return BoolQuery
      */
-    public function getBoolQuery()
+    public function getBoolQuery(): BoolQuery
     {
         if ($this->boolQuery->hasParam('must')) {
             // if a "must" is used we assume they wanted everything else optional
             return $this->boolQuery;
         }
 
-        return $this->boolQuery->setMinimumNumberShouldMatch('2<80%');
+        return $this->boolQuery->setMinimumShouldMatch('2<80%');
     }
 
     /**
-     * @param Range $range
-     * @param Field $field
-     * @param bool $cacheable
+     * {@inheritdoc}
      */
-    protected function handleRange(Range $range, Field $field, $cacheable = false)
+    protected function handleRange(Range $range, Field $field, bool $cacheable = false): void
     {
         $useBoost = $field->useBoost();
-        $boost    = $field->getBoost();
-        $boolOp   = $field->getBoolOperator();
+        $boost = $field->getBoost();
+        $boolOp = $field->getBoolOperator();
 
         if ($boolOp->equals(BoolOperator::REQUIRED())) {
             $method = 'addMust';
@@ -211,10 +220,15 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
 
         if ($range instanceof DateRange) {
             if ($range->hasLowerNode()) {
-                $data[$lowerOperator] = $range->getLowerNode()->toDateTime($this->localTimeZone)->format('U');
+                $data[$lowerOperator] = $range->getLowerNode()
+                    ->toDateTime($this->localTimeZone)
+                    ->format('Y-m-d');
             }
             if ($range->hasUpperNode()) {
-                $data[$upperOperator] = $range->getUpperNode()->toDateTime($this->localTimeZone)->modify('+1 day')->format('U');
+                $data[$upperOperator] = $range->getUpperNode()
+                    ->toDateTime($this->localTimeZone)
+                    ->modify('+1 day')
+                    ->format('Y-m-d');
             }
         } else {
             if ($range->hasLowerNode()) {
@@ -243,33 +257,31 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
     }
 
     /**
-     * @param Subquery $subquery
-     * @param Field|null $field
+     * {@inheritdoc}
      */
-    protected function startSubquery(Subquery $subquery, Field $field = null)
+    protected function startSubquery(Subquery $subquery, ?Field $field = null): void
     {
         $this->outerBoolQuery = $this->boolQuery;
         $this->boolQuery = $this->qb->query()->bool();
     }
 
     /**
-     * @param Subquery $subquery
-     * @param Field|null $field
+     * {@inheritdoc}
      */
-    protected function endSubquery(Subquery $subquery, Field $field = null)
+    protected function endSubquery(Subquery $subquery, ?Field $field = null): void
     {
         $params = $this->boolQuery->getParams();
         if (!empty($params)) {
-            $this->boolQuery->setMinimumNumberShouldMatch(1);
+            $this->boolQuery->setMinimumShouldMatch(1);
 
             if ($this->inField()) {
                 $useBoost = $field->useBoost();
-                $boost    = $field->getBoost();
-                $boolOp   = $field->getBoolOperator();
+                $boost = $field->getBoost();
+                $boolOp = $field->getBoolOperator();
             } else {
                 $useBoost = $subquery->useBoost();
-                $boost    = $subquery->getBoost();
-                $boolOp   = $subquery->getBoolOperator();
+                $boost = $subquery->getBoost();
+                $boolOp = $subquery->getBoolOperator();
             }
 
             if ($useBoost) {
@@ -289,28 +301,25 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
     }
 
     /**
-     * @param Node $node
-     * @param Field|null $field
+     * {@inheritdoc}
      */
-    protected function mustMatch(Node $node, Field $field = null)
+    protected function mustMatch(Node $node, ?Field $field = null): void
     {
         $this->addTextToQuery('addMust', $node, $field);
     }
 
     /**
-     * @param Node $node
-     * @param Field|null $field
+     * {@inheritdoc}
      */
-    protected function shouldMatch(Node $node, Field $field = null)
+    protected function shouldMatch(Node $node, ?Field $field = null): void
     {
         $this->addTextToQuery('addShould', $node, $field);
     }
 
     /**
-     * @param Node $node
-     * @param Field|null $field
+     * {@inheritdoc}
      */
-    protected function mustNotMatch(Node $node, Field $field = null)
+    protected function mustNotMatch(Node $node, ?Field $field = null): void
     {
         $this->addTextToQuery('addMustNot', $node, $field);
     }
@@ -320,10 +329,10 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
      * text searching is needed/supported.
      *
      * @param string $method
-     * @param Node $node
-     * @param Field|null $field
+     * @param Node   $node
+     * @param Field  $field
      */
-    protected function addTextToQuery($method, Node $node, Field $field = null)
+    protected function addTextToQuery(string $method, Node $node, ?Field $field = null): void
     {
         if ($node instanceof Word && $node->isStopWord() && $this->ignoreStopWords) {
             return;
@@ -332,15 +341,15 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
         $fieldName = $this->inField() ? $field->getName() : $this->defaultFieldName;
 
         if ($this->inField() && !$this->inSubquery()) {
-            $useBoost  = $field->useBoost();
-            $boost     = $field->getBoost();
-            $useFuzzy  = $field->useFuzzy();
-            $fuzzy     = $field->getFuzzy();
+            $useBoost = $field->useBoost();
+            $boost = $field->getBoost();
+            $useFuzzy = $field->useFuzzy();
+            $fuzzy = $field->getFuzzy();
         } else {
-            $useBoost  = $node->useBoost();
-            $boost     = $node->getBoost();
-            $useFuzzy  = $node->useFuzzy();
-            $fuzzy     = $node->getFuzzy();
+            $useBoost = $node->useBoost();
+            $boost = $node->getBoost();
+            $useFuzzy = $node->useFuzzy();
+            $fuzzy = $node->getFuzzy();
         }
 
         /*
@@ -358,9 +367,9 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
 
         if ($useFuzzy && $node instanceof Phrase) {
             $data = [
-                'query' => $node->getValue(),
-                'type' => Phrase::NODE_TYPE,
-                'lenient' => true,
+                'query'       => $node->getValue(),
+                'type'        => Phrase::NODE_TYPE,
+                'lenient'     => true,
                 'phrase_slop' => $fuzzy,
             ];
 
@@ -370,7 +379,6 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
 
             $query = $this->qb->query()->match();
             $query->setField($fieldName, $data);
-
         } elseif ($useFuzzy) {
             $query = $this->qb->query()->fuzzy();
             $query->setField($fieldName, $node->getValue());
@@ -379,11 +387,9 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
             if ($useBoost) {
                 $query->setFieldOption('boost', $boost);
             }
-
         } elseif ($node instanceof Word && $node->hasTrailingWildcard()) {
             $query = $this->qb->query()->wildcard();
-            $query->setValue($fieldName, strtolower($node->getValue()).'*', $useBoost ? $boost : Word::DEFAULT_BOOST);
-
+            $query->setValue($fieldName, strtolower($node->getValue()) . '*', $useBoost ? $boost : Word::DEFAULT_BOOST);
         } else {
             $data = ['query' => $node->getValue(), 'operator' => 'and', 'lenient' => true];
 
@@ -403,30 +409,25 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
     }
 
     /**
-     * @param Node $node
-     * @param Field|null $field
-     * @param bool $cacheable
+     * {@inheritdoc}
      */
-    protected function mustMatchTerm(Node $node, Field $field = null, $cacheable = false)
+    protected function mustMatchTerm(Node $node, ?Field $field = null, bool $cacheable = false): void
     {
         $this->addTermToQuery('addMust', $node, $field, $cacheable);
     }
 
     /**
-     * @param Node $node
-     * @param Field|null $field
+     * {@inheritdoc}
      */
-    protected function shouldMatchTerm(Node $node, Field $field = null)
+    protected function shouldMatchTerm(Node $node, ?Field $field = null): void
     {
         $this->addTermToQuery('addShould', $node, $field);
     }
 
     /**
-     * @param Node $node
-     * @param Field|null $field
-     * @param bool $cacheable
+     * {@inheritdoc}
      */
-    protected function mustNotMatchTerm(Node $node, Field $field = null, $cacheable = false)
+    protected function mustNotMatchTerm(Node $node, ?Field $field = null, bool $cacheable = false): void
     {
         $this->addTermToQuery('addMustNot', $node, $field, $cacheable);
     }
@@ -436,11 +437,11 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
      * request for that item could be cached, like documents with hashtag of cats.
      *
      * @param string $method
-     * @param Node $node
-     * @param Field|null $field
-     * @param bool $cacheable
+     * @param Node   $node
+     * @param Field  $field
+     * @param bool   $cacheable
      */
-    protected function addTermToQuery($method, Node $node, Field $field = null, $cacheable = false)
+    protected function addTermToQuery(string $method, Node $node, ?Field $field = null, bool $cacheable = false): void
     {
         if ($node instanceof Emoji && $this->ignoreEmojis) {
             return;
@@ -450,24 +451,24 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
             return;
         }
 
-        $value = $this->lowerCaseTerms ? strtolower($node->getValue()) : $node->getValue();
+        $value = $this->lowerCaseTerms ? strtolower((string)$node->getValue()) : $node->getValue();
         $fieldName = $this->inField() ? $field->getName() : $this->defaultFieldName;
 
         if ($this->inField() && !$this->inSubquery()) {
             $useBoost = $field->useBoost();
-            $boost    = $field->getBoost();
+            $boost = $field->getBoost();
         } else {
             $useBoost = $node->useBoost();
-            $boost    = $node->getBoost();
+            $boost = $node->getBoost();
         }
 
         if ('_exists_' === $fieldName) {
-            $term = new Query\Exists($value);
+            $term = new Exists($value);
             $method = 'addMust';
             $cacheable = true;
         } elseif ('_missing_' === $fieldName) {
-            $term = new Query\Missing($value);
-            $method = 'addMust';
+            $term = new Exists($value);
+            $method = 'addMustNot';
             $cacheable = true;
         } elseif ($node instanceof Date) {
             $term = $this->createDateRangeForSingleNode(
@@ -476,14 +477,12 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
                 $cacheable,
                 $useBoost ? $boost : Date::DEFAULT_BOOST
             );
-
         } elseif ($node instanceof Numbr && $node->useComparisonOperator()) {
             $data = [$node->getComparisonOperator()->getValue() => $value];
             if ($useBoost) {
                 $data['boost'] = $boost;
             }
             $term = $this->qb->query()->range($fieldName, $data);
-
         } else {
             $term = $this->qb->query()->term();
             $term->setTerm($fieldName, $value, $boost);
@@ -509,25 +508,28 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
      * The Date node is a date with no time component. @see Date::toDateTime
      *
      * @param string $fieldName
-     * @param Date $node
-     * @param bool $cacheable
-     * @param float $boost
+     * @param Date   $node
+     * @param bool   $cacheable
+     * @param float  $boost
      *
-     * @return Filter\Range|Query\Range
+     * @return RangeQuery
      */
     protected function createDateRangeForSingleNode(
-        $fieldName,
+        string $fieldName,
         Date $node,
-        $cacheable = false,
-        $boost = Date::DEFAULT_BOOST
-    ) {
+        bool $cacheable = false,
+        float $boost = Date::DEFAULT_BOOST
+    ): RangeQuery {
         $operator = $node->getComparisonOperator()->getValue();
 
         if ($operator === ComparisonOperator::EQ) {
             $date = $node->toDateTime($this->localTimeZone);
-            $data = ['gte' => $date->format('U'), 'lt' => $date->modify('+1 day')->format('U')];
+            $data = [
+                'gte' => $date->format('Y-m-d'),
+                'lt'  => $date->modify('+1 day')->format('Y-m-d'),
+            ];
         } else {
-            $data = [$operator => $node->toDateTime($this->localTimeZone)->format('U')];
+            $data = [$operator => $node->toDateTime($this->localTimeZone)->format('Y-m-d')];
         }
 
         if ($cacheable) {
@@ -539,19 +541,19 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
     }
 
     /**
-     * @param string $method
-     * @param string $fieldName
-     * @param Query\AbstractQuery $query
+     * @param string        $method
+     * @param string        $fieldName
+     * @param AbstractQuery $query
      */
-    protected function addToBoolQuery($method, $fieldName, Query\AbstractQuery $query)
+    protected function addToBoolQuery(string $method, string $fieldName, AbstractQuery $query): void
     {
         if (false === strpos($fieldName, '.')) {
             $this->boolQuery->$method($query);
             return;
         }
 
+        $fieldName = str_replace('.raw', '', $fieldName);
         $nestedPath = substr($fieldName, 0, strrpos($fieldName, '.'));
-
         if (!isset($this->nestedFields[$nestedPath])) {
             $this->boolQuery->$method($query);
             return;
@@ -559,8 +561,8 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
 
         $nestedQuery = $nestedPath . '-' . $method;
         if (!isset($this->nestedQueries[$nestedQuery])) {
-            $this->nestedQueries[$nestedQuery] = (new Query\Nested())
-                ->setQuery($this->qb->query()->bool()->setMinimumNumberShouldMatch('2<80%'))
+            $this->nestedQueries[$nestedQuery] = (new Nested())
+                ->setQuery($this->qb->query()->bool()->setMinimumShouldMatch('2<80%'))
                 ->setPath($nestedPath);
             $this->boolQuery->$method($this->nestedQueries[$nestedQuery]);
         }

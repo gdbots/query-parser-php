@@ -16,12 +16,17 @@ class EchoLogger implements \Psr\Log\LoggerInterface
      * @param mixed $level
      * @param string $message
      * @param array $context
-     *
-     * @return null
      */
     public function log($level, $message, array $context = array())
     {
         echo $message.PHP_EOL;
+
+        // nuke hits from context since we print those
+        // after response data anyways
+        if (isset($context['response']) && isset($context['response']['hits']) && isset($context['response']['hits']['hits'])) {
+            unset($context['response']['hits']['hits']);
+        }
+
         echo json_encode($context, JSON_PRETTY_PRINT).PHP_EOL.PHP_EOL;
         echo str_repeat(PHP_EOL, 2).str_repeat('*', 70).str_repeat(PHP_EOL, 2);
     }
@@ -34,11 +39,16 @@ $client = new Client(['servers' => [['host' => $host, 'port' => $port]]]);
 $client->setLogger(new EchoLogger());
 
 $parser  = new QueryParser();
+/** @var ElasticaQueryBuilder $builder */
 $builder = (new ElasticaQueryBuilder())
+    ->addNestedField('dynamic_fields')
     ->setDefaultFieldName('_all')
     ->setEmoticonFieldName('emoticons')
     ->setHashtagFieldName('hashtags')
     ->setMentionFieldName('mentions')
+    ->addFullTextSearchField('subject')
+    ->addFullTextSearchField('dynamic_fields.string_val')
+    ->addFullTextSearchField('dynamic_fields.text_val')
     ->setLocalTimeZone(new DateTimeZone('America/Los_Angeles'))
 ;
 
@@ -58,13 +68,13 @@ $query = (new FunctionScore())
     ->setQuery($query)
     ->setBoostMode(FunctionScore::BOOST_MODE_SUM)
     ->addFunction('field_value_factor', [
-        'field' => '__popularity',
+        'field' => 'priority',
         'modifier' => 'none',
     ], null, 0.4);
 */
 $query = \Elastica\Query::create($query);
 //$query->setExplain(true);
-//$query->setSort(['published_at' => 'desc']);
+$query->setSort(['date_sent' => 'desc']);
 $results = $client->getIndex($index)->search($query, $options);
 
 echo 'Total Time (ms) / Records Found:' . PHP_EOL;

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\QueryParser\Node;
 
@@ -24,20 +25,20 @@ final class Field extends Node
     /**
      * Field constructor.
      *
-     * @param string $fieldName
-     * @param Node $node
-     * @param BoolOperator|null $boolOperator
-     * @param bool $useBoost
-     * @param float|mixed $boost
+     * @param string       $fieldName
+     * @param Node         $node
+     * @param BoolOperator $boolOperator
+     * @param bool         $useBoost
+     * @param float        $boost
      *
      * @throws \LogicException
      */
     public function __construct(
-        $fieldName,
+        string $fieldName,
         Node $node,
-        BoolOperator $boolOperator = null,
-        $useBoost = false,
-        $boost = self::DEFAULT_BOOST
+        ?BoolOperator $boolOperator = null,
+        bool $useBoost = false,
+        float $boost = self::DEFAULT_BOOST
     ) {
         if (isset(self::$aliases[$fieldName])) {
             $fieldName = self::$aliases[$fieldName];
@@ -53,13 +54,14 @@ final class Field extends Node
 
     /**
      * @param array $data
+     *
      * @return static
      */
     public static function fromArray(array $data = [])
     {
-        $value    = isset($data['value']) ? $data['value'] : null;
+        $value = isset($data['value']) ? $data['value'] : '';
         $useBoost = isset($data['use_boost']) ? (bool)$data['use_boost'] : false;
-        $boost    = isset($data['boost']) ? (float)$data['boost'] : self::DEFAULT_BOOST;
+        $boost = isset($data['boost']) ? (float)$data['boost'] : self::DEFAULT_BOOST;
 
         try {
             $boolOperator = isset($data['bool_operator']) ? BoolOperator::create($data['bool_operator']) : null;
@@ -86,15 +88,17 @@ final class Field extends Node
     /**
      * @return string
      */
-    public function getName()
+    public function getName(): string
     {
-        return $this->getValue();
+        /** @var string $name */
+        $name = $this->getValue();
+        return $name;
     }
 
     /**
      * @return Node
      */
-    public function getNode()
+    public function getNode(): Node
     {
         return $this->node;
     }
@@ -102,7 +106,7 @@ final class Field extends Node
     /**
      * @return bool
      */
-    public function hasCompoundNode()
+    public function hasCompoundNode(): bool
     {
         return $this->node->isCompoundNode();
     }
@@ -110,7 +114,7 @@ final class Field extends Node
     /**
      * @param QueryBuilder $builder
      */
-    public function acceptBuilder(QueryBuilder $builder)
+    public function acceptBuilder(QueryBuilder $builder): void
     {
         $builder->addField($this);
     }

@@ -1,12 +1,14 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Tests\QueryParser\Builder;
 
 use Gdbots\QueryParser\Builder\XmlQueryBuilder;
 use Gdbots\QueryParser\QueryParser;
 use Gdbots\QueryParser\Node\Node;
+use PHPUnit\Framework\TestCase;
 
-class XmlQueryBuilderTest extends \PHPUnit_Framework_TestCase
+class XmlQueryBuilderTest extends TestCase
 {
     /** @var QueryParser */
     protected $parser;
@@ -25,10 +27,10 @@ class XmlQueryBuilderTest extends \PHPUnit_Framework_TestCase
      *
      * @param string $name
      * @param string $input
-     * @param null $ignored
+     * @param null   $ignored
      * @param Node[] $expectedNodes
      */
-    public function testToSimpleXmlElement($name, $input, $ignored, array $expectedNodes = [])
+    public function testToSimpleXmlElement(string $name, string $input, $ignored, array $expectedNodes = []): void
     {
         $this->builder->addParsedQuery($this->parser->parse($input));
         $xml = $this->builder->toSimpleXmlElement();
@@ -37,6 +39,8 @@ class XmlQueryBuilderTest extends \PHPUnit_Framework_TestCase
         if ($expectedNodeCount && $xml->count() < $expectedNodeCount) {
             $this->fail('Failed to generate SimpleXmlElement from: ' . $input);
         }
+
+        $this->assertSame($expectedNodeCount, $xml->count());
 
         /** @var \SimpleXmlElement $child */
         $i = 0;
@@ -59,8 +63,8 @@ class XmlQueryBuilderTest extends \PHPUnit_Framework_TestCase
     /**
      * @return array
      */
-    public function getTestQueries()
+    public function getTestQueries(): array
     {
-        return require __DIR__.'/../Fixtures/test-queries.php';
+        return require __DIR__ . '/../Fixtures/test-queries.php';
     }
 }
