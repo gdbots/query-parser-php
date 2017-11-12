@@ -66,9 +66,9 @@ abstract class Node implements FromArray, ToArray, \JsonSerializable
         $this->value = $value;
         $this->boolOperator = $boolOperator ?: BoolOperator::OPTIONAL();
 
-        $this->useBoost = (bool)$useBoost && static::SUPPORTS_BOOST && $this->boolOperator === BoolOperator::OPTIONAL();
+        $this->useBoost = $useBoost && static::SUPPORTS_BOOST && $this->boolOperator === BoolOperator::OPTIONAL();
         if ($this->useBoost) {
-            $this->boost = (float)$boost;
+            $this->boost = $boost;
             if ($this->boost < static::MIN_BOOST) {
                 $this->boost = static::MIN_BOOST;
             }
@@ -78,7 +78,7 @@ abstract class Node implements FromArray, ToArray, \JsonSerializable
             }
         }
 
-        $this->useFuzzy = (bool)$useFuzzy && static::SUPPORTS_FUZZY && $this->boolOperator === BoolOperator::OPTIONAL();
+        $this->useFuzzy = $useFuzzy && static::SUPPORTS_FUZZY && $this->boolOperator === BoolOperator::OPTIONAL();
         if ($this->useFuzzy) {
             $this->fuzzy = NumberUtils::bound($fuzzy, static::MIN_FUZZY, static::MAX_FUZZY);
         }
@@ -114,7 +114,7 @@ abstract class Node implements FromArray, ToArray, \JsonSerializable
     {
         $array = ['type' => static::NODE_TYPE];
 
-        if (null !== $this->value) {
+        if ($this->hasValue()) {
             $array['value'] = $this->value;
         }
 
@@ -148,7 +148,7 @@ abstract class Node implements FromArray, ToArray, \JsonSerializable
      */
     final public function hasValue(): bool
     {
-        return null !== $this->value;
+        return null !== $this->value && '' !== $this->value;
     }
 
     /**
