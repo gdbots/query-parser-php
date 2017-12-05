@@ -188,7 +188,7 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
             return $this->boolQuery;
         }
 
-        return $this->boolQuery->setMinimumShouldMatch('2<80%');
+        return $this->boolQuery->setMinimumNumberShouldMatch('2<80%');
     }
 
     /**
