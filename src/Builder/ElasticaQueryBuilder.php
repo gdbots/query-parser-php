@@ -451,7 +451,7 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
             return;
         }
 
-        $value = $this->lowerCaseTerms &&  is_string($node->getValue()) ? strtolower((string)$node->getValue()) : $node->getValue();
+        $value = $this->lowerCaseTerms && !$node instanceof Numbr ? strtolower((string)$node->getValue()) : $node->getValue();
         $fieldName = $this->inField() ? $field->getName() : $this->defaultFieldName;
 
         if ($this->inField() && !$this->inSubquery()) {
