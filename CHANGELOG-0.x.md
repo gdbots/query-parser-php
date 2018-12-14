@@ -2,7 +2,7 @@
 This changelog references the relevant changes done in 0.x versions.
 
 ## v0.3.1
-* (patch) issue #288: cannot search nodes using any time field
+* BUG :: Fix invalid string casting on Numbr in ElasticaQueryBuilder.
 
 ## v0.3.0
 __BREAKING CHANGES__
