@@ -1756,6 +1756,30 @@ return [
             new Word('token'),
         ],
     ],
+
+    [
+        'name'            => 'should not have words or phrases without real characters',
+        'input'           => 'test taco-spice chester:copperpot :: : ; ;; " " , - -- - ++ "a phrase:" _ [ ] { } | \\ / ` * ~ ! @ ( ) # $ % ^ & = < > ?',
+        'expected_tokens' => [
+            [T::T_WORD, 'test'],
+            [T::T_WORD, 'taco-spice'],
+            [T::T_FIELD_START, 'chester'],
+            [T::T_WORD, 'copperpot'],
+            T::T_FIELD_END,
+            T::T_PROHIBITED,
+            T::T_REQUIRED,
+            [T::T_PHRASE, 'a phrase:'],
+            T::T_WILDCARD,
+            T::T_SUBQUERY_START,
+            T::T_SUBQUERY_END,
+        ],
+        'expected_nodes'  => [
+            new Word('test'),
+            new Word('taco-spice'),
+            new Field('chester', new Word('copperpot')),
+            new Phrase('a phrase:'),
+        ],
+    ],
     /*
      * END: WEIRD QUERIES
      */
