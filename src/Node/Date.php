@@ -78,7 +78,7 @@ final class Date extends Node
     /**
      * @return array
      */
-    public function toArray()
+    public function toArray(): array
     {
         $array = parent::toArray();
         if ($this->comparisonOperator->equals(ComparisonOperator::EQ())) {
@@ -111,9 +111,9 @@ final class Date extends Node
      *
      * @param \DateTimeZone $timeZone
      *
-     * @return \DateTime
+     * @return \DateTimeInterface
      */
-    public function toDateTime(\DateTimeZone $timeZone = null): \DateTime
+    public function toDateTime(?\DateTimeZone $timeZone = null): \DateTimeInterface
     {
         if (null === self::$utc) {
             self::$utc = new \DateTimeZone('UTC');

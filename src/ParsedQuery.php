@@ -3,15 +3,13 @@ declare(strict_types=1);
 
 namespace Gdbots\QueryParser;
 
-use Gdbots\Common\FromArray;
-use Gdbots\Common\ToArray;
 use Gdbots\QueryParser\Node\Field;
 use Gdbots\QueryParser\Node\Node;
 
-class ParsedQuery implements FromArray, ToArray, \JsonSerializable
+class ParsedQuery implements \JsonSerializable
 {
     /** @var Node[] */
-    private $nodes = [];
+    private array $nodes = [];
 
     /** @var array */
     private $nodesByType = [];

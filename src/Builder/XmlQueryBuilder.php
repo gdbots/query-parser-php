@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Gdbots\QueryParser\Builder;
 
-use Gdbots\Common\Util\StringUtils;
+use Gdbots\QueryParser\Util\StringUtil;
 use Gdbots\QueryParser\Enum\ComparisonOperator;
 use Gdbots\QueryParser\Node\Date;
 use Gdbots\QueryParser\Node\Field;
@@ -235,7 +235,8 @@ class XmlQueryBuilder extends AbstractQueryBuilder
             }
         }
 
-        $tag .= sprintf(' rule="%s"', StringUtils::toSnakeFromCamel($rule));
+        $snaked = trim(strtolower(preg_replace('/([A-Z])/', '_$1', $rule)), '_');
+        $tag .= sprintf(' rule="%s"', $snaked);
 
         if ($node instanceof Numbr || $node instanceof Date) {
             switch ($node->getComparisonOperator()->getValue()) {

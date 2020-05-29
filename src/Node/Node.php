@@ -3,14 +3,10 @@ declare(strict_types=1);
 
 namespace Gdbots\QueryParser\Node;
 
-use Gdbots\Common\FromArray;
-use Gdbots\Common\ToArray;
-use Gdbots\Common\Util\NumberUtils;
-use Gdbots\Common\Util\StringUtils;
 use Gdbots\QueryParser\Builder\QueryBuilder;
 use Gdbots\QueryParser\Enum\BoolOperator;
 
-abstract class Node implements FromArray, ToArray, \JsonSerializable
+abstract class Node implements \JsonSerializable
 {
     const NODE_TYPE = 'node';
     const COMPOUND_NODE = false;
@@ -80,7 +76,7 @@ abstract class Node implements FromArray, ToArray, \JsonSerializable
 
         $this->useFuzzy = $useFuzzy && static::SUPPORTS_FUZZY && $this->boolOperator === BoolOperator::OPTIONAL();
         if ($this->useFuzzy) {
-            $this->fuzzy = NumberUtils::bound($fuzzy, static::MIN_FUZZY, static::MAX_FUZZY);
+            $this->fuzzy = min(max($fuzzy, static::MIN_FUZZY), static::MAX_FUZZY);
         }
     }
 
@@ -99,7 +95,8 @@ abstract class Node implements FromArray, ToArray, \JsonSerializable
         }
 
         /** @var Node $class */
-        $class = 'Gdbots\QueryParser\Node\\' . StringUtils::toCamelFromSnake($type);
+        $camel = str_replace(' ', '', ucwords(str_replace('_', ' ', $type)));
+        $class = 'Gdbots\QueryParser\Node\\' . $camel;
         if (!class_exists($class)) {
             throw new \InvalidArgumentException(sprintf('Node type [%s] does not exist.', $type));
         }

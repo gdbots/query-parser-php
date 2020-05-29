@@ -5,12 +5,11 @@
   "type": "library",
   "license": "Apache-2.0",
   "require": {
-    "php": ">=7.1",
-    "gdbots/common": "~0.1 || ^1.0"
+    "php": ">=7.4"
   },
   "require-dev": {
-    "phpunit/phpunit": "~6.4",
-    "ruflin/elastica": "~5.3"
+    "phpunit/phpunit": "^9.1",
+    "ruflin/elastica": "^7.0.0-beta.4"
   },
   "autoload": {
     "psr-4": {
@@ -24,10 +23,5 @@
   },
   "scripts": {
     "test": "vendor/bin/phpunit"
-  },
-  "extra": {
-    "branch-alias": {
-      "dev-master": "0.3.x-dev"
-    }
   }
 }

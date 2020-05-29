@@ -8,10 +8,9 @@ use PHPUnit\Framework\TestCase;
 
 class QueryParserTest extends TestCase
 {
-    /** @var QueryParser */
-    protected $parser;
+    protected ?QueryParser $parser = null;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->parser = new QueryParser();
     }
@@ -30,9 +29,6 @@ class QueryParserTest extends TestCase
         $this->assertEquals($expectedNodes, $result->getNodes(), "Test query [{$name}] with input [{$input}] failed.");
     }
 
-    /**
-     * @return array
-     */
     public function getTestQueries(): array
     {
         return require __DIR__ . '/Fixtures/test-queries.php';
