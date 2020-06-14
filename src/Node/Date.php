@@ -17,23 +17,9 @@ final class Date extends Node
     const MAX_FUZZY = 5;
     */
 
-    /** @var \DateTimeZone */
-    private static $utc;
+    private static ?\DateTimeZone $utc = null;
+    private ComparisonOperator $comparisonOperator;
 
-    /** @var ComparisonOperator */
-    private $comparisonOperator;
-
-    /**
-     * Date constructor.
-     *
-     * @param string             $value
-     * @param BoolOperator       $boolOperator
-     * @param bool               $useBoost
-     * @param float              $boost
-     * @param bool               $useFuzzy
-     * @param int                $fuzzy
-     * @param ComparisonOperator $comparisonOperator
-     */
     public function __construct(
         string $value,
         ?BoolOperator $boolOperator = null,
@@ -47,37 +33,29 @@ final class Date extends Node
         $this->comparisonOperator = $comparisonOperator ?: ComparisonOperator::EQ();
     }
 
-    /**
-     * @param array $data
-     *
-     * @return self
-     */
-    public static function fromArray(array $data = [])
+    public static function fromArray(array $data = []): self
     {
-        $value = isset($data['value']) ? $data['value'] : '';
-        $useBoost = isset($data['use_boost']) ? (bool)$data['use_boost'] : false;
-        $boost = isset($data['boost']) ? (float)$data['boost'] : self::DEFAULT_BOOST;
-        $useFuzzy = isset($data['use_fuzzy']) ? (bool)$data['use_fuzzy'] : false;
-        $fuzzy = isset($data['fuzzy']) ? (int)$data['fuzzy'] : self::DEFAULT_FUZZY;
+        $value = $data['value'] ?? '';
+        $useBoost = (bool)($data['use_boost'] ?? false);
+        $boost = (float)($data['boost'] ?? self::DEFAULT_BOOST);
+        $useFuzzy = (bool)($data['use_fuzzy'] ?? false);
+        $fuzzy = (int)($data['fuzzy'] ?? self::DEFAULT_FUZZY);
 
         try {
             $boolOperator = isset($data['bool_operator']) ? BoolOperator::create($data['bool_operator']) : null;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $boolOperator = null;
         }
 
         try {
             $comparisonOperator = isset($data['comparison_operator']) ? ComparisonOperator::create($data['comparison_operator']) : null;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $comparisonOperator = null;
         }
 
         return new self($value, $boolOperator, $useBoost, $boost, $useFuzzy, $fuzzy, $comparisonOperator);
     }
 
-    /**
-     * @return array
-     */
     public function toArray(): array
     {
         $array = parent::toArray();
@@ -89,17 +67,11 @@ final class Date extends Node
         return $array;
     }
 
-    /**
-     * @return bool
-     */
     public function useComparisonOperator(): bool
     {
         return !$this->comparisonOperator->equals(ComparisonOperator::EQ());
     }
 
-    /**
-     * @return ComparisonOperator
-     */
     public function getComparisonOperator(): ComparisonOperator
     {
         return $this->comparisonOperator;
@@ -120,7 +92,7 @@ final class Date extends Node
         }
 
         $date = \DateTime::createFromFormat('!Y-m-d', $this->getValue(), $timeZone ?: self::$utc);
-        if (!$date instanceof \DateTime) {
+        if (!$date instanceof \DateTimeInterface) {
             $date = \DateTime::createFromFormat('!Y-m-d', (new \DateTime())->format('Y-m-d'), $timeZone ?: self::$utc);
         }
 
@@ -131,9 +103,6 @@ final class Date extends Node
         return $date;
     }
 
-    /**
-     * @param QueryBuilder $builder
-     */
     public function acceptBuilder(QueryBuilder $builder): void
     {
         $builder->addDate($this);

@@ -55,7 +55,7 @@ class XmlQueryBuilder extends AbstractQueryBuilder
     {
         try {
             $xml = new \SimpleXMLElement($this->toXmlString());
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $xml = null;
         }
 

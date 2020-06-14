@@ -5,17 +5,13 @@ namespace Gdbots\QueryParser;
 
 final class TokenStream implements \JsonSerializable
 {
-    /** @var Token */
-    private static $eoi;
+    private static ?Token $eoi = null;
 
     /** @var Token[] */
-    private $tokens = [];
+    private array $tokens = [];
 
-    /** @var Token */
-    private $current;
-
-    /** @var int */
-    private $position = 0;
+    private Token $current;
+    private int $position = 0;
 
     /**
      * @param Token[] $tokens
@@ -38,7 +34,7 @@ final class TokenStream implements \JsonSerializable
     public function reset(): self
     {
         $this->position = 0;
-        $this->current = isset($this->tokens[$this->position]) ? $this->tokens[$this->position] : self::$eoi;
+        $this->current = $this->tokens[$this->position] ?? self::$eoi;
         return $this;
     }
 
@@ -151,7 +147,7 @@ final class TokenStream implements \JsonSerializable
     /**
      * Returns true if the current type equals any of the given types.
      *
-     * @param array $types
+     * @param int[] $types
      *
      * @return bool
      */
@@ -175,7 +171,7 @@ final class TokenStream implements \JsonSerializable
     /**
      * Returns true if the lookahead type equals any of the given types.
      *
-     * @param array $types
+     * @param int[] $types
      *
      * @return bool
      */
@@ -199,7 +195,7 @@ final class TokenStream implements \JsonSerializable
     /**
      * Returns true if the previous token type equals any of the given types.
      *
-     * @param array $types
+     * @param int[] $types
      *
      * @return bool
      */
@@ -208,20 +204,14 @@ final class TokenStream implements \JsonSerializable
         return isset($this->tokens[$this->position - 2]) && $this->tokens[$this->position - 2]->typeEqualsAnyOf($types);
     }
 
-    /**
-     * @return Token
-     */
     public function getCurrent(): Token
     {
         return $this->current;
     }
 
-    /**
-     * @return Token|null
-     */
     public function getLookahead(): ?Token
     {
-        return isset($this->tokens[$this->position]) ? $this->tokens[$this->position] : null;
+        return $this->tokens[$this->position] ?: null;
     }
 
     /**
@@ -234,9 +224,6 @@ final class TokenStream implements \JsonSerializable
         return $this->tokens;
     }
 
-    /**
-     * @return array
-     */
     public function jsonSerialize()
     {
         return $this->tokens;

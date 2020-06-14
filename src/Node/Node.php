@@ -26,31 +26,12 @@ abstract class Node implements \JsonSerializable
     /** @var mixed */
     private $value = null;
 
-    /** @var BoolOperator */
-    private $boolOperator;
+    private BoolOperator $boolOperator;
+    private bool $useBoost = false;
+    private float $boost = self::DEFAULT_BOOST;
+    private bool $useFuzzy = false;
+    private int $fuzzy = self::DEFAULT_FUZZY;
 
-    /** @var bool */
-    private $useBoost = false;
-
-    /** @var float */
-    private $boost = self::DEFAULT_BOOST;
-
-    /** @var bool */
-    private $useFuzzy = false;
-
-    /** @var int */
-    private $fuzzy = self::DEFAULT_FUZZY;
-
-    /**
-     * Node constructor.
-     *
-     * @param mixed        $value
-     * @param BoolOperator $boolOperator
-     * @param bool         $useBoost
-     * @param float        $boost
-     * @param bool         $useFuzzy
-     * @param int          $fuzzy
-     */
     public function __construct(
         $value,
         ?BoolOperator $boolOperator = null,
@@ -80,12 +61,6 @@ abstract class Node implements \JsonSerializable
         }
     }
 
-    /**
-     * @param array $data
-     *
-     * @return static
-     * @throws \InvalidArgumentException
-     */
     public static function factory(array $data = []): self
     {
         $type = $data['type'];
@@ -104,10 +79,7 @@ abstract class Node implements \JsonSerializable
         return $class::fromArray($data);
     }
 
-    /**
-     * @return array
-     */
-    public function toArray()
+    public function toArray(): array
     {
         $array = ['type' => static::NODE_TYPE];
 
@@ -132,113 +104,71 @@ abstract class Node implements \JsonSerializable
         return $array;
     }
 
-    /**
-     * @return array
-     */
     final public function jsonSerialize()
     {
         return $this->toArray();
     }
 
-    /**
-     * @return bool
-     */
     final public function hasValue(): bool
     {
         return null !== $this->value && '' !== $this->value;
     }
 
-    /**
-     * @return mixed
-     */
     final public function getValue()
     {
         return $this->value;
     }
 
-    /**
-     * @return BoolOperator
-     */
     final public function getBoolOperator(): BoolOperator
     {
         return $this->boolOperator;
     }
 
-    /**
-     * @return bool
-     */
     final public function isOptional(): bool
     {
         return $this->boolOperator->equals(BoolOperator::OPTIONAL());
     }
 
-    /**
-     * @return bool
-     */
     final public function isRequired(): bool
     {
         return $this->boolOperator->equals(BoolOperator::REQUIRED());
     }
 
-    /**
-     * @return bool
-     */
     final public function isProhibited(): bool
     {
         return $this->boolOperator->equals(BoolOperator::PROHIBITED());
     }
 
-    /**
-     * @return bool
-     */
     final public function isCompoundNode(): bool
     {
         return static::COMPOUND_NODE;
     }
 
-    /**
-     * @return bool
-     */
     public function useComparisonOperator(): bool
     {
         return false;
     }
 
-    /**
-     * @return bool
-     */
     final public function useBoost(): bool
     {
         return $this->useBoost;
     }
 
-    /**
-     * @return float
-     */
     final public function getBoost(): float
     {
         return $this->boost;
     }
 
-    /**
-     * @return bool
-     */
     final public function useFuzzy(): bool
     {
         return $this->useFuzzy;
     }
 
-    /**
-     * @return int
-     */
     final public function getFuzzy(): int
     {
         return $this->fuzzy;
     }
 
-    /**
-     * @param QueryBuilder $builder
-     */
     public function acceptBuilder(QueryBuilder $builder): void
     {
         // do nothing

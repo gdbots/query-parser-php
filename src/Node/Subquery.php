@@ -12,18 +12,8 @@ final class Subquery extends Node
     const COMPOUND_NODE = true;
 
     /** @var Node[] */
-    private $nodes = [];
+    private array $nodes = [];
 
-    /**
-     * Subquery constructor.
-     *
-     * @param Node[]       $nodes
-     * @param BoolOperator $boolOperator
-     * @param bool         $useBoost
-     * @param float        $boost
-     *
-     * @throws \LogicException
-     */
     public function __construct(
         array $nodes,
         ?BoolOperator $boolOperator = null,
@@ -40,15 +30,10 @@ final class Subquery extends Node
         }
     }
 
-    /**
-     * @param array $data
-     *
-     * @return self
-     */
-    public static function fromArray(array $data = [])
+    public static function fromArray(array $data = []): self
     {
-        $useBoost = isset($data['use_boost']) ? (bool)$data['use_boost'] : false;
-        $boost = isset($data['boost']) ? (float)$data['boost'] : self::DEFAULT_BOOST;
+        $useBoost = (bool)($data['use_boost'] ?? false);
+        $boost = (float)($data['boost'] ?? self::DEFAULT_BOOST);
 
         $nodes = [];
         if (isset($data['nodes'])) {
@@ -59,17 +44,14 @@ final class Subquery extends Node
 
         try {
             $boolOperator = isset($data['bool_operator']) ? BoolOperator::create($data['bool_operator']) : null;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $boolOperator = null;
         }
 
         return new self($nodes, $boolOperator, $useBoost, $boost);
     }
 
-    /**
-     * @return array
-     */
-    public function toArray()
+    public function toArray(): array
     {
         $array = parent::toArray();
         $array['nodes'] = [];
@@ -89,9 +71,6 @@ final class Subquery extends Node
         return $this->nodes;
     }
 
-    /**
-     * @param QueryBuilder $builder
-     */
     public function acceptBuilder(QueryBuilder $builder): void
     {
         $builder->addSubquery($this);

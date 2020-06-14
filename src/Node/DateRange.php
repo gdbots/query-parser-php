@@ -8,13 +8,6 @@ final class DateRange extends Range
     const NODE_TYPE = 'date_range';
     const COMPOUND_NODE = true;
 
-    /**
-     * DateRange constructor.
-     *
-     * @param Date $lowerNode
-     * @param Date $upperNode
-     * @param bool $exclusive
-     */
     public function __construct(?Date $lowerNode = null, ?Date $upperNode = null, bool $exclusive = false)
     {
         parent::__construct($lowerNode, $upperNode, $exclusive);
