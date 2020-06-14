@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Gdbots\QueryParser;
 
-class Token implements \JsonSerializable
+final class Token implements \JsonSerializable
 {
     const T_EOI              = 0;  // end of input
     const T_WHITE_SPACE      = 1;
@@ -42,10 +42,9 @@ class Token implements \JsonSerializable
      *
      * @var array
      */
-    private static $typeNames;
+    private static array $typeNames;
 
-    /** @var int */
-    private $type = self::T_EOI;
+    private int $type;
 
     /** @var string|float|null */
     private $value;
@@ -73,28 +72,19 @@ class Token implements \JsonSerializable
             static::$typeNames = array_flip((new \ReflectionClass(__CLASS__))->getConstants());
         }
 
-        return isset(self::$typeNames[$type]) ? self::$typeNames[$type] : (string)$type;
+        return self::$typeNames[$type] ?? (string)$type;
     }
 
-    /**
-     * @return array
-     */
     public function jsonSerialize()
     {
         return ['type' => $this->type, 'value' => $this->value];
     }
 
-    /**
-     * @return string
-     */
     public function getTypeName(): string
     {
         return self::name($this->type);
     }
 
-    /**
-     * @return int
-     */
     public function getType(): int
     {
         return $this->type;
@@ -108,11 +98,6 @@ class Token implements \JsonSerializable
         return $this->value;
     }
 
-    /**
-     * @param int $type
-     *
-     * @return bool
-     */
     public function typeEquals(int $type): bool
     {
         return $type === $this->type;
@@ -128,25 +113,16 @@ class Token implements \JsonSerializable
         return in_array($this->type, $types, true);
     }
 
-    /**
-     * @return bool
-     */
     public function isWhiteSpace(): bool
     {
         return self::T_WHITE_SPACE === $this->type;
     }
 
-    /**
-     * @return bool
-     */
     public function isIgnored(): bool
     {
         return self::T_IGNORED === $this->type;
     }
 
-    /**
-     * @return bool
-     */
     public function isEndOfInput(): bool
     {
         return self::T_EOI === $this->type;

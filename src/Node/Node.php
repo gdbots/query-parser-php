@@ -3,14 +3,10 @@ declare(strict_types=1);
 
 namespace Gdbots\QueryParser\Node;
 
-use Gdbots\Common\FromArray;
-use Gdbots\Common\ToArray;
-use Gdbots\Common\Util\NumberUtils;
-use Gdbots\Common\Util\StringUtils;
 use Gdbots\QueryParser\Builder\QueryBuilder;
 use Gdbots\QueryParser\Enum\BoolOperator;
 
-abstract class Node implements FromArray, ToArray, \JsonSerializable
+abstract class Node implements \JsonSerializable
 {
     const NODE_TYPE = 'node';
     const COMPOUND_NODE = false;
@@ -30,31 +26,12 @@ abstract class Node implements FromArray, ToArray, \JsonSerializable
     /** @var mixed */
     private $value = null;
 
-    /** @var BoolOperator */
-    private $boolOperator;
+    private BoolOperator $boolOperator;
+    private bool $useBoost = false;
+    private float $boost = self::DEFAULT_BOOST;
+    private bool $useFuzzy = false;
+    private int $fuzzy = self::DEFAULT_FUZZY;
 
-    /** @var bool */
-    private $useBoost = false;
-
-    /** @var float */
-    private $boost = self::DEFAULT_BOOST;
-
-    /** @var bool */
-    private $useFuzzy = false;
-
-    /** @var int */
-    private $fuzzy = self::DEFAULT_FUZZY;
-
-    /**
-     * Node constructor.
-     *
-     * @param mixed        $value
-     * @param BoolOperator $boolOperator
-     * @param bool         $useBoost
-     * @param float        $boost
-     * @param bool         $useFuzzy
-     * @param int          $fuzzy
-     */
     public function __construct(
         $value,
         ?BoolOperator $boolOperator = null,
@@ -80,16 +57,10 @@ abstract class Node implements FromArray, ToArray, \JsonSerializable
 
         $this->useFuzzy = $useFuzzy && static::SUPPORTS_FUZZY && $this->boolOperator === BoolOperator::OPTIONAL();
         if ($this->useFuzzy) {
-            $this->fuzzy = NumberUtils::bound($fuzzy, static::MIN_FUZZY, static::MAX_FUZZY);
+            $this->fuzzy = min(max($fuzzy, static::MIN_FUZZY), static::MAX_FUZZY);
         }
     }
 
-    /**
-     * @param array $data
-     *
-     * @return static
-     * @throws \InvalidArgumentException
-     */
     public static function factory(array $data = []): self
     {
         $type = $data['type'];
@@ -99,7 +70,8 @@ abstract class Node implements FromArray, ToArray, \JsonSerializable
         }
 
         /** @var Node $class */
-        $class = 'Gdbots\QueryParser\Node\\' . StringUtils::toCamelFromSnake($type);
+        $camel = str_replace(' ', '', ucwords(str_replace('_', ' ', $type)));
+        $class = 'Gdbots\QueryParser\Node\\' . $camel;
         if (!class_exists($class)) {
             throw new \InvalidArgumentException(sprintf('Node type [%s] does not exist.', $type));
         }
@@ -107,10 +79,7 @@ abstract class Node implements FromArray, ToArray, \JsonSerializable
         return $class::fromArray($data);
     }
 
-    /**
-     * @return array
-     */
-    public function toArray()
+    public function toArray(): array
     {
         $array = ['type' => static::NODE_TYPE];
 
@@ -135,113 +104,71 @@ abstract class Node implements FromArray, ToArray, \JsonSerializable
         return $array;
     }
 
-    /**
-     * @return array
-     */
     final public function jsonSerialize()
     {
         return $this->toArray();
     }
 
-    /**
-     * @return bool
-     */
     final public function hasValue(): bool
     {
         return null !== $this->value && '' !== $this->value;
     }
 
-    /**
-     * @return mixed
-     */
     final public function getValue()
     {
         return $this->value;
     }
 
-    /**
-     * @return BoolOperator
-     */
     final public function getBoolOperator(): BoolOperator
     {
         return $this->boolOperator;
     }
 
-    /**
-     * @return bool
-     */
     final public function isOptional(): bool
     {
         return $this->boolOperator->equals(BoolOperator::OPTIONAL());
     }
 
-    /**
-     * @return bool
-     */
     final public function isRequired(): bool
     {
         return $this->boolOperator->equals(BoolOperator::REQUIRED());
     }
 
-    /**
-     * @return bool
-     */
     final public function isProhibited(): bool
     {
         return $this->boolOperator->equals(BoolOperator::PROHIBITED());
     }
 
-    /**
-     * @return bool
-     */
     final public function isCompoundNode(): bool
     {
         return static::COMPOUND_NODE;
     }
 
-    /**
-     * @return bool
-     */
     public function useComparisonOperator(): bool
     {
         return false;
     }
 
-    /**
-     * @return bool
-     */
     final public function useBoost(): bool
     {
         return $this->useBoost;
     }
 
-    /**
-     * @return float
-     */
     final public function getBoost(): float
     {
         return $this->boost;
     }
 
-    /**
-     * @return bool
-     */
     final public function useFuzzy(): bool
     {
         return $this->useFuzzy;
     }
 
-    /**
-     * @return int
-     */
     final public function getFuzzy(): int
     {
         return $this->fuzzy;
     }
 
-    /**
-     * @param QueryBuilder $builder
-     */
     public function acceptBuilder(QueryBuilder $builder): void
     {
         // do nothing

@@ -4,19 +4,16 @@ declare(strict_types=1);
 namespace Gdbots\Tests\QueryParser\Builder;
 
 use Gdbots\QueryParser\Builder\XmlQueryBuilder;
-use Gdbots\QueryParser\QueryParser;
 use Gdbots\QueryParser\Node\Node;
+use Gdbots\QueryParser\QueryParser;
 use PHPUnit\Framework\TestCase;
 
 class XmlQueryBuilderTest extends TestCase
 {
-    /** @var QueryParser */
-    protected $parser;
+    protected ?QueryParser $parser = null;
+    protected ?XmlQueryBuilder $builder = null;
 
-    /** @var XmlQueryBuilder */
-    protected $builder;
-
-    public function setUp()
+    public function setUp(): void
     {
         $this->parser = new QueryParser();
         $this->builder = new XmlQueryBuilder();
@@ -60,9 +57,6 @@ class XmlQueryBuilderTest extends TestCase
         }
     }
 
-    /**
-     * @return array
-     */
     public function getTestQueries(): array
     {
         return require __DIR__ . '/../Fixtures/test-queries.php';

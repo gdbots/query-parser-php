@@ -3,25 +3,15 @@ declare(strict_types=1);
 
 namespace Gdbots\QueryParser;
 
-use Gdbots\Common\FromArray;
-use Gdbots\Common\ToArray;
 use Gdbots\QueryParser\Node\Field;
 use Gdbots\QueryParser\Node\Node;
 
-class ParsedQuery implements FromArray, ToArray, \JsonSerializable
+final class ParsedQuery implements \JsonSerializable
 {
-    /** @var Node[] */
-    private $nodes = [];
+    private array $nodes = [];
+    private array $nodesByType = [];
 
-    /** @var array */
-    private $nodesByType = [];
-
-    /**
-     * @param array $data
-     *
-     * @return static
-     */
-    public static function fromArray(array $data = [])
+    public static function fromArray(array $data = []): self
     {
         $obj = new static();
 
@@ -32,17 +22,11 @@ class ParsedQuery implements FromArray, ToArray, \JsonSerializable
         return $obj;
     }
 
-    /**
-     * @return array
-     */
-    public function toArray()
+    public function toArray(): array
     {
         return $this->nodes;
     }
 
-    /**
-     * @return array
-     */
     public function jsonSerialize()
     {
         return $this->toArray();
@@ -51,7 +35,7 @@ class ParsedQuery implements FromArray, ToArray, \JsonSerializable
     /**
      * @param Node[] $nodes
      *
-     * @return static
+     * @return self
      */
     public function addNodes(array $nodes): self
     {
@@ -65,7 +49,7 @@ class ParsedQuery implements FromArray, ToArray, \JsonSerializable
     /**
      * @param Node $node
      *
-     * @return static
+     * @return self
      */
     public function addNode(Node $node): self
     {
@@ -114,7 +98,7 @@ class ParsedQuery implements FromArray, ToArray, \JsonSerializable
      * Returns an array of fields (specifically the field names) that are
      * used in this query.  e.g. "status:active", "status" is the field name.
      *
-     * @return array
+     * @return string[]
      */
     public function getFieldsUsed(): array
     {

@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 namespace Gdbots\QueryParser\Enum;
 
-use Gdbots\Common\Enum;
-
 /**
  * @method static ComparisonOperator EQ()
  * @method static ComparisonOperator GT()
@@ -12,7 +10,7 @@ use Gdbots\Common\Enum;
  * @method static ComparisonOperator LT()
  * @method static ComparisonOperator LTE()
  */
-final class ComparisonOperator extends Enum
+final class ComparisonOperator extends AbstractEnum
 {
     const EQ = 'eq';
     const GT = 'gt';

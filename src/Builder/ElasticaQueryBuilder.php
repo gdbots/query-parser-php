@@ -25,11 +25,8 @@ use Gdbots\QueryParser\Node\Word;
 
 class ElasticaQueryBuilder extends AbstractQueryBuilder
 {
-    /** @var RuflinQueryBuilder */
-    protected $qb;
-
-    /** @var BoolQuery */
-    protected $boolQuery;
+    protected RuflinQueryBuilder $qb;
+    protected BoolQuery $boolQuery;
 
     /**
      * When a subquery is entered we'll take the current query
@@ -38,19 +35,11 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
      *
      * @var BoolQuery
      */
-    protected $outerBoolQuery;
-
-    /** @var bool */
-    protected $ignoreEmojis = true;
-
-    /** @var bool */
-    protected $ignoreEmoticons = true;
-
-    /** @var bool */
-    protected $ignoreStopWords = true;
-
-    /** @var bool */
-    protected $lowerCaseTerms = true;
+    protected BoolQuery $outerBoolQuery;
+    protected bool $ignoreEmojis = true;
+    protected bool $ignoreEmoticons = true;
+    protected bool $ignoreStopWords = true;
+    protected bool $lowerCaseTerms = true;
 
     /**
      * Array of field names which are nested objects in ElasticSearch and
@@ -60,7 +49,7 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
      *
      * @var string[]
      */
-    protected $nestedFields = [];
+    protected array $nestedFields = [];
 
     /**
      * Any fields encountered that are nested are stored as a nested query
@@ -71,21 +60,16 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
      *
      * @var Nested[]
      */
-    protected $nestedQueries = [];
+    protected array $nestedQueries = [];
 
-    /**
-     * ElasticaQueryBuilder constructor.
-     */
     public function __construct()
     {
+        $this->defaultFieldName = '_all';
         $this->qb = new RuflinQueryBuilder();
         $this->clear();
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function clear(): QueryBuilder
+    public function clear(): self
     {
         $this->boolQuery = $this->qb->query()->bool();
         $this->outerBoolQuery = $this->boolQuery;
@@ -93,94 +77,53 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
         return $this;
     }
 
-    /**
-     * @param bool $ignoreEmojis
-     *
-     * @return static
-     */
     public function ignoreEmojis(bool $ignoreEmojis = true): self
     {
         $this->ignoreEmojis = $ignoreEmojis;
         return $this;
     }
 
-    /**
-     * @param bool $ignoreEmoticons
-     *
-     * @return static
-     */
     public function ignoreEmoticons(bool $ignoreEmoticons = true): self
     {
         $this->ignoreEmoticons = $ignoreEmoticons;
         return $this;
     }
 
-    /**
-     * @param bool $ignoreStopWords
-     *
-     * @return static
-     */
     public function ignoreStopWords(bool $ignoreStopWords = true): self
     {
         $this->ignoreStopWords = $ignoreStopWords;
         return $this;
     }
 
-    /**
-     * @param bool $lowerCaseTerms
-     *
-     * @return static
-     */
     public function lowerCaseTerms(bool $lowerCaseTerms = true): self
     {
         $this->lowerCaseTerms = $lowerCaseTerms;
         return $this;
     }
 
-    /**
-     * @param string[] $fields
-     *
-     * @return static
-     */
     public function setNestedFields(array $fields): self
     {
         $this->nestedFields = array_flip($fields);
         return $this;
     }
 
-    /**
-     * @param string $fieldName
-     *
-     * @return static
-     */
     public function addNestedField(string $fieldName): self
     {
         $this->nestedFields[$fieldName] = true;
         return $this;
     }
 
-    /**
-     * @param string $fieldName
-     *
-     * @return static
-     */
     public function removeNestedField(string $fieldName): self
     {
         unset($this->nestedFields[$fieldName]);
         return $this;
     }
 
-    /**
-     * @return array
-     */
     public function getNestedFields(): array
     {
         return array_keys($this->nestedFields);
     }
 
-    /**
-     * @return BoolQuery
-     */
     public function getBoolQuery(): BoolQuery
     {
         if ($this->boolQuery->hasParam('must')) {
@@ -191,9 +134,6 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
         return $this->boolQuery->setMinimumShouldMatch('2<80%');
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function handleRange(Range $range, Field $field, bool $cacheable = false): void
     {
         $useBoost = $field->useBoost();
@@ -256,18 +196,12 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
         $this->addToBoolQuery($method, $field->getName(), $this->qb->query()->range($field->getName(), $data));
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function startSubquery(Subquery $subquery, ?Field $field = null): void
     {
         $this->outerBoolQuery = $this->boolQuery;
         $this->boolQuery = $this->qb->query()->bool();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function endSubquery(Subquery $subquery, ?Field $field = null): void
     {
         $params = $this->boolQuery->getParams();
@@ -300,32 +234,23 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
         $this->boolQuery = $this->outerBoolQuery;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function mustMatch(Node $node, ?Field $field = null): void
     {
         $this->addTextToQuery('addMust', $node, $field);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function shouldMatch(Node $node, ?Field $field = null): void
     {
         $this->addTextToQuery('addShould', $node, $field);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function mustNotMatch(Node $node, ?Field $field = null): void
     {
         $this->addTextToQuery('addMustNot', $node, $field);
     }
 
     /**
-     * Adds a text node to the active query.  These all use the "match" when full
+     * Adds a text node to the active query. These all use the "match" when full
      * text searching is needed/supported.
      *
      * @param string $method
@@ -365,31 +290,31 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
             $fuzzy = 1;
         }
 
-        if ($useFuzzy && $node instanceof Phrase) {
-            $data = [
-                'query'       => $node->getValue(),
-                'type'        => Phrase::NODE_TYPE,
-                'lenient'     => true,
-                'phrase_slop' => $fuzzy,
-            ];
+        if ($node instanceof Phrase) {
+            $data = ['query' => $node->getValue()];
 
             if ($useBoost) {
                 $data['boost'] = $boost;
             }
 
-            $query = $this->qb->query()->match();
-            $query->setField($fieldName, $data);
+            if ($useFuzzy) {
+                $data['slop'] = $fuzzy;
+            }
+
+            $query = $this->qb->query()->match_phrase($fieldName, $data);
         } elseif ($useFuzzy) {
-            $query = $this->qb->query()->fuzzy();
-            $query->setField($fieldName, $node->getValue());
+            $query = $this->qb->query()->fuzzy($fieldName, $node->getValue());
             $query->setFieldOption('fuzziness', $fuzzy);
 
             if ($useBoost) {
                 $query->setFieldOption('boost', $boost);
             }
         } elseif ($node instanceof Word && $node->hasTrailingWildcard()) {
-            $query = $this->qb->query()->wildcard();
-            $query->setValue($fieldName, strtolower($node->getValue()) . '*', $useBoost ? $boost : Word::DEFAULT_BOOST);
+            $query = $this->qb->query()->wildcard(
+                $fieldName,
+                strtolower($node->getValue()) . '*',
+                $useBoost ? $boost : Word::DEFAULT_BOOST
+            );
         } else {
             $data = ['query' => $node->getValue(), 'operator' => 'and', 'lenient' => true];
 
@@ -397,43 +322,29 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
                 $data['boost'] = $boost;
             }
 
-            if ($node instanceof Phrase) {
-                $data['type'] = Phrase::NODE_TYPE;
-            }
-
-            $query = $this->qb->query()->match();
-            $query->setField($fieldName, $data);
+            $query = $this->qb->query()->match($fieldName, $data);
         }
 
         $this->addToBoolQuery($method, $fieldName, $query);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function mustMatchTerm(Node $node, ?Field $field = null, bool $cacheable = false): void
     {
         $this->addTermToQuery('addMust', $node, $field, $cacheable);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function shouldMatchTerm(Node $node, ?Field $field = null): void
     {
         $this->addTermToQuery('addShould', $node, $field);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function mustNotMatchTerm(Node $node, ?Field $field = null, bool $cacheable = false): void
     {
         $this->addTermToQuery('addMustNot', $node, $field, $cacheable);
     }
 
     /**
-     * Adds a term to the bool query or filter context.  Filter context is used when the
+     * Adds a term to the bool query or filter context. Filter context is used when the
      * request for that item could be cached, like documents with hashtag of cats.
      *
      * @param string $method
@@ -540,11 +451,6 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
         return $this->qb->query()->range($fieldName, $data);
     }
 
-    /**
-     * @param string        $method
-     * @param string        $fieldName
-     * @param AbstractQuery $query
-     */
     protected function addToBoolQuery(string $method, string $fieldName, AbstractQuery $query): void
     {
         if (false === strpos($fieldName, '.')) {
@@ -563,7 +469,8 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
         if (!isset($this->nestedQueries[$nestedQuery])) {
             $this->nestedQueries[$nestedQuery] = (new Nested())
                 ->setQuery($this->qb->query()->bool()->setMinimumShouldMatch('2<80%'))
-                ->setPath($nestedPath);
+                ->setPath($nestedPath)
+                ->setParam('ignore_unmapped', true);
             $this->boolQuery->$method($this->nestedQueries[$nestedQuery]);
         }
 

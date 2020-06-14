@@ -9,10 +9,9 @@ use PHPUnit\Framework\TestCase;
 
 class TokenizerTest extends TestCase
 {
-    /** @var Tokenizer */
-    protected $tokenizer;
+    protected ?Tokenizer $tokenizer = null;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->tokenizer = new Tokenizer();
     }
@@ -45,9 +44,6 @@ class TokenizerTest extends TestCase
         $this->assertEquals($expectedTokens, $tokenStream->getTokens(), "Test query [{$name}] with input [{$input}] failed.");
     }
 
-    /**
-     * @return array
-     */
     public function getTestQueries(): array
     {
         return require __DIR__ . '/Fixtures/test-queries.php';

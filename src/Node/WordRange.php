@@ -8,13 +8,6 @@ final class WordRange extends Range
     const NODE_TYPE = 'word_range';
     const COMPOUND_NODE = true;
 
-    /**
-     * WordRange constructor.
-     *
-     * @param Word $lowerNode
-     * @param Word $upperNode
-     * @param bool $exclusive
-     */
     public function __construct(?Word $lowerNode = null, ?Word $upperNode = null, bool $exclusive = false)
     {
         parent::__construct($lowerNode, $upperNode, $exclusive);

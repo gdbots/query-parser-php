@@ -17,22 +17,9 @@ final class Field extends Node
      *
      * @var array
      */
-    public static $aliases = [];
+    public static array $aliases = [];
+    private Node $node;
 
-    /** @var Node */
-    private $node;
-
-    /**
-     * Field constructor.
-     *
-     * @param string       $fieldName
-     * @param Node         $node
-     * @param BoolOperator $boolOperator
-     * @param bool         $useBoost
-     * @param float        $boost
-     *
-     * @throws \LogicException
-     */
     public function __construct(
         string $fieldName,
         Node $node,
@@ -52,20 +39,15 @@ final class Field extends Node
         }
     }
 
-    /**
-     * @param array $data
-     *
-     * @return static
-     */
-    public static function fromArray(array $data = [])
+    public static function fromArray(array $data = []): self
     {
-        $value = isset($data['value']) ? $data['value'] : '';
-        $useBoost = isset($data['use_boost']) ? (bool)$data['use_boost'] : false;
-        $boost = isset($data['boost']) ? (float)$data['boost'] : self::DEFAULT_BOOST;
+        $value = $data['value'] ?? '';
+        $useBoost = (bool)($data['use_boost'] ?? false);
+        $boost = (float)($data['boost'] ?? self::DEFAULT_BOOST);
 
         try {
             $boolOperator = isset($data['bool_operator']) ? BoolOperator::create($data['bool_operator']) : null;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $boolOperator = null;
         }
 
@@ -75,45 +57,28 @@ final class Field extends Node
         return new self($value, $node, $boolOperator, $useBoost, $boost);
     }
 
-    /**
-     * @return array
-     */
-    public function toArray()
+    public function toArray(): array
     {
         $array = parent::toArray();
         $array['node'] = $this->node->toArray();
         return $array;
     }
 
-    /**
-     * @return string
-     */
     public function getName(): string
     {
-        /** @var string $name */
-        $name = $this->getValue();
-        return $name;
+        return $this->getValue();
     }
 
-    /**
-     * @return Node
-     */
     public function getNode(): Node
     {
         return $this->node;
     }
 
-    /**
-     * @return bool
-     */
     public function hasCompoundNode(): bool
     {
         return $this->node->isCompoundNode();
     }
 
-    /**
-     * @param QueryBuilder $builder
-     */
     public function acceptBuilder(QueryBuilder $builder): void
     {
         $builder->addField($this);
