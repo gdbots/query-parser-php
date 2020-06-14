@@ -419,9 +419,9 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
      * The Date node is a date with no time component. @see Date::toDateTime
      *
      * @param string $fieldName
-     * @param Date  $node
-     * @param bool  $cacheable
-     * @param float $boost
+     * @param Date   $node
+     * @param bool   $cacheable
+     * @param float  $boost
      *
      * @return RangeQuery
      */
