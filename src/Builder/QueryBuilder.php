@@ -26,7 +26,7 @@ interface QueryBuilder
      *
      * @return static
      */
-    public function clear(): QueryBuilder;
+    public function clear(): self;
 
     /**
      * Sets the fields that this builder will enable for full text search.
@@ -35,7 +35,7 @@ interface QueryBuilder
      *
      * @return static
      */
-    public function setFullTextSearchFields(array $fields): QueryBuilder;
+    public function setFullTextSearchFields(array $fields): self;
 
     /**
      * Adds a field that this builder will enable for full text search.
@@ -44,7 +44,7 @@ interface QueryBuilder
      *
      * @return static
      */
-    public function addFullTextSearchField(string $fieldName): QueryBuilder;
+    public function addFullTextSearchField(string $fieldName): self;
 
     /**
      * Removes a field that was previously enabled for full text search.
@@ -53,7 +53,7 @@ interface QueryBuilder
      *
      * @return static
      */
-    public function removeFullTextSearchField(string $fieldName): QueryBuilder;
+    public function removeFullTextSearchField(string $fieldName): self;
 
     /**
      * Gets the fields enabled for full text search.
@@ -79,70 +79,70 @@ interface QueryBuilder
      *
      * @return static
      */
-    public function setDefaultFieldName(string $fieldName): QueryBuilder;
+    public function setDefaultFieldName(string $fieldName): self;
 
     /**
      * @param string $fieldName
      *
      * @return static
      */
-    public function setEmojiFieldName(string $fieldName): QueryBuilder;
+    public function setEmojiFieldName(string $fieldName): self;
 
     /**
      * @param string $fieldName
      *
      * @return static
      */
-    public function setEmoticonFieldName(string $fieldName): QueryBuilder;
+    public function setEmoticonFieldName(string $fieldName): self;
 
     /**
      * @param string $fieldName
      *
      * @return static
      */
-    public function setHashtagFieldName(string $fieldName): QueryBuilder;
+    public function setHashtagFieldName(string $fieldName): self;
 
     /**
      * @param string $fieldName
      *
      * @return static
      */
-    public function setMentionFieldName(string $fieldName): QueryBuilder;
+    public function setMentionFieldName(string $fieldName): self;
 
     /**
      * @param \DateTimeZone $timeZone
      *
      * @return static
      */
-    public function setLocalTimeZone(\DateTimeZone $timeZone): QueryBuilder;
+    public function setLocalTimeZone(\DateTimeZone $timeZone): self;
 
     /**
      * @param ParsedQuery $parsedQuery
      *
      * @return static
      */
-    public function addParsedQuery(ParsedQuery $parsedQuery): QueryBuilder;
+    public function addParsedQuery(ParsedQuery $parsedQuery): self;
 
     /**
      * @param Date $date
      *
      * @return static
      */
-    public function addDate(Date $date): QueryBuilder;
+    public function addDate(Date $date): self;
 
     /**
      * @param Emoji $emoji
      *
      * @return static
      */
-    public function addEmoji(Emoji $emoji): QueryBuilder;
+    public function addEmoji(Emoji $emoji): self;
 
     /**
      * @param Emoticon $emoticon
      *
      * @return static
      */
-    public function addEmoticon(Emoticon $emoticon): QueryBuilder;
+    public function addEmoticon(Emoticon $emoticon): self;
 
     /**
      * @param Field $field
@@ -151,35 +151,35 @@ interface QueryBuilder
      *
      * @throws \LogicException
      */
-    public function addField(Field $field): QueryBuilder;
+    public function addField(Field $field): self;
 
     /**
      * @param Hashtag $hashtag
      *
      * @return static
      */
-    public function addHashtag(Hashtag $hashtag): QueryBuilder;
+    public function addHashtag(Hashtag $hashtag): self;
 
     /**
      * @param Mention $mention
      *
      * @return static
      */
-    public function addMention(Mention $mention): QueryBuilder;
+    public function addMention(Mention $mention): self;
 
     /**
      * @param Numbr $number
      *
      * @return static
      */
-    public function addNumber(Numbr $number): QueryBuilder;
+    public function addNumber(Numbr $number): self;
 
     /**
      * @param Phrase $phrase
      *
      * @return static
      */
-    public function addPhrase(Phrase $phrase): QueryBuilder;
+    public function addPhrase(Phrase $phrase): self;
 
     /**
      * @param Range $range
@@ -188,7 +188,7 @@ interface QueryBuilder
      *
      * @throws \LogicException
      */
-    public function addRange(Range $range): QueryBuilder;
+    public function addRange(Range $range): self;
 
     /**
      * @param Subquery $subquery
@@ -197,19 +197,19 @@ interface QueryBuilder
      *
      * @throws \LogicException
      */
-    public function addSubquery(Subquery $subquery): QueryBuilder;
+    public function addSubquery(Subquery $subquery): self;
 
     /**
      * @param Url $url
      *
      * @return static
      */
-    public function addUrl(Url $url): QueryBuilder;
+    public function addUrl(Url $url): self;
 
     /**
      * @param Word $word
      *
      * @return static
      */
-    public function addWord(Word $word): QueryBuilder;
+    public function addWord(Word $word): self;
 }

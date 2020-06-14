@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Gdbots\QueryParser\Builder;
 
-use Gdbots\QueryParser\Util\StringUtil;
 use Gdbots\QueryParser\Enum\ComparisonOperator;
 use Gdbots\QueryParser\Node\Date;
 use Gdbots\QueryParser\Node\Field;
@@ -24,33 +23,21 @@ use Gdbots\QueryParser\Node\Word;
  */
 class XmlQueryBuilder extends AbstractQueryBuilder
 {
-    /** @var string */
-    protected $result;
+    protected string $result = '';
+    protected int $indent = 2;
 
-    /** @var int */
-    protected $indent = 2;
-
-    /**
-     * {@inheritdoc}
-     */
-    public function clear(): QueryBuilder
+    public function clear(): self
     {
         $this->result = '';
         $this->indent = 2;
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function toXmlString(): string
     {
         return '<?xml version="1.0"?>' . PHP_EOL . '<query>' . PHP_EOL . rtrim((string)$this->result) . PHP_EOL . '</query>';
     }
 
-    /**
-     * @return \SimpleXMLElement
-     */
     public function toSimpleXmlElement(): \SimpleXMLElement
     {
         try {
@@ -66,9 +53,6 @@ class XmlQueryBuilder extends AbstractQueryBuilder
         return new \SimpleXMLElement('<?xml version="1.0"?><query></query>');
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function startField(Field $field, bool $cacheable = false): void
     {
         $tag = sprintf('field name="%s"', $field->getName());
@@ -89,18 +73,12 @@ class XmlQueryBuilder extends AbstractQueryBuilder
         $this->indent();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function endField(Field $field, bool $cacheable = false): void
     {
         $this->outdent();
         $this->printLine('</field>');
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function handleRange(Range $range, Field $field, bool $cacheable = false): void
     {
         $this->printLine(
@@ -134,9 +112,6 @@ class XmlQueryBuilder extends AbstractQueryBuilder
         $this->printLine('</' . $range::NODE_TYPE . '>');
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function startSubquery(Subquery $subquery, ?Field $field = null): void
     {
         $tag = $subquery::NODE_TYPE;
@@ -150,68 +125,42 @@ class XmlQueryBuilder extends AbstractQueryBuilder
         $this->indent();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function endSubquery(Subquery $subquery, ?Field $field = null): void
     {
         $this->outdent();
         $this->printLine('</subquery>');
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function mustMatch(Node $node, ?Field $field = null): void
     {
         $this->printSimpleNode(__FUNCTION__, $node, $field);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function shouldMatch(Node $node, ?Field $field = null): void
     {
         $this->printSimpleNode(__FUNCTION__, $node, $field);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function mustNotMatch(Node $node, ?Field $field = null): void
     {
         $this->printSimpleNode(__FUNCTION__, $node, $field);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function mustMatchTerm(Node $node, ?Field $field = null, bool $cacheable = false): void
     {
         $this->printSimpleNode(__FUNCTION__, $node, $field);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function shouldMatchTerm(Node $node, ?Field $field = null): void
     {
         $this->printSimpleNode(__FUNCTION__, $node, $field);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function mustNotMatchTerm(Node $node, ?Field $field = null, bool $cacheable = false): void
     {
         $this->printSimpleNode(__FUNCTION__, $node, $field);
     }
 
-    /**
-     * @param string $rule
-     * @param Node   $node
-     * @param Field  $field
-     */
     protected function printSimpleNode(string $rule, Node $node, ?Field $field = null): void
     {
         if ($this->inRange()) {
@@ -274,26 +223,16 @@ class XmlQueryBuilder extends AbstractQueryBuilder
         $this->printLine(sprintf('<%s>%s</%s>', $tag, $value, $node::NODE_TYPE));
     }
 
-    /**
-     * @param string $line
-     * @param bool   $newLine
-     */
     protected function printLine(string $line, bool $newLine = true): void
     {
         $this->result .= str_repeat(' ', $this->indent) . $line . ($newLine ? PHP_EOL : '');
     }
 
-    /**
-     * @param int $step
-     */
     protected function indent(int $step = 2): void
     {
         $this->indent += $step;
     }
 
-    /**
-     * @param int $step
-     */
     protected function outdent(int $step = 2): void
     {
         $this->indent -= $step;
