@@ -2,6 +2,10 @@
 This changelog references the relevant changes done in 2.x versions.
 
 
+## v2.0.1
+* Do not truncate input in `Tokenizer::scan`. Removed `substr($input, 0, 256)` rule as we're unsure where/why it's there and seems safe to remove.
+
+
 ## v2.0.0
 __BREAKING CHANGES__
 
