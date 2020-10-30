@@ -1328,6 +1328,19 @@ return [
             new Word('$p0rty-spicé'),
         ],
     ],
+
+    [
+        'name'            => 'utf chars',
+        'input'           => '测试 測試',
+        'expected_tokens' => [
+            [T::T_WORD, '测试'],
+            [T::T_WORD, '測試'],
+        ],
+        'expected_nodes'  => [
+            new Word('测试'),
+            new Word('測試'),
+        ],
+    ],
     /*
      * END: ACCENTED CHARS
      */
