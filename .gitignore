@@ -17,6 +17,7 @@ phpunit.xml
 .buildpath
 *.iml
 .idea/
+.phpunit.result.cache
 .project
 .settings
 
