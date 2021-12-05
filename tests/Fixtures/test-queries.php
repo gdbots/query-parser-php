@@ -40,7 +40,7 @@ return [
             [T::T_URL, 'http://test.com/1_2.html?a=b%20&c=1+2#test'],
         ],
         'expected_nodes'  => [
-            new Url('http://test.com/1_2.html?a=b%20&c=1+2#test', BoolOperator::REQUIRED()),
+            new Url('http://test.com/1_2.html?a=b%20&c=1+2#test', BoolOperator::REQUIRED),
         ],
     ],
 
@@ -52,7 +52,7 @@ return [
             [T::T_URL, 'http://test.com/1_2.html?a=b%20&c=1+2#test'],
         ],
         'expected_nodes'  => [
-            new Url('http://test.com/1_2.html?a=b%20&c=1+2#test', BoolOperator::PROHIBITED()),
+            new Url('http://test.com/1_2.html?a=b%20&c=1+2#test', BoolOperator::PROHIBITED),
         ],
     ],
 
@@ -124,8 +124,8 @@ return [
             [T::T_EMOTICON, ':('],
         ],
         'expected_nodes'  => [
-            new Emoticon(':)', BoolOperator::REQUIRED()),
-            new Emoticon(':(', BoolOperator::REQUIRED()),
+            new Emoticon(':)', BoolOperator::REQUIRED),
+            new Emoticon(':(', BoolOperator::REQUIRED),
         ],
     ],
     /*
@@ -149,11 +149,11 @@ return [
         ],
         'expected_nodes'  => [
             new Word('ice'),
-            new Emoji('🍦', BoolOperator::REQUIRED()),
+            new Emoji('🍦', BoolOperator::REQUIRED),
             new Word('poop'),
-            new Emoji('💩', BoolOperator::REQUIRED()),
+            new Emoji('💩', BoolOperator::REQUIRED),
             new Word('doh'),
-            new Emoji('😳', BoolOperator::REQUIRED()),
+            new Emoji('😳', BoolOperator::REQUIRED),
         ],
     ],
     /*
@@ -264,7 +264,7 @@ return [
         ],
         'expected_nodes'  => [
             new Word('a'),
-            new Phrase('simple phrase', BoolOperator::REQUIRED()),
+            new Phrase('simple phrase', BoolOperator::REQUIRED),
         ],
     ],
 
@@ -278,7 +278,7 @@ return [
         ],
         'expected_nodes'  => [
             new Word('a'),
-            new Phrase('simple phrase', BoolOperator::PROHIBITED()),
+            new Phrase('simple phrase', BoolOperator::PROHIBITED),
         ],
     ],
 
@@ -420,10 +420,10 @@ return [
         ],
         'expected_nodes'  => [
             new Word('a'),
-            new Hashtag('Cat', BoolOperator::REQUIRED()),
+            new Hashtag('Cat', BoolOperator::REQUIRED),
             new Word('in'),
             new Word('a'),
-            new Hashtag('hat', BoolOperator::REQUIRED()),
+            new Hashtag('hat', BoolOperator::REQUIRED),
         ],
     ],
 
@@ -439,8 +439,8 @@ return [
             [T::T_NUMBER, 100.0],
         ],
         'expected_nodes'  => [
-            new Hashtag('Cat', BoolOperator::REQUIRED()),
-            new Hashtag('hat', BoolOperator::PROHIBITED(), true, Hashtag::MAX_BOOST),
+            new Hashtag('Cat', BoolOperator::REQUIRED),
+            new Hashtag('hat', BoolOperator::PROHIBITED, true, Hashtag::MAX_BOOST),
         ],
     ],
 
@@ -456,8 +456,8 @@ return [
             [T::T_NUMBER, 100.1],
         ],
         'expected_nodes'  => [
-            new Hashtag('hat', BoolOperator::REQUIRED()),
-            new Hashtag('hat', BoolOperator::REQUIRED()),
+            new Hashtag('hat', BoolOperator::REQUIRED),
+            new Hashtag('hat', BoolOperator::REQUIRED),
         ],
     ],
 
@@ -475,10 +475,10 @@ return [
             [T::T_HASHTAG, '2015cat__'],
         ],
         'expected_nodes'  => [
-            new Hashtag('Cat', BoolOperator::REQUIRED()),
-            new Hashtag('hat', BoolOperator::PROHIBITED(), true, Hashtag::MAX_BOOST),
-            new Hashtag('_cat', BoolOperator::REQUIRED()),
-            new Hashtag('2015cat__', BoolOperator::REQUIRED()),
+            new Hashtag('Cat', BoolOperator::REQUIRED),
+            new Hashtag('hat', BoolOperator::PROHIBITED, true, Hashtag::MAX_BOOST),
+            new Hashtag('_cat', BoolOperator::REQUIRED),
+            new Hashtag('2015cat__', BoolOperator::REQUIRED),
         ],
     ],
 
@@ -493,8 +493,8 @@ return [
         ],
         'expected_nodes'  => [
             new Word('cat#cat'),
-            new Hashtag('cat', BoolOperator::REQUIRED()),
-            new Hashtag('cat', BoolOperator::REQUIRED()),
+            new Hashtag('cat', BoolOperator::REQUIRED),
+            new Hashtag('cat', BoolOperator::REQUIRED),
         ],
     ],
     /*
@@ -515,10 +515,10 @@ return [
             [T::T_MENTION, 'user-name'],
         ],
         'expected_nodes'  => [
-            new Mention('user', BoolOperator::REQUIRED()),
-            new Mention('user_name', BoolOperator::REQUIRED()),
-            new Mention('user.name', BoolOperator::REQUIRED()),
-            new Mention('user-name', BoolOperator::REQUIRED()),
+            new Mention('user', BoolOperator::REQUIRED),
+            new Mention('user_name', BoolOperator::REQUIRED),
+            new Mention('user.name', BoolOperator::REQUIRED),
+            new Mention('user-name', BoolOperator::REQUIRED),
 
         ],
     ],
@@ -537,10 +537,10 @@ return [
             [T::T_MENTION, 'user-name'],
         ],
         'expected_nodes'  => [
-            new Mention('user', BoolOperator::REQUIRED()),
-            new Mention('user_name', BoolOperator::REQUIRED()),
-            new Mention('user.name', BoolOperator::REQUIRED()),
-            new Mention('user-name', BoolOperator::REQUIRED()),
+            new Mention('user', BoolOperator::REQUIRED),
+            new Mention('user_name', BoolOperator::REQUIRED),
+            new Mention('user.name', BoolOperator::REQUIRED),
+            new Mention('user-name', BoolOperator::REQUIRED),
         ],
     ],
 
@@ -558,10 +558,10 @@ return [
             [T::T_MENTION, 'user-name'],
         ],
         'expected_nodes'  => [
-            new Mention('user', BoolOperator::PROHIBITED()),
-            new Mention('user_name', BoolOperator::PROHIBITED()),
-            new Mention('user.name', BoolOperator::PROHIBITED()),
-            new Mention('user-name', BoolOperator::PROHIBITED()),
+            new Mention('user', BoolOperator::PROHIBITED),
+            new Mention('user_name', BoolOperator::PROHIBITED),
+            new Mention('user.name', BoolOperator::PROHIBITED),
+            new Mention('user-name', BoolOperator::PROHIBITED),
         ],
     ],
 
@@ -587,9 +587,9 @@ return [
             [T::T_MENTION, 'who'],
         ],
         'expected_nodes'  => [
-            new Mention('john', BoolOperator::REQUIRED()),
-            new Mention('wtf', BoolOperator::REQUIRED()),
-            new Mention('who', BoolOperator::REQUIRED()),
+            new Mention('john', BoolOperator::REQUIRED),
+            new Mention('wtf', BoolOperator::REQUIRED),
+            new Mention('who', BoolOperator::REQUIRED),
         ],
     ],
 
@@ -603,7 +603,7 @@ return [
             [T::T_WORD, 'john!doe'],
         ],
         'expected_nodes'  => [
-            new Mention('john', BoolOperator::REQUIRED()),
+            new Mention('john', BoolOperator::REQUIRED),
             new Word('doe'),
             new Word('john!doe'),
         ],
@@ -756,8 +756,8 @@ return [
             [T::T_NUMBER, 5.0],
         ],
         'expected_nodes'  => [
-            new Field('first-name', new Word('homer'), BoolOperator::REQUIRED(), false, Field::DEFAULT_BOOST),
-            new Field('last_name', new Word('simpson'), BoolOperator::PROHIBITED(), false, Field::DEFAULT_BOOST),
+            new Field('first-name', new Word('homer'), BoolOperator::REQUIRED, false, Field::DEFAULT_BOOST),
+            new Field('last_name', new Word('simpson'), BoolOperator::PROHIBITED, false, Field::DEFAULT_BOOST),
             new Field('job.performance', new Word('poor'), null, true, 5.0),
         ],
     ],
@@ -805,7 +805,7 @@ return [
         ],
         'expected_nodes'  => [
             new Field('field', new Phrase('boosted^5 +required'), null, true, 1.0),
-            new Field('field', new Phrase('[1..5]'), BoolOperator::PROHIBITED(), false, Field::DEFAULT_BOOST),
+            new Field('field', new Phrase('[1..5]'), BoolOperator::PROHIBITED, false, Field::DEFAULT_BOOST),
         ],
     ],
 
@@ -833,10 +833,10 @@ return [
             T::T_FIELD_END,
         ],
         'expected_nodes'  => [
-            new Field('field', new Numbr(100, ComparisonOperator::GT()), null, false, Field::DEFAULT_BOOST),
-            new Field('field', new Numbr(100.1, ComparisonOperator::GTE()), null, false, Field::DEFAULT_BOOST),
-            new Field('field', new Numbr(100, ComparisonOperator::LT()), null, false, Field::DEFAULT_BOOST),
-            new Field('field', new Numbr(100.1, ComparisonOperator::LTE()), null, false, Field::DEFAULT_BOOST),
+            new Field('field', new Numbr(100, ComparisonOperator::GT), null, false, Field::DEFAULT_BOOST),
+            new Field('field', new Numbr(100.1, ComparisonOperator::GTE), null, false, Field::DEFAULT_BOOST),
+            new Field('field', new Numbr(100, ComparisonOperator::LT), null, false, Field::DEFAULT_BOOST),
+            new Field('field', new Numbr(100.1, ComparisonOperator::LTE), null, false, Field::DEFAULT_BOOST),
         ],
     ],
 
@@ -852,8 +852,8 @@ return [
             T::T_FIELD_END,
         ],
         'expected_nodes'  => [
-            new Field('field', new Hashtag('cats', BoolOperator::REQUIRED()), null, false, Field::DEFAULT_BOOST),
-            new Field('field', new Mention('user.name', BoolOperator::REQUIRED()), null, false, Field::DEFAULT_BOOST),
+            new Field('field', new Hashtag('cats', BoolOperator::REQUIRED), null, false, Field::DEFAULT_BOOST),
+            new Field('field', new Mention('user.name', BoolOperator::REQUIRED), null, false, Field::DEFAULT_BOOST),
         ],
     ],
 
@@ -894,7 +894,7 @@ return [
                     new Numbr(1),
                     new Numbr(5)
                 ),
-                BoolOperator::REQUIRED(),
+                BoolOperator::REQUIRED,
                 false,
                 Field::DEFAULT_BOOST
             ),
@@ -940,7 +940,7 @@ return [
                     new Numbr(5.5),
                     true
                 ),
-                BoolOperator::REQUIRED(),
+                BoolOperator::REQUIRED,
                 false,
                 Field::DEFAULT_BOOST
             ),
@@ -1046,7 +1046,7 @@ return [
                     Date::DEFAULT_BOOST,
                     false,
                     Date::DEFAULT_FUZZY,
-                    ComparisonOperator::GT()
+                    ComparisonOperator::GT
                 ),
                 null,
                 false,
@@ -1061,7 +1061,7 @@ return [
                     Date::DEFAULT_BOOST,
                     false,
                     Date::DEFAULT_FUZZY,
-                    ComparisonOperator::LT()
+                    ComparisonOperator::LT
                 ),
                 null,
                 false,
@@ -1076,7 +1076,7 @@ return [
                     Date::DEFAULT_BOOST,
                     false,
                     Date::DEFAULT_FUZZY,
-                    ComparisonOperator::GTE()
+                    ComparisonOperator::GTE
                 ),
                 null,
                 false,
@@ -1091,7 +1091,7 @@ return [
                     Date::DEFAULT_BOOST,
                     false,
                     Date::DEFAULT_FUZZY,
-                    ComparisonOperator::LTE()
+                    ComparisonOperator::LTE
                 ),
                 null,
                 false,
@@ -1131,8 +1131,8 @@ return [
             new Field('email', new Word('john@doe.com'), null, false, Field::DEFAULT_BOOST),
             new Field(
                 'user',
-                new Mention('twitterz', BoolOperator::REQUIRED()),
-                BoolOperator::PROHIBITED(),
+                new Mention('twitterz', BoolOperator::REQUIRED),
+                BoolOperator::PROHIBITED,
                 false,
                 Field::DEFAULT_BOOST
             ),
@@ -1157,7 +1157,7 @@ return [
         'expected_nodes'  => [
             new Field(
                 'tags',
-                new Hashtag('cats', BoolOperator::REQUIRED()),
+                new Hashtag('cats', BoolOperator::REQUIRED),
                 null,
                 false,
                 Field::DEFAULT_BOOST
@@ -1165,8 +1165,8 @@ return [
             new Field(
                 'tags',
                 new Subquery([
-                    new Hashtag('cats', BoolOperator::REQUIRED()),
-                    new Hashtag('dogs', BoolOperator::REQUIRED()),
+                    new Hashtag('cats', BoolOperator::REQUIRED),
+                    new Hashtag('dogs', BoolOperator::REQUIRED),
                 ]),
                 null,
                 false,
@@ -1213,9 +1213,9 @@ return [
             [T::T_NUMBER, 5.0],
         ],
         'expected_nodes'  => [
-            new Word('c.h.u.d', BoolOperator::REQUIRED()),
-            new Word('zombieland', BoolOperator::PROHIBITED()),
-            new Word('ac/dc', BoolOperator::REQUIRED(), true, 5.0),
+            new Word('c.h.u.d', BoolOperator::REQUIRED),
+            new Word('zombieland', BoolOperator::PROHIBITED),
+            new Word('ac/dc', BoolOperator::REQUIRED, true, 5.0),
         ],
     ],
 
@@ -1234,10 +1234,10 @@ return [
             [T::T_NUMBER, 5.0],
         ],
         'expected_nodes'  => [
-            new Word('cANDy', BoolOperator::REQUIRED()),
-            new Word('OReos', BoolOperator::REQUIRED()),
-            new Word('dANDy', BoolOperator::REQUIRED()),
-            new Word('chORes', BoolOperator::REQUIRED(), true, 5.0),
+            new Word('cANDy', BoolOperator::REQUIRED),
+            new Word('OReos', BoolOperator::REQUIRED),
+            new Word('dANDy', BoolOperator::REQUIRED),
+            new Word('chORes', BoolOperator::REQUIRED, true, 5.0),
         ],
     ],
     /*
@@ -1264,8 +1264,8 @@ return [
         'expected_nodes'  => [
             new Date('2000-01-01'),
             new Date('2000-01-01'),
-            new Date('2015-12-18', BoolOperator::REQUIRED()),
-            new Date('2015-12-18', BoolOperator::PROHIBITED()),
+            new Date('2015-12-18', BoolOperator::REQUIRED),
+            new Date('2015-12-18', BoolOperator::PROHIBITED),
         ],
     ],
 
@@ -1302,7 +1302,7 @@ return [
             [T::T_WORD, 'Knowles-Carter'],
         ],
         'expected_nodes'  => [
-            new Word('Beyoncé', BoolOperator::REQUIRED()),
+            new Word('Beyoncé', BoolOperator::REQUIRED),
             new Word('Giselle'),
             new Word('Knowles-Carter'),
         ],
@@ -1363,8 +1363,8 @@ return [
             [T::T_WORD, '50¢'],
         ],
         'expected_nodes'  => [
-            new Word('p!nk', BoolOperator::REQUIRED()),
-            new Word('K$sha', BoolOperator::REQUIRED()),
+            new Word('p!nk', BoolOperator::REQUIRED),
+            new Word('K$sha', BoolOperator::REQUIRED),
             new Word('in'),
             new Word('a'),
             new Word('tr33'),
@@ -1391,7 +1391,7 @@ return [
             T::T_FUZZY,
         ],
         'expected_nodes'  => [
-            new Word('florence+machine', BoolOperator::REQUIRED()),
+            new Word('florence+machine', BoolOperator::REQUIRED),
             new Word('ac/dc', null, true, Word::MAX_BOOST),
             new Word('Stellastarr', null, false, Word::DEFAULT_BOOST, false, Word::DEFAULT_FUZZY, true),
             new Word('T\'Pau'),
@@ -1454,8 +1454,8 @@ return [
             T::T_SUBQUERY_END,
         ],
         'expected_nodes'  => [
-            new Phrase('ipad pro', BoolOperator::REQUIRED()),
-            new Subquery([new Word('gold'), new Word('silver')], BoolOperator::REQUIRED()),
+            new Phrase('ipad pro', BoolOperator::REQUIRED),
+            new Subquery([new Word('gold'), new Word('silver')], BoolOperator::REQUIRED),
         ],
     ],
 
@@ -1473,7 +1473,7 @@ return [
         ],
         'expected_nodes'  => [
             new Phrase('iphone 7'),
-            new Subquery([new Word('16gb'), new Word('32gb')], BoolOperator::PROHIBITED()),
+            new Subquery([new Word('16gb'), new Word('32gb')], BoolOperator::PROHIBITED),
         ],
     ],
     /*
@@ -1532,8 +1532,8 @@ return [
         ],
         'expected_nodes'  => [
             new Word('test'),
-            new Word('what', BoolOperator::REQUIRED()),
-            new Word('test', BoolOperator::REQUIRED()),
+            new Word('what', BoolOperator::REQUIRED),
+            new Word('test', BoolOperator::REQUIRED),
         ],
     ],
 
@@ -1572,11 +1572,11 @@ return [
             new Numbr(2),
             new Numbr(3.14),
             new Word('a'),
-            new Word('b', BoolOperator::REQUIRED()),
+            new Word('b', BoolOperator::REQUIRED),
             new Field(
                 'field',
-                new Numbr(1.0, ComparisonOperator::GT()),
-                BoolOperator::REQUIRED(),
+                new Numbr(1.0, ComparisonOperator::GT),
+                BoolOperator::REQUIRED,
                 false,
                 Field::DEFAULT_BOOST
             ),
@@ -1646,9 +1646,9 @@ return [
             new Word('blah'),
             new Phrase('[[shortcode]]'),
             new Word('akd_'),
-            new Word('gj%', BoolOperator::PROHIBITED()),
+            new Word('gj%', BoolOperator::PROHIBITED),
             new Subquery([
-                new Word('a', BoolOperator::PROHIBITED()),
+                new Word('a', BoolOperator::PROHIBITED),
                 new Word('onclick'),
                 new Word('javascript:alert'),
                 new Word('test'),
@@ -1685,9 +1685,9 @@ return [
             new Word('shortcode'),
             new Word('quot'),
             new Word('akd_'),
-            new Word('gj%', BoolOperator::PROHIBITED()),
+            new Word('gj%', BoolOperator::PROHIBITED),
             new Subquery([
-                new Word('gt', BoolOperator::PROHIBITED()),
+                new Word('gt', BoolOperator::PROHIBITED),
                 new Word('lt;a'),
                 new Word('onclick'),
                 new Word('quot;javascript:alert'),

@@ -27,7 +27,7 @@ final class ParsedQuery implements \JsonSerializable
         return $this->nodes;
     }
 
-    public function jsonSerialize()
+    public function jsonSerialize(): array
     {
         return $this->toArray();
     }

@@ -31,7 +31,7 @@ final class Phrase extends Node
         $fuzzy = (int)($data['fuzzy'] ?? self::DEFAULT_FUZZY);
 
         try {
-            $boolOperator = isset($data['bool_operator']) ? BoolOperator::create($data['bool_operator']) : null;
+            $boolOperator = isset($data['bool_operator']) ? BoolOperator::from($data['bool_operator']) : null;
         } catch (\Throwable $e) {
             $boolOperator = null;
         }

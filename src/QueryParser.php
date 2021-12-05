@@ -161,7 +161,7 @@ final class QueryParser
 
         $comparisonOperator = $this->getComparisonOperator();
         $fieldValue = $this->stream->getCurrent();
-        $nodes = $this->createNodes($fieldValue, BoolOperator::OPTIONAL(), $comparisonOperator);
+        $nodes = $this->createNodes($fieldValue, BoolOperator::OPTIONAL, $comparisonOperator);
         $this->stream->skipUntil(Token::T_FIELD_END);
 
         if (empty($nodes)) {
@@ -194,11 +194,11 @@ final class QueryParser
                 break;
 
             case Token::T_DATE:
-                $lowerNode = $this->createDate($this->stream->getCurrent()->getValue(), BoolOperator::OPTIONAL());
+                $lowerNode = $this->createDate($this->stream->getCurrent()->getValue(), BoolOperator::OPTIONAL);
                 break;
 
             case Token::T_WORD:
-                $lowerNode = $this->createWord($this->stream->getCurrent()->getValue(), BoolOperator::OPTIONAL());
+                $lowerNode = $this->createWord($this->stream->getCurrent()->getValue(), BoolOperator::OPTIONAL);
                 break;
 
             default:
@@ -216,11 +216,11 @@ final class QueryParser
                 break;
 
             case Token::T_DATE:
-                $upperNode = $this->createDate($this->stream->getCurrent()->getValue(), BoolOperator::OPTIONAL());
+                $upperNode = $this->createDate($this->stream->getCurrent()->getValue(), BoolOperator::OPTIONAL);
                 break;
 
             case Token::T_WORD:
-                $upperNode = $this->createWord($this->stream->getCurrent()->getValue(), BoolOperator::OPTIONAL());
+                $upperNode = $this->createWord($this->stream->getCurrent()->getValue(), BoolOperator::OPTIONAL);
                 break;
 
             default:
@@ -386,28 +386,28 @@ final class QueryParser
 
     private function createEmoji(string $value, BoolOperator $boolOperator): Emoji
     {
-        $boolOperator = $boolOperator->equals(BoolOperator::OPTIONAL()) ? BoolOperator::REQUIRED() : $boolOperator;
+        $boolOperator = $boolOperator === BoolOperator::OPTIONAL ? BoolOperator::REQUIRED : $boolOperator;
         $m = $this->getModifiers();
         return new Emoji($value, $boolOperator, $m['use_boost'], $m['boost']);
     }
 
     private function createEmoticon(string $value, BoolOperator $boolOperator): Emoticon
     {
-        $boolOperator = $boolOperator->equals(BoolOperator::OPTIONAL()) ? BoolOperator::REQUIRED() : $boolOperator;
+        $boolOperator = $boolOperator === BoolOperator::OPTIONAL ? BoolOperator::REQUIRED : $boolOperator;
         $m = $this->getModifiers();
         return new Emoticon($value, $boolOperator, $m['use_boost'], $m['boost']);
     }
 
     private function createHashtag(string $value, BoolOperator $boolOperator): Hashtag
     {
-        $boolOperator = $boolOperator->equals(BoolOperator::OPTIONAL()) ? BoolOperator::REQUIRED() : $boolOperator;
+        $boolOperator = $boolOperator === BoolOperator::OPTIONAL ? BoolOperator::REQUIRED : $boolOperator;
         $m = $this->getModifiers();
         return new Hashtag($value, $boolOperator, $m['use_boost'], $m['boost']);
     }
 
     private function createMention(string $value, BoolOperator $boolOperator): Mention
     {
-        $boolOperator = $boolOperator->equals(BoolOperator::OPTIONAL()) ? BoolOperator::REQUIRED() : $boolOperator;
+        $boolOperator = $boolOperator === BoolOperator::OPTIONAL ? BoolOperator::REQUIRED : $boolOperator;
         $m = $this->getModifiers();
         return new Mention($value, $boolOperator, $m['use_boost'], $m['boost']);
     }
@@ -445,28 +445,28 @@ final class QueryParser
         );
     }
 
-    private function getBoolOperator(int $default = BoolOperator::OPTIONAL): BoolOperator
+    private function getBoolOperator(): BoolOperator
     {
         if ($this->stream->nextIf(Token::T_REQUIRED)
             || $this->stream->lookaheadTypeIs(Token::T_AND)
             || $this->stream->prevTypeIs(Token::T_AND)
         ) {
-            return BoolOperator::REQUIRED();
+            return BoolOperator::REQUIRED;
         }
 
         if ($this->stream->nextIf(Token::T_PROHIBITED)) {
-            return BoolOperator::PROHIBITED();
+            return BoolOperator::PROHIBITED;
         }
 
-        return BoolOperator::create($default);
+        return BoolOperator::OPTIONAL;
     }
 
     private function getComparisonOperator(): ?ComparisonOperator
     {
         if ($this->stream->nextIf(Token::T_GREATER_THAN)) {
-            $op = ComparisonOperator::GT;
+            $op = ComparisonOperator::GT->value;
         } elseif ($this->stream->nextIf(Token::T_LESS_THAN)) {
-            $op = ComparisonOperator::LT;
+            $op = ComparisonOperator::LT->value;
         } else {
             return null;
         }
@@ -475,7 +475,7 @@ final class QueryParser
             $op .= 'e';
         }
 
-        return ComparisonOperator::create($op);
+        return ComparisonOperator::from($op);
     }
 
     private function getModifiers(): array

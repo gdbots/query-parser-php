@@ -42,7 +42,7 @@ final class Word extends Node
         $trailingWildcard = (bool)($data['trailing_wildcard'] ?? false);
 
         try {
-            $boolOperator = isset($data['bool_operator']) ? BoolOperator::create($data['bool_operator']) : null;
+            $boolOperator = isset($data['bool_operator']) ? BoolOperator::from($data['bool_operator']) : null;
         } catch (\Throwable $e) {
             $boolOperator = null;
         }

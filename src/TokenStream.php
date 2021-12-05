@@ -224,7 +224,7 @@ final class TokenStream implements \JsonSerializable
         return $this->tokens;
     }
 
-    public function jsonSerialize()
+    public function jsonSerialize(): array
     {
         return $this->tokens;
     }
