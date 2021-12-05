@@ -63,7 +63,7 @@ final class Date extends Node
             return $array;
         }
 
-        $array['comparison_operator'] = $this->comparisonOperator;
+        $array['comparison_operator'] = $this->comparisonOperator->value;
         return $array;
     }
 

@@ -453,7 +453,7 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
 
     protected function addToBoolQuery(string $method, string $fieldName, AbstractQuery $query): void
     {
-        if (false === strpos($fieldName, '.')) {
+        if (!str_contains($fieldName, '.')) {
             $this->boolQuery->$method($query);
             return;
         }

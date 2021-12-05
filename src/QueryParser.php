@@ -338,7 +338,7 @@ final class QueryParser
             $data = $nodes[0]->toArray();
 
             if (!isset($data['bool_operator'])) {
-                $data['bool_operator'] = $queryBoolOperator;
+                $data['bool_operator'] = $queryBoolOperator->value;
             }
 
             if (!isset($data['use_boost'])) {

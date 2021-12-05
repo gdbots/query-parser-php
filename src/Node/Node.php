@@ -88,7 +88,7 @@ abstract class Node implements \JsonSerializable
         }
 
         if (!$this->isOptional()) {
-            $array['bool_operator'] = $this->boolOperator;
+            $array['bool_operator'] = $this->boolOperator->value;
         }
 
         if ($this->useBoost) {
