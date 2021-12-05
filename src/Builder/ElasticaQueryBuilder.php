@@ -140,9 +140,9 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
         $boost = $field->getBoost();
         $boolOp = $field->getBoolOperator();
 
-        if ($boolOp->equals(BoolOperator::REQUIRED())) {
+        if ($boolOp === BoolOperator::REQUIRED) {
             $method = 'addMust';
-        } elseif ($boolOp->equals(BoolOperator::PROHIBITED())) {
+        } elseif ($boolOp === BoolOperator::PROHIBITED) {
             $method = 'addMustNot';
         } else {
             $method = 'addShould';
@@ -222,9 +222,9 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
                 $this->boolQuery->setBoost($boost);
             }
 
-            if ($boolOp->equals(BoolOperator::REQUIRED())) {
+            if ($boolOp === BoolOperator::REQUIRED) {
                 $this->outerBoolQuery->addMust($this->boolQuery);
-            } elseif ($boolOp->equals(BoolOperator::PROHIBITED())) {
+            } elseif ($boolOp === BoolOperator::PROHIBITED) {
                 $this->outerBoolQuery->addMustNot($this->boolQuery);
             } else {
                 $this->outerBoolQuery->addShould($this->boolQuery);
@@ -389,7 +389,7 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
                 $useBoost ? $boost : Date::DEFAULT_BOOST
             );
         } elseif ($node instanceof Numbr && $node->useComparisonOperator()) {
-            $data = [$node->getComparisonOperator()->getValue() => $value];
+            $data = [$node->getComparisonOperator()->value => $value];
             if ($useBoost) {
                 $data['boost'] = $boost;
             }
@@ -431,7 +431,7 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
         bool $cacheable = false,
         float $boost = Date::DEFAULT_BOOST
     ): RangeQuery {
-        $operator = $node->getComparisonOperator()->getValue();
+        $operator = $node->getComparisonOperator();
 
         if ($operator === ComparisonOperator::EQ) {
             $date = $node->toDateTime($this->localTimeZone);
@@ -440,7 +440,7 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
                 'lt'  => $date->modify('+1 day')->format('Y-m-d'),
             ];
         } else {
-            $data = [$operator => $node->toDateTime($this->localTimeZone)->format('Y-m-d')];
+            $data = [$operator->value => $node->toDateTime($this->localTimeZone)->format('Y-m-d')];
         }
 
         if ($cacheable) {
@@ -453,7 +453,7 @@ class ElasticaQueryBuilder extends AbstractQueryBuilder
 
     protected function addToBoolQuery(string $method, string $fieldName, AbstractQuery $query): void
     {
-        if (false === strpos($fieldName, '.')) {
+        if (!str_contains($fieldName, '.')) {
             $this->boolQuery->$method($query);
             return;
         }

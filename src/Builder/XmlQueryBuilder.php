@@ -58,7 +58,7 @@ class XmlQueryBuilder extends AbstractQueryBuilder
         $tag = sprintf('field name="%s"', $field->getName());
 
         if (!$field->isOptional()) {
-            $tag .= sprintf(' bool_operator="%s"', strtolower($field->getBoolOperator()->getName()));
+            $tag .= sprintf(' bool_operator="%s"', strtolower($field->getBoolOperator()->name));
         }
 
         if ($cacheable) {
@@ -188,27 +188,13 @@ class XmlQueryBuilder extends AbstractQueryBuilder
         $tag .= sprintf(' rule="%s"', $snaked);
 
         if ($node instanceof Numbr || $node instanceof Date) {
-            switch ($node->getComparisonOperator()->getValue()) {
-                case ComparisonOperator::GT:
-                    $comparisonOperator = 'gt';
-                    break;
-
-                case ComparisonOperator::GTE:
-                    $comparisonOperator = 'gte';
-                    break;
-
-                case ComparisonOperator::LT:
-                    $comparisonOperator = 'lt';
-                    break;
-
-                case ComparisonOperator::LTE:
-                    $comparisonOperator = 'lte';
-                    break;
-
-                default:
-                    $comparisonOperator = null;
-                    break;
-            }
+            $comparisonOperator = match ($node->getComparisonOperator()) {
+                ComparisonOperator::GT => 'gt',
+                ComparisonOperator::GTE => 'gte',
+                ComparisonOperator::LT => 'lt',
+                ComparisonOperator::LTE => 'lte',
+                default => null,
+            };
 
             if (null !== $comparisonOperator) {
                 $tag .= sprintf(' comparison_operator="%s"', $comparisonOperator);

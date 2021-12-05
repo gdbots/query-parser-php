@@ -17,7 +17,7 @@ final class Numbr extends Node
     public function __construct(float $value, ?ComparisonOperator $comparisonOperator = null)
     {
         parent::__construct($value, null);
-        $this->comparisonOperator = $comparisonOperator ?: ComparisonOperator::EQ();
+        $this->comparisonOperator = $comparisonOperator ?: ComparisonOperator::EQ;
     }
 
     public static function fromArray(array $data = []): self
@@ -25,7 +25,7 @@ final class Numbr extends Node
         $value = (float)($data['value'] ?? 0.0);
 
         try {
-            $comparisonOperator = isset($data['comparison_operator']) ? ComparisonOperator::create($data['comparison_operator']) : null;
+            $comparisonOperator = isset($data['comparison_operator']) ? ComparisonOperator::from($data['comparison_operator']) : null;
         } catch (\Throwable $e) {
             $comparisonOperator = null;
         }
@@ -36,17 +36,17 @@ final class Numbr extends Node
     public function toArray(): array
     {
         $array = parent::toArray();
-        if ($this->comparisonOperator->equals(ComparisonOperator::EQ())) {
+        if ($this->comparisonOperator === ComparisonOperator::EQ) {
             return $array;
         }
 
-        $array['comparison_operator'] = $this->comparisonOperator->getValue();
+        $array['comparison_operator'] = $this->comparisonOperator->value;
         return $array;
     }
 
     public function useComparisonOperator(): bool
     {
-        return !$this->comparisonOperator->equals(ComparisonOperator::EQ());
+        return $this->comparisonOperator !== ComparisonOperator::EQ;
     }
 
     public function getComparisonOperator(): ComparisonOperator

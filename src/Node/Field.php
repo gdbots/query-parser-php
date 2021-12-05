@@ -46,7 +46,7 @@ final class Field extends Node
         $boost = (float)($data['boost'] ?? self::DEFAULT_BOOST);
 
         try {
-            $boolOperator = isset($data['bool_operator']) ? BoolOperator::create($data['bool_operator']) : null;
+            $boolOperator = isset($data['bool_operator']) ? BoolOperator::from($data['bool_operator']) : null;
         } catch (\Throwable $e) {
             $boolOperator = null;
         }

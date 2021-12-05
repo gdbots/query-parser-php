@@ -75,7 +75,7 @@ final class Token implements \JsonSerializable
         return self::$typeNames[$type] ?? (string)$type;
     }
 
-    public function jsonSerialize()
+    public function jsonSerialize(): array
     {
         return ['type' => $this->type, 'value' => $this->value];
     }

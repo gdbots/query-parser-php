@@ -41,9 +41,9 @@ abstract class Node implements \JsonSerializable
         int $fuzzy = self::DEFAULT_FUZZY
     ) {
         $this->value = $value;
-        $this->boolOperator = $boolOperator ?: BoolOperator::OPTIONAL();
+        $this->boolOperator = $boolOperator ?: BoolOperator::OPTIONAL;
 
-        $this->useBoost = $useBoost && static::SUPPORTS_BOOST && $this->boolOperator === BoolOperator::OPTIONAL();
+        $this->useBoost = $useBoost && static::SUPPORTS_BOOST && $this->boolOperator === BoolOperator::OPTIONAL;
         if ($this->useBoost) {
             $this->boost = $boost;
             if ($this->boost < static::MIN_BOOST) {
@@ -55,7 +55,7 @@ abstract class Node implements \JsonSerializable
             }
         }
 
-        $this->useFuzzy = $useFuzzy && static::SUPPORTS_FUZZY && $this->boolOperator === BoolOperator::OPTIONAL();
+        $this->useFuzzy = $useFuzzy && static::SUPPORTS_FUZZY && $this->boolOperator === BoolOperator::OPTIONAL;
         if ($this->useFuzzy) {
             $this->fuzzy = min(max($fuzzy, static::MIN_FUZZY), static::MAX_FUZZY);
         }
@@ -88,7 +88,7 @@ abstract class Node implements \JsonSerializable
         }
 
         if (!$this->isOptional()) {
-            $array['bool_operator'] = $this->boolOperator;
+            $array['bool_operator'] = $this->boolOperator->value;
         }
 
         if ($this->useBoost) {
@@ -104,7 +104,7 @@ abstract class Node implements \JsonSerializable
         return $array;
     }
 
-    final public function jsonSerialize()
+    final public function jsonSerialize(): array
     {
         return $this->toArray();
     }
@@ -126,17 +126,17 @@ abstract class Node implements \JsonSerializable
 
     final public function isOptional(): bool
     {
-        return $this->boolOperator->equals(BoolOperator::OPTIONAL());
+        return $this->boolOperator === BoolOperator::OPTIONAL;
     }
 
     final public function isRequired(): bool
     {
-        return $this->boolOperator->equals(BoolOperator::REQUIRED());
+        return $this->boolOperator === BoolOperator::REQUIRED;
     }
 
     final public function isProhibited(): bool
     {
-        return $this->boolOperator->equals(BoolOperator::PROHIBITED());
+        return $this->boolOperator === BoolOperator::PROHIBITED;
     }
 
     final public function isCompoundNode(): bool
